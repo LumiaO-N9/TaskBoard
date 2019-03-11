@@ -13,6 +13,7 @@ flask = "*"
 python-dotenv = "*"
 flask-sqlalchemy = "*"
 flask-wtf = "*"
+bootstrap-flask = "*"
 
 [requires]
 python_version = "3.7"
