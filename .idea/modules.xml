@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/FinalYearProject.iml" filepath="$PROJECT_DIR$/.idea/FinalYearProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/TaskBoard.iml" filepath="$PROJECT_DIR$/.idea/TaskBoard.iml" />
       <module fileurl="file://$PROJECT_DIR$/../GreyLi/bluelog/.idea/bluelog.iml" filepath="$PROJECT_DIR$/../GreyLi/bluelog/.idea/bluelog.iml" />
     </modules>
   </component>
