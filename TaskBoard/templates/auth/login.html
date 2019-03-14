@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+{% block title %}Login{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}" type="text/css">
+{% endblock %}
+{% block content %}
+    <div class="container">
+        {% include '_flashMessage.html' %}
+        <form class="form-signin" method="post" action="{{ request.full_path }}">
+            {{ form.csrf_token }}
+            <h2 class="form-signin-heading">TaskBoard - Log in</h2>
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input type="text" id="inputEmail" name="username" class="form-control" placeholder="Username"
+                   required autofocus>
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password"
+                   required>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="remember" value="y"> Remember me
+                </label>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        </form>
+
+    </div> <!-- /container -->
+
+{% endblock %}
