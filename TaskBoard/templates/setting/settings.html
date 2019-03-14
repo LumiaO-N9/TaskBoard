@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block style %}
+    <style>
+        h3 {
+            font-size: 24px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        body {
+            background-color: #eee;
+        }
+
+
+    </style>
+{% endblock %}
+{% block content %}
+    {% include '_navbar.html' %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6 ">
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h3>User Settings</h3></div>
+                    <div class="panel-body">
+                        <div class="col-md-6">
+                            <h4>Change Password</h4>
+                            <form method="post" action="{{ request.full_path }}">
+                                {#                                {{ form.csrf_token }}#}
+                                <div class="form-group">
+                                    <input type="password" id="password" name="password" class="form-control"
+                                           placeholder="Current Password">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="password1" name="password1" class="form-control"
+                                           placeholder="New Password">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="password2" name="password2" class="form-control"
+                                           placeholder="Verify Password">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-default btn-info" type="submit">Update Password
+                                    </button>
+                                    <button class="btn btn-default btn-default" type="reset">Reset
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Change Username</h4>
+                            <form method="post" action="{{ request.full_path }}">
+                                {#                                {{ form.csrf_token }}#}
+                                <div class="form-group">
+                                    <input type="text" id="username" name="username" class="form-control"
+                                           placeholder="New Username">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-default btn-info" type="submit">Update Username
+                                    </button>
+                                    <button class="btn btn-default btn-default" type="reset">Reset
+                                    </button>
+                                </div>
+                            </form>
+                            <h4>Change Email</h4>
+                            <form method="post" action="{{ request.full_path }}">
+                                {#                                {{ form.csrf_token }}#}
+                                <div class="form-group">
+                                    <input type="text" id="email" name="email" class="form-control"
+                                           placeholder="New Email">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-default btn-info" type="submit">Update Email
+                                    </button>
+                                    <button class="btn btn-default btn-default" type="reset">Reset
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Select Default Board</h4>
+                            <select class="form-control" id="default_board_change">
+                                <option value="{{ current_user.default_project.id }}">{{ current_user.default_project.title }}</option>
+                                {% for project in projects if project != current_user.default_project %}
+                                    <option value="{{ project.id }}">{{ project.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <hr>
+                        </div>
+                        <div class="col-md-12">
+                            <h4>TaskBoard Users</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Admin</th>
+                                        <th>Default Board</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    {% from 'macros.html' import TextToGlyphicon %}
+                                    {% for user in users %}
+                                        <tr>
+                                            <td>{{ user.username }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>{{ TextToGlyphicon(user.is_admin) }}</td>
+                                            <td>{{ user.default_project.title }}</td>
+                                            <td>
+                                                {% if current_user.is_admin %}
+                                                    <a data-toggle="modal" data-target="#EditUserModal{{ user.id }}"
+                                                       name="edit">
+                                                        <span class="glyphicon glyphicon-edit"></span>
+                                                    </a>
+                                                    <a href="javascript:" name="delete"
+                                                       onclick="del_user(this, '{{ user.id }}')">
+                                                    <span class="glyphicon glyphicon-trash"
+                                                          style="margin-left:20px">
+                                                    </span>
+                                                    </a>
+                                                    {% include '_UserEditModal.html' %}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                                <form method="post" action="{{ request.full_path }}">
+                                    {#                                {{ form.csrf_token }}#}
+                                    <div class="form-group">
+                                        <button class="btn btn-default btn-info" type="submit"><span
+                                                class="glyphicon glyphicon-plus"></span> Add User
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h3>Board Settings</h3></div>
+                    <div class="panel-body">
+                        Panel content
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $('#settings').addClass('active').children('a').removeAttr('href');
+        var csrftoken = $('meta[name=csrf-token]').attr('content');
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken)
+                }
+            }
+        });
+        $('#default_board_change').change(function () {
+            let project_id = $(this).val();
+            let user_id = "{{ current_user.id }}"
+            $.ajax({
+                url: "{{ url_for('setting.change_default_board') }}",
+                type: 'POST',
+                data: {
+                    'project_id': project_id,
+                    'user_id': user_id
+                },
+                success: function (e) {
+                    if (e == '1') {
+                        alert('ok');
+                    } else {
+                        alert('fail');
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        });
+
+        function edit_user(the, user_id) {
+            var name = $(the).parents('tr').children('td').eq(1).text();
+            var index = layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: '编辑栏目',
+                content: '<div class="text-center" style="margin-top:20px"><p>请输入新的栏目名称</p><p><input type="text" id="new_name" value="' +
+                    name + '"></p></div>',
+                btn: ['确定', '取消'],
+                anim: 2,
+                offset: '150px',
+                yes: function (index, layero) {
+                    var new_name = $('#new_name').val();
+                    $.ajax({
+                        url: "",
+                        type: 'POST',
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token() }}',
+                            'user_id': user_id,
+                            'user_name': new_name
+                        },
+                        success: function (e) {
+                            if (e == '1') {
+                                layer.close(index);
+                                layer.msg('修改成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else {
+                                layer.msg('新的名称没有保存，修改失败！')
+                            }
+                        },
+
+                    });
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            })
+        }
+
+        function del_user(the, user_id) {
+            var name = $(the).parents('tr').children('td').eq(1).text();
+            var index = layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: '删除栏目',
+                content: '<div class="text-center" style="margin-top:20px"><p>是否确定删除 <span class="label label-danger">' +
+                    name + '</span> 栏目?</p></div>',
+                btn: ['删除', '取消'],
+                anim: 6,
+                offset: '150px',
+                yes: function (index, layero) {
+                    $.ajax({
+                        url: "",
+                        type: 'POST',
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token() }}',
+                            'user_id': user_id,
+                        },
+                        success: function (e) {
+                            if (e == '1') {
+                                layer.close(index);
+                                layer.msg('删除成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else {
+                                layer.msg('删除失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index, layero) {
+                    layer.close(index);
+                }
+            })
+        }
+    </script>
+{% endblock %}
+
