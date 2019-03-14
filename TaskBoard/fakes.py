@@ -13,7 +13,7 @@ def fake_admin_user():
         is_admin=True,
         email=fake.email(),
     )
-    user.set_password('admin')
+    user.set_password('TaskBoard')
     db.session.add(user)
     db.session.commit()
 
