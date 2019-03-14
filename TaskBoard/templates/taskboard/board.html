@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+{% block title %}TaskBoard{% endblock %}
+{% block content %}
+{% include '_navbar.html' %}
+    <div class="container-fluid">
+        <div class="row center-block" style="max-width: 1000px;">
+            {% include '_flashMessage.html' %}
+        </div>
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4"></div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $('#board').addClass('active').children('a').removeAttr('href');
+    </script>
+{% endblock %}
