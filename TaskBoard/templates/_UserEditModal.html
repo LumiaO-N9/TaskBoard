@@ -1,0 +1,77 @@
+<div class="modal fade" tabindex="-1"
+     id="EditUserModal{{ user.id }}">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal"
+                        aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Edit User
+                    title</h4>
+            </div>
+            <div class="modal-body">
+                <form method="post"
+                      action="{{ request.full_path }}">
+                    {#                                {{ form.csrf_token }}#}
+                    <div class="form-group">
+                        <label>Change Username</label>
+                        <input type="text"
+                               name="username" class="form-control"
+                               placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <label>Change Password</label>
+                        <input type="password"
+                               name="password1" class="form-control"
+                               placeholder="New Password">
+                    </div>
+                    <div class="form-group">
+                        <input type="password"
+                               name="password2" class="form-control"
+                               placeholder="Verify Password">
+                    </div>
+                    <div class="form-group">
+                        <label>Change Email</label>
+                        <input type="text" name="email"
+                               class="form-control"
+                               placeholder="New Email">
+                    </div>
+                    <div class="form-group">
+                        <label>Select Default Board</label>
+                        <select class="form-control">
+                            <option>{{ user.default_project.title }}</option>
+                            {% for project in projects if project !=user.default_project %}
+                                <option>{{ project.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Board Access</label>
+                        <select class="form-control" multiple>
+                            {% for project in projects %}
+                                <option>{{ project.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-default btn-info"
+                                type="submit">Update Password
+                        </button>
+                        <button class="btn btn-default btn-default"
+                                type="reset">Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">Close
+                </button>
+                <button type="button" class="btn btn-primary">Save
+                    changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
