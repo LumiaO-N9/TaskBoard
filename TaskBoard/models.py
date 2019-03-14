@@ -1,12 +1,13 @@
 from datetime import datetime
 from TaskBoard.extensions import db
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 association_table = db.Table('association', db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
                              db.Column('project_id', db.Integer, db.ForeignKey('project.id')))
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20))
     password_hash = db.Column(db.String(128))
@@ -15,6 +16,7 @@ class User(db.Model):
     createtime = db.Column(db.DateTime, default=datetime.utcnow)
     lastlogintime = db.Column(db.DateTime, default=datetime.utcnow)
     default_project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    default_project = db.relationship('Project')
     projects = db.relationship('Project', secondary=association_table, back_populates='users')
     tasks = db.relationship('Task', back_populates='user')
 
