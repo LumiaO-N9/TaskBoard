@@ -1,0 +1,67 @@
+<table id="projects_table" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Milestones</th>
+        <th>Categories</th>
+        <th>Users</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    {% for project in projects %}
+        <tr name="project_tr" id="project_tr{{ project.id }}"
+            data-status="{{ project.status }}">
+            <td id="project_title{{ project.id }}">{{ project.title }}</td>
+            <td>
+                <ul class="list-group">
+                    {% for milestone in project.milestones %}
+                        <li class="list-group-item list-group-item-success">
+                            <span class="badge">{{ milestone.tasks|length }}</span>
+                            {{ milestone.title }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                <ul class="list-group">
+                    {% for category in project.categories %}
+                        <li class="list-group-item list-group-item-info">
+                            {{ category.title }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                <ul class="list-group" name="users">
+                    {% for user in project.users %}
+                        <li name="{{ user.id }}"
+                            class="list-group-item list-group-item-warning">
+                            {{ user.username }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                <a data-toggle="modal" data-target="#EditProjectModal{{ project.id }}"
+                   name="edit">
+                    <span class="glyphicon glyphicon-edit"></span>
+                </a>
+                <a href="javascript:" name="delete"
+                   onclick="del_project(this, '{{ project.id }}')">
+                                                    <span class="glyphicon glyphicon-trash"
+                                                          style="margin-left:8px">
+                                                    </span>
+                </a>
+                {% include '_ProjectEditModal.html' %}
+                <label name="status" style="margin-left:8px;font-weight: normal">
+                    {% if project.status %}
+                        <input type="checkbox" value="{{ project.id }}" checked>
+                    {% else %}
+                        <input type="checkbox" value="{{ project.id }}">
+                    {% endif %}
+                    Active
+                </label>
+            </td>
+        </tr>
+    {% endfor %}
+</table>

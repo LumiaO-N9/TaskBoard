@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Settings{% endblock %}
 {% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layui.css') }}" type="text/css">
     <style>
         h3 {
             font-size: 24px;
@@ -8,10 +9,42 @@
             margin-bottom: 0px;
         }
 
+        h4 {
+            display: block;
+        }
+
+        h4 span select.form-control {
+            width: auto;
+        }
+
+        .small {
+            font-size: 75%;
+            font-weight: normal;
+            color: #777;
+            margin-left: 4px;
+        }
+
+        .form-control-inline {
+            width: 220px;
+            display: inline;
+        }
+
+        .half-width {
+            width: 50%;
+            float: left;
+            font-weight: normal;
+            padding-right: 10px;
+            margin-right: 0;
+        }
+
         body {
             background-color: #eee;
         }
 
+        body .layui-layer-setmybg .layui-layer-content {
+            background-color: #33d451;
+            color: #fff;
+        }
 
     </style>
 {% endblock %}
@@ -19,14 +52,13 @@
     {% include '_navbar.html' %}
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-6 ">
+            <div class="col-sm-12 col-md-6">
                 <div class="panel panel-info">
                     <div class="panel-heading"><h3>User Settings</h3></div>
                     <div class="panel-body">
-                        <div class="col-md-6">
-                            <h4>Change Password</h4>
+                        <div class="col-sm-6">
+                            <div class="header"><h4>Change Password</h4></div>
                             <form method="post" action="{{ request.full_path }}">
-                                {#                                {{ form.csrf_token }}#}
                                 <div class="form-group">
                                     <input type="password" id="password" name="password" class="form-control"
                                            placeholder="Current Password">
@@ -47,10 +79,9 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="col-md-6">
-                            <h4>Change Username</h4>
+                        <div class="col-sm-6">
+                            <div class="header"><h4>Change Username</h4></div>
                             <form method="post" action="{{ request.full_path }}">
-                                {#                                {{ form.csrf_token }}#}
                                 <div class="form-group">
                                     <input type="text" id="username" name="username" class="form-control"
                                            placeholder="New Username">
@@ -62,9 +93,8 @@
                                     </button>
                                 </div>
                             </form>
-                            <h4>Change Email</h4>
+                            <div class="header"><h4>Change Email</h4></div>
                             <form method="post" action="{{ request.full_path }}">
-                                {#                                {{ form.csrf_token }}#}
                                 <div class="form-group">
                                     <input type="text" id="email" name="email" class="form-control"
                                            placeholder="New Email">
@@ -77,20 +107,20 @@
                                 </div>
                             </form>
                         </div>
-                        <div class="col-md-6">
-                            <h4>Select Default Board</h4>
+                        <div class="col-sm-6">
+                            <div class="header"><h4>Select Default Board</h4></div>
                             <select class="form-control" id="default_board_change">
-                                <option value="{{ current_user.default_project.id }}">{{ current_user.default_project.title }}</option>
+                                <option value="{{ current_user.default_project.id|default('None') }}">{{ current_user.default_project.title|default('None') }}</option>
                                 {% for project in projects if project != current_user.default_project %}
                                     <option value="{{ project.id }}">{{ project.title }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-sm-12">
                             <hr>
                         </div>
-                        <div class="col-md-12">
-                            <h4>TaskBoard Users</h4>
+                        <div class="col-sm-12">
+                            <div class="header"><h4>TaskBoard Users</h4></div>
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
@@ -118,7 +148,7 @@
                                                     <a href="javascript:" name="delete"
                                                        onclick="del_user(this, '{{ user.id }}')">
                                                     <span class="glyphicon glyphicon-trash"
-                                                          style="margin-left:20px">
+                                                          style="margin-left:8px">
                                                     </span>
                                                     </a>
                                                     {% include '_UserEditModal.html' %}
@@ -137,27 +167,79 @@
                                 </form>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-sm-12 col-md-6">
                 <div class="panel panel-info">
-                    <div class="panel-heading"><h3>Board Settings</h3></div>
+                    <div class="panel-heading"><h3>Project Settings</h3></div>
                     <div class="panel-body">
-                        Panel content
-                        <div class="col-md-6"></div>
-                        <div class="col-md-6"></div>
+                        <div class="col-sm-12">
+                            <h4>Current Projects
+                                <span class="small form-group form-inline pull-right">Show By User:
+                                    <select class="form-control" id="show_by_user">
+                                        <option value="any">Any User</option>
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}">{{ user.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </span>
+                                <span class="small form-group form-inline pull-right">Filter By Status:
+                                    <select class="form-control" id="filter_by_status">
+                                        <option value="all">All Projects</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </span>
+                                <span class="small form-group form-inline pull-right">Sort By:
+                                    <select class="form-control" id="sort_by_name_or_date">
+                                        <option value="name">Project Name</option>
+                                        <option value="date">Create Date</option>
+                                    </select>
+                                </span>
+                            </h4>
+                        </div>
+                        <div class="col-sm-12">
+                            <div id="projects_table_div" class="table-responsive">
+                                {% include '_ProjectsTable.html' %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div style="margin-left: 30px;">
+        <div id="test3"></div>
+        <div id="test4" style="margin-left: 30px;"></div>
+    </div>
+
 {% endblock %}
 {% block scripts %}
-    <script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/layui.js') }}"></script>
+    <script type="text/javascript">
+
         $('#settings').addClass('active').children('a').removeAttr('href');
+
+        layer.config({
+            offset: '150px',
+        });
+        $('div[name=color_picker]').each(function () {
+            let ele = $(this);
+            layui.use('colorpicker', function () {
+                let colorpicker = layui.colorpicker;
+                //渲染
+                colorpicker.render({
+                    elem: ele,  //绑定元素
+                    color: '#d9edf7', //设置默认色
+                    size: 'lg'
+                });
+            });
+        });
+
+
         var csrftoken = $('meta[name=csrf-token]').attr('content');
+
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
@@ -165,19 +247,26 @@
                 }
             }
         });
-        $('#default_board_change').change(function () {
-            let project_id = $(this).val();
-            let user_id = "{{ current_user.id }}"
+
+        $('label[name="status"] input').change(function () {
+            let ele = $(this);
+            let project_id = ele.val();
+            let project_title = $('#project_title' + project_id).text();
             $.ajax({
-                url: "{{ url_for('setting.change_default_board') }}",
+                url: "{{ url_for('setting.change_project_status') }}",
                 type: 'POST',
                 data: {
                     'project_id': project_id,
-                    'user_id': user_id
                 },
                 success: function (e) {
-                    if (e == '1') {
-                        alert('ok');
+                    if (e == 'ok') {
+                        layer.msg(project_title + '状态修改成功。');
+                        let tr_ele = ele.parents('tr');
+                        if (tr_ele.attr('data-status') == 'False') {
+                            tr_ele.attr('data-status', 'True');
+                        } else if (tr_ele.attr('data-status') == 'True') {
+                            tr_ele.attr('data-status', 'False');
+                        }
                     } else {
                         alert('fail');
                     }
@@ -188,70 +277,93 @@
             });
         });
 
-        function edit_user(the, user_id) {
-            var name = $(the).parents('tr').children('td').eq(1).text();
-            var index = layer.open({
-                type: 1,
-                skin: "layui-layer-rim",
-                area: ['400px', '200px'],
-                title: '编辑栏目',
-                content: '<div class="text-center" style="margin-top:20px"><p>请输入新的栏目名称</p><p><input type="text" id="new_name" value="' +
-                    name + '"></p></div>',
-                btn: ['确定', '取消'],
-                anim: 2,
-                offset: '150px',
-                yes: function (index, layero) {
-                    var new_name = $('#new_name').val();
-                    $.ajax({
-                        url: "",
-                        type: 'POST',
-                        data: {
-                            csrfmiddlewaretoken: '{{ csrf_token() }}',
-                            'user_id': user_id,
-                            'user_name': new_name
-                        },
-                        success: function (e) {
-                            if (e == '1') {
-                                layer.close(index);
-                                layer.msg('修改成功！');
-                                setTimeout(() => {
-                                    parent.location.reload();
-                                }, 700);
-                            } else {
-                                layer.msg('新的名称没有保存，修改失败！')
-                            }
-                        },
+        $('#show_by_user').change(UserAndStatusFilter);
 
-                    });
+        $('#filter_by_status').change(UserAndStatusFilter);
+
+        $('#sort_by_name_or_date').change(function () {
+            let sort_by = $('#sort_by_name_or_date option:selected').val();
+            if (sort_by == 'name') {
+                $('#projects_table').load('{{ url_for("setting.sort_by_name") }}', UserAndStatusFilter);
+            } else if (sort_by == 'date') {
+                $('#projects_table').load('{{ url_for("setting.sort_by_date") }}', UserAndStatusFilter);
+            }
+        });
+
+        $('#default_board_change').change(function () {
+            let project_id = $(this).val();
+            let project_title = $('#default_board_change option:selected').text();
+            let user_id = "{{ current_user.id }}"
+            $.ajax({
+                url: "{{ url_for('setting.change_default_board') }}",
+                type: 'POST',
+                data: {
+                    'project_id': project_id,
+                    'user_id': user_id
                 },
-                btn2: function (index, layero) {
-                    layer.close(index);
-                }
-            })
+                success: function (e) {
+                    if (e == 'ok') {
+                        layer.msg('Default Project成功修改为:' + project_title);
+                    } else {
+                        alert('fail');
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        });
+
+        function UserAndStatusFilter() {
+            let user_filter_val = $('#show_by_user option:selected').val();
+            let status_filter_val = $('#filter_by_status option:selected').val();
+            let active_tr = $('tr[data-status="True"]');
+            let inactive_tr = $('tr[data-status="False"]');
+            if (user_filter_val !== 'any') {
+                $('ul[name="users"]>li[name!=' + user_filter_val + ']').parents('tr').hide();
+                $('ul[name="users"]>li[name=' + user_filter_val + ']').parents('tr').show();
+            } else {
+                $('ul[name="users"]').parents('tr').show();
+            }
+            if (status_filter_val == 'all') {
+                active_tr.each(function () {
+                    if ($(this).is(':hidden'))
+                        return
+                    $(this).show();
+                });
+                inactive_tr.each(function () {
+                    if ($(this).is(':hidden'))
+                        return
+                    $(this).show();
+                });
+            } else if (status_filter_val == 'active') {
+                inactive_tr.hide();
+            } else if (status_filter_val == 'inactive') {
+                active_tr.hide();
+            }
         }
 
         function del_user(the, user_id) {
-            var name = $(the).parents('tr').children('td').eq(1).text();
-            var index = layer.open({
+            let name = $(the).parents('tr').children('td').eq(0).text();
+            layer.open({
                 type: 1,
                 skin: "layui-layer-rim",
                 area: ['400px', '200px'],
-                title: '删除栏目',
-                content: '<div class="text-center" style="margin-top:20px"><p>是否确定删除 <span class="label label-danger">' +
-                    name + '</span> 栏目?</p></div>',
+                title: '删除用户',
+                content: '<div class="text-center" style="margin-top:20px"><p>是否确定删除用户 <span class="label label-danger">' +
+                    name + '</span> ?</p></div>',
                 btn: ['删除', '取消'],
                 anim: 6,
                 offset: '150px',
                 yes: function (index, layero) {
                     $.ajax({
-                        url: "",
+                        url: "{{ url_for('setting.del_user_by_id') }}",
                         type: 'POST',
                         data: {
-                            csrfmiddlewaretoken: '{{ csrf_token() }}',
                             'user_id': user_id,
                         },
                         success: function (e) {
-                            if (e == '1') {
+                            if (e == 'ok') {
                                 layer.close(index);
                                 layer.msg('删除成功！');
                                 setTimeout(() => {
@@ -263,11 +375,77 @@
                         },
                     });
                 },
-                btn2: function (index, layero) {
+                btn2: function (index) {
                     layer.close(index);
                 }
-            })
+            });
         }
+
+        function del_project(the, project_id) {
+            let title = $(the).parents('tr').children('td').eq(0).text();
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: '删除用户',
+                content: '<div class="text-center" style="margin-top:20px"><p>是否确定删除项目 <span class="label label-danger">' +
+                    title + '</span> ?</p></div>',
+                btn: ['删除', '取消'],
+                anim: 6,
+                offset: '150px',
+                yes: function (index, layero) {
+                    $.ajax({
+                        url: "{{ url_for('setting.del_project_by_id') }}",
+                        type: 'POST',
+                        data: {
+                            'project_id': project_id,
+                        },
+                        success: function (e) {
+                            if (e == 'ok') {
+                                layer.close(index);
+                                layer.msg('删除成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else {
+                                layer.msg('删除失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        }
+
+        function user_modal_save(the, user_id) {
+            let form = $("#UserEditModalForm" + user_id);
+            let modal = $('#EditUserModal' + user_id);
+            $.ajax({
+                url: "{{ url_for('setting.save_user_edit_modal') }}",
+                type: 'POST',
+                data: form.serialize(),
+                success: function (status) {
+                    if (status == 'ok') {
+                        modal.modal('toggle');
+                        layer.msg('修改成功！');
+                    } else {
+                        layer.msg('修改失败！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+                complete: function (done) {
+                    setTimeout(() => {
+                        parent.location.reload();
+                    }, 700);
+                }
+            });
+
+        }
+
     </script>
 {% endblock %}
 
