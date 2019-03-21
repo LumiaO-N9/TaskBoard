@@ -1,0 +1,79 @@
+<div class="modal fade" tabindex="-1"
+     id="EditProjectModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal"
+                        aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title">Add Project</h3>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        <label>Project Name</label>
+                        <span id="old_project_title_span" hidden></span>
+                        <input id="project_title_input" type="text" name="project_title"
+                               class="form-control" data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+                        <div id="project_title-input-error" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 form-group">
+                        <label>Milestones</label>
+                        <ul id="milestone_ul" name="milestones-list" class="list-group"></ul>
+                        <input type="text"
+                               id="milestoneNameInput"
+                               name="MilestoneNameInput"
+                               class="form-control"
+                               placeholder="Milestone Name" style="width: 85%;">
+                        <a class="btn btn-default btn-md" style="margin-top: 5px;"
+                           onclick="add_milestone_or_category('','milestone')"><span
+                                class="glyphicon glyphicon-plus"></span></a>
+                    </div>
+                    <div class="col-xs-6 form-group">
+                        <label>Categories</label>
+                        <ul id="category_ul" name="category-list" class="list-group"></ul>
+                        <input type="text"
+                               id="categoryNameInput" class="form-control  pull-left"
+                               name="CategoryNameInput"
+                               placeholder="Category Name" style="width: 85%;">
+                        <div name="color_picker_category" id="color_picker"
+                             style="margin-left: 3px;"></div>
+                        <a class="btn btn-default btn-md"
+                           style="margin-top: 5px;display: block;width: 40.02px;"
+                           onclick="add_milestone_or_category('','category')">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-12">
+                        <label>Select Users</label>
+                        <div id="select_users">
+                            {% for user in users %}
+                                <label class="half-width">
+                                    <input name="normal_user" type="checkbox" id="inlineCheckbox{{ user.id }}"
+                                           value="{{ user.id }}"> {{ user.username }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <p class="small clearfix">
+                    <em>Administrators have access to all projects, whether or not they are selected here.</em>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">Close
+                </button>
+                <a type="button" class="btn btn-primary" name="delete"
+                   onclick="project_modal_save('')">Save
+                    changes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
