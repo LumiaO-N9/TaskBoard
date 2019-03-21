@@ -2,6 +2,7 @@
 {% block title %}Settings{% endblock %}
 {% block style %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layui.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css">
     <style>
         h3 {
             font-size: 24px;
@@ -10,7 +11,10 @@
         }
 
         h4 {
+            font-size: 18px;
             display: block;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         h4 span select.form-control {
@@ -41,9 +45,16 @@
             background-color: #eee;
         }
 
-        body .layui-layer-setmybg .layui-layer-content {
-            background-color: #33d451;
-            color: #fff;
+        .input-error {
+            padding-top: 5px;
+            font-size: 90%;
+            color: #a10;
+            display: none;
+        }
+
+        body .layer-error-skin {
+            background: #f24838;
+            color: #ffffff;
         }
 
     </style>
@@ -58,61 +69,76 @@
                     <div class="panel-body">
                         <div class="col-sm-6">
                             <div class="header"><h4>Change Password</h4></div>
-                            <form method="post" action="{{ request.full_path }}">
+                            <div id="change_password_form">
                                 <div class="form-group">
                                     <input type="password" id="password" name="password" class="form-control"
                                            placeholder="Current Password">
                                 </div>
                                 <div class="form-group">
                                     <input type="password" id="password1" name="password1" class="form-control"
-                                           placeholder="New Password">
+                                           placeholder="New Password"
+                                           data-rule='pattern:"^.*(?=.{6,})(?=.*[A-Za-z])(?=.*[!@#$%^&*?\\(\\)\\-_\\.]).*$"'
+                                           value=""
+                                           oncopy="return false" onpaste="return false"
+                                           oncontextmenu="return false">
+                                    <div class="input-error">最少6位，包括至少1个字母，1个特殊字符</div>
                                 </div>
                                 <div class="form-group">
                                     <input type="password" id="password2" name="password2" class="form-control"
-                                           placeholder="Verify Password">
+                                           placeholder="Verify Password" oncopy="return false" onpaste="return false"
+                                           oncontextmenu="return false">
+                                    <div class="input-error">两次输入的密码不一致！</div>
                                 </div>
                                 <div class="form-group">
-                                    <button class="btn btn-default btn-info" type="submit">Update Password
-                                    </button>
+                                    <input type="button" class="btn btn-default btn-info"
+                                           onclick="change_user_password()" value="Update Password"/>
                                     <button class="btn btn-default btn-default" type="reset">Reset
                                     </button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="header"><h4>Change Username</h4></div>
-                            <form method="post" action="{{ request.full_path }}">
+                            <div>
                                 <div class="form-group">
                                     <input type="text" id="username" name="username" class="form-control"
-                                           placeholder="New Username">
+                                           placeholder="New Username"
+                                           data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+                                    <div id="username-error" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
                                 </div>
                                 <div class="form-group">
-                                    <button class="btn btn-default btn-info" type="submit">Update Username
-                                    </button>
+                                    <input type="button" class="btn btn-default btn-info" value="Update Username"
+                                           onclick="change_user_username_or_email('username')"/>
                                     <button class="btn btn-default btn-default" type="reset">Reset
                                     </button>
                                 </div>
-                            </form>
+                            </div>
                             <div class="header"><h4>Change Email</h4></div>
-                            <form method="post" action="{{ request.full_path }}">
+                            <form id="change_user_email">
                                 <div class="form-group">
                                     <input type="text" id="email" name="email" class="form-control"
-                                           placeholder="New Email">
+                                           placeholder="New Email"
+                                           data-rule='pattern:"^([A-Za-z0-9_\\-\\.])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,4})$"'>
+                                    <div id="email-error" class="input-error">邮箱格式有误</div>
                                 </div>
                                 <div class="form-group">
-                                    <button class="btn btn-default btn-info" type="submit">Update Email
-                                    </button>
+                                    <input type="button" class="btn btn-default btn-info"
+                                           onclick="change_user_username_or_email('email')"
+                                           value="Update Email"/>
                                     <button class="btn btn-default btn-default" type="reset">Reset
                                     </button>
                                 </div>
                             </form>
                         </div>
                         <div class="col-sm-6">
-                            <div class="header"><h4>Select Default Board</h4></div>
-                            <select class="form-control" id="default_board_change">
-                                <option value="{{ current_user.default_project.id|default('None') }}">{{ current_user.default_project.title|default('None') }}</option>
-                                {% for project in projects if project != current_user.default_project %}
-                                    <option value="{{ project.id }}">{{ project.title }}</option>
+                            <div class="header"><h4>Select Default Project</h4></div>
+                            <select class="form-control" id="default_project_change">
+                                <option value="{{ current_user.default_project.id|default('None') }}"
+                                        selected>{{ current_user.default_project.title|default('None') }}</option>
+                                {% for project in projects %}
+                                    {% if current_user.is_admin or project != current_user.default_project and (project == current_user.access_project or project in current_user.projects) %}
+                                        <option value="{{ project.id }}">{{ project.title }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
@@ -121,51 +147,17 @@
                         </div>
                         <div class="col-sm-12">
                             <div class="header"><h4>TaskBoard Users</h4></div>
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Email</th>
-                                        <th>Admin</th>
-                                        <th>Default Board</th>
-                                        <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    {% from 'macros.html' import TextToGlyphicon %}
-                                    {% for user in users %}
-                                        <tr>
-                                            <td>{{ user.username }}</td>
-                                            <td>{{ user.email }}</td>
-                                            <td>{{ TextToGlyphicon(user.is_admin) }}</td>
-                                            <td>{{ user.default_project.title }}</td>
-                                            <td>
-                                                {% if current_user.is_admin %}
-                                                    <a data-toggle="modal" data-target="#EditUserModal{{ user.id }}"
-                                                       name="edit">
-                                                        <span class="glyphicon glyphicon-edit"></span>
-                                                    </a>
-                                                    <a href="javascript:" name="delete"
-                                                       onclick="del_user(this, '{{ user.id }}')">
-                                                    <span class="glyphicon glyphicon-trash"
-                                                          style="margin-left:8px">
-                                                    </span>
-                                                    </a>
-                                                    {% include '_UserEditModal.html' %}
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </table>
-                                <form method="post" action="{{ request.full_path }}">
-                                    {#                                {{ form.csrf_token }}#}
-                                    <div class="form-group">
-                                        <button class="btn btn-default btn-info" type="submit"><span
-                                                class="glyphicon glyphicon-plus"></span> Add User
-                                        </button>
-                                    </div>
-                                </form>
+                            <div id="users_table_div" class="table-responsive">
+                                {% include '_UsersTable.html' %}
                             </div>
+                            {% if current_user.is_admin %}
+                                <div class="form-group">
+                                    <a class="btn btn-default btn-info" onclick="show_user_edit_modal('')">
+                                        <span class="glyphicon glyphicon-plus"></span> Add User
+                                    </a>
+                                </div>
+                                {% include '_UserAddModal.html' %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -203,52 +195,134 @@
                             <div id="projects_table_div" class="table-responsive">
                                 {% include '_ProjectsTable.html' %}
                             </div>
+                            {% if current_user.is_admin %}
+                                <div class="form-group">
+                                    <button class="btn btn-default btn-info" onclick="show_project_edit_modal('')"><span
+                                            class="glyphicon glyphicon-plus"></span> Add Project
+                                    </button>
+                                </div>
+                                {% include '_ProjectAddModal.html' %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div style="margin-left: 30px;">
-        <div id="test3"></div>
-        <div id="test4" style="margin-left: 30px;"></div>
-    </div>
 
 {% endblock %}
 {% block scripts %}
+    <script type="text/javascript" src="{{ url_for('static',filename='js/Sortable.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/layui.js') }}"></script>
     <script type="text/javascript">
+        $(function () {
 
-        $('#settings').addClass('active').children('a').removeAttr('href');
+            $('#settings').addClass('active').children('a').removeAttr('href');
 
-        layer.config({
-            offset: '150px',
-        });
-        $('div[name=color_picker]').each(function () {
-            let ele = $(this);
-            layui.use('colorpicker', function () {
-                let colorpicker = layui.colorpicker;
-                //渲染
-                colorpicker.render({
-                    elem: ele,  //绑定元素
-                    color: '#d9edf7', //设置默认色
-                    size: 'lg'
+            layer.config({
+                offset: '150px',
+            });
+            Register_password_validator();
+            Register_username_validator();
+            Register_email_validator();
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        let csrftoken = $('meta[name=csrf-token]').attr('content');
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken)
+                    }
+                }
+            });
+
+
+            $('label[name="status"] input').change(Register_status_change);
+
+            $('#show_by_user').change(UserAndStatusFilter);
+
+            $('#filter_by_status').change(UserAndStatusFilter);
+
+            $('#sort_by_name_or_date').change(function () {
+                let sort_by = $('#sort_by_name_or_date option:selected').val();
+                if (sort_by === 'name') {
+                    $('#projects_table').load('{{ url_for("setting.sort_by_name") }}', UserAndStatusFilter);
+                } else if (sort_by === 'date') {
+                    $('#projects_table').load('{{ url_for("setting.sort_by_date") }}', UserAndStatusFilter);
+                }
+            });
+
+            $('#default_project_change').change(function () {
+                let project_id = $(this).val();
+                let project_title = $('#default_project_change option:selected').text();
+                let user_id = "{{ current_user.id }}"
+                $.ajax({
+                    url: "{{ url_for('setting.change_default_project') }}",
+                    type: 'POST',
+                    data: {
+                        'project_id': project_id,
+                        'user_id': user_id
+                    },
+                    success: function (e) {
+                        if (e === 'ok') {
+                            layer.msg('Default Project成功修改为:' + project_title);
+                            setTimeout(() => {
+                                $('#users_table_div').load('{{ url_for("setting.ajax_load_user_table") }}');
+                            }, 300);
+                        } else {
+                            alert('fail');
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    },
                 });
             });
+
+            $('input[name=milestone_input]').bind('keypress', EnterPress);
+
+            $('input[name=category_input]').bind('keypress', EnterPress);
+
+            $('#username').bind('keypress', function (event) {
+                if (event.keyCode === 13)
+                    change_user_username_or_email('username');
+            });
+
+            $('#email').bind('keypress', function (event) {
+                if (event.keyCode === 13)
+                    change_user_username_or_email('email');
+            })
+
+
         });
 
-
-        var csrftoken = $('meta[name=csrf-token]').attr('content');
-
-        $.ajaxSetup({
-            beforeSend: function (xhr, settings) {
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken)
+        function Register_password_validator() {
+            let form = $('#change_password_form');
+            form.find('[data-rule]').each(function () {
+                new Input($(this));
+            });
+            let password1 = $('#password1');
+            let password2 = $('#password2');
+            let error = password2.next('div.input-error');
+            password1.on('blur', function () {
+                password2.trigger('blur');
+            });
+            password2.on('blur', function () {
+                if (password1.val() === password2.val()) {
+                    error.hide();
+                } else {
+                    error.show();
                 }
-            }
-        });
+            });
+        }
 
-        $('label[name="status"] input').change(function () {
+        function Register_email_validator() {
+            new Input($('#email'));
+        }
+
+        function Register_username_validator() {
+            new Input($('#username'));
+        }
+
+        function Register_status_change() {
             let ele = $(this);
             let project_id = ele.val();
             let project_title = $('#project_title' + project_id).text();
@@ -259,14 +333,15 @@
                     'project_id': project_id,
                 },
                 success: function (e) {
-                    if (e == 'ok') {
+                    if (e === 'ok') {
                         layer.msg(project_title + '状态修改成功。');
                         let tr_ele = ele.parents('tr');
-                        if (tr_ele.attr('data-status') == 'False') {
+                        if (tr_ele.attr('data-status') === 'False') {
                             tr_ele.attr('data-status', 'True');
-                        } else if (tr_ele.attr('data-status') == 'True') {
-                            tr_ele.attr('data-status', 'False');
+                        } else if (tr_ele.attr('data-status') !== 'True') {
+                            return;
                         }
+                        tr_ele.attr('data-status', 'False');
                     } else {
                         alert('fail');
                     }
@@ -275,46 +350,38 @@
                     console.log(error);
                 },
             });
-        });
+        }
 
-        $('#show_by_user').change(UserAndStatusFilter);
+        function Register_color_picker(project_id) {
+            $('#color_picker' + project_id).each(function () {
+                let ele = $(this);
+                ele.attr('data-color', '#D9EDF7');
+                layui.use('colorpicker', function () {
+                    let colorpicker = layui.colorpicker;
+                    //渲染
+                    colorpicker.render({
+                        elem: ele,  //绑定元素
+                        color: '#D9EDF7', //设置默认色
+                        size: 'lg',
+                        predefine: true,
+                        colors: ['#dff0d8', '#d9edf7', '#fcf8e3', '#f2dede', '#337ab7'],
+                        change: function (color) {
+                            ele.attr('data-color', color);
+                        }
+                    });
+                });
+            });
+        }
 
-        $('#filter_by_status').change(UserAndStatusFilter);
-
-        $('#sort_by_name_or_date').change(function () {
-            let sort_by = $('#sort_by_name_or_date option:selected').val();
-            if (sort_by == 'name') {
-                $('#projects_table').load('{{ url_for("setting.sort_by_name") }}', UserAndStatusFilter);
-            } else if (sort_by == 'date') {
-                $('#projects_table').load('{{ url_for("setting.sort_by_date") }}', UserAndStatusFilter);
+        function EnterPress(event) {
+            let input = $(this);
+            if (event.keyCode === 13) {
+                input.trigger('blur');
             }
-        });
-
-        $('#default_board_change').change(function () {
-            let project_id = $(this).val();
-            let project_title = $('#default_board_change option:selected').text();
-            let user_id = "{{ current_user.id }}"
-            $.ajax({
-                url: "{{ url_for('setting.change_default_board') }}",
-                type: 'POST',
-                data: {
-                    'project_id': project_id,
-                    'user_id': user_id
-                },
-                success: function (e) {
-                    if (e == 'ok') {
-                        layer.msg('Default Project成功修改为:' + project_title);
-                    } else {
-                        alert('fail');
-                    }
-                },
-                error: function (error) {
-                    console.log(error);
-                },
-            });
-        });
+        }
 
         function UserAndStatusFilter() {
+            $('label[name="status"] input').change(Register_status_change);
             let user_filter_val = $('#show_by_user option:selected').val();
             let status_filter_val = $('#filter_by_status option:selected').val();
             let active_tr = $('tr[data-status="True"]');
@@ -325,7 +392,7 @@
             } else {
                 $('ul[name="users"]').parents('tr').show();
             }
-            if (status_filter_val == 'all') {
+            if (status_filter_val === 'all') {
                 active_tr.each(function () {
                     if ($(this).is(':hidden'))
                         return
@@ -333,14 +400,74 @@
                 });
                 inactive_tr.each(function () {
                     if ($(this).is(':hidden'))
-                        return
+                        return;
                     $(this).show();
                 });
-            } else if (status_filter_val == 'active') {
+            } else if (status_filter_val === 'active') {
                 inactive_tr.hide();
-            } else if (status_filter_val == 'inactive') {
+            } else if (status_filter_val === 'inactive') {
                 active_tr.hide();
             }
+        }
+
+        function add_milestone_or_category(project_id, name) {
+            let ul = $('#' + name + '_ul' + project_id);
+            let input = $('#' + name + 'NameInput' + project_id)
+            input.css('border', '1px solid #dbdbdb');
+            let title_array = [];
+            let id_array = [];
+            ul.find('span[name=' + name + '_title_span]:visible').each(function () {
+                title_array.push($(this).text());
+                id_array.push($(this)[0].id.split(name + '_span')[1]);
+            });
+            let last_li_id = '1';
+            while (id_array.indexOf(last_li_id) > -1) {   // 解决id冲突
+                last_li_id = (parseInt(last_li_id) + 1).toString();
+            }
+            let title = input.val();
+            if (title.trim() === '') {
+                return;
+            }
+            if (title_array.indexOf(title.trim()) > -1) {
+                layer.msg('This Project is already has the same name ' + name + ', Please check another one !');
+                input.select();
+                return;
+            }
+            input.val('');
+            let instance = {
+                id: last_li_id,
+                title: title
+            };
+            let li_str = '';
+            let color = '';
+            if (name === 'milestone') {
+                li_str = `<li name ="temporary" id="milestone_li${instance.id}" class="list-group-item" value="${instance.id}">
+                <span class="fa fa-arrows-v" style="margin-left: -15px;padding-left: 10px">  |</span>`;
+            } else if (name === 'category') {
+                color = $('#color_picker' + project_id).attr('data-color');
+                li_str = `<li name ="temporary" id="category_li${instance.id}" class="list-group-item" value="${instance.id}" style="text-transform: capitalize;background: ${color}">`;
+            }
+            ul.append(li_str + `
+                 <span name="old_title" hidden>${instance.title}</span>
+                <span name="${name}_title_span" id="${name}_span${instance.id}">${instance.title}</span>
+                <input name="${name}_input" onblur="save_milestone_or_category_title_change(this)"
+                       onfocus="this.select()" class=""
+                       id="${name}_input${instance.id}"
+                       value="${instance.title}"
+                       style="width: auto;border-radius:4px;border:1px solid #DBDBDB;"
+                       hidden>
+                <div class="pull-right">
+                    <a id="${name}_a${instance.id}" name="edit"
+                       onclick="edit_milestone_or_category_title(this)">
+                        <span class="glyphicon glyphicon-edit"></span>
+                    </a>
+                    <a name="hide" onclick="hide_milestone_or_category(this)">
+                        <span class="glyphicon glyphicon-trash" style="margin-left:4px"></span>
+                    </a>
+                </div>
+            </li>`
+            );
+            $('input[name=' + name + '_input]').bind('keypress', EnterPress);
         }
 
         function del_user(the, user_id) {
@@ -355,7 +482,7 @@
                 btn: ['删除', '取消'],
                 anim: 6,
                 offset: '150px',
-                yes: function (index, layero) {
+                yes: function (index) {
                     $.ajax({
                         url: "{{ url_for('setting.del_user_by_id') }}",
                         type: 'POST',
@@ -363,7 +490,7 @@
                             'user_id': user_id,
                         },
                         success: function (e) {
-                            if (e == 'ok') {
+                            if (e === 'ok') {
                                 layer.close(index);
                                 layer.msg('删除成功！');
                                 setTimeout(() => {
@@ -401,7 +528,7 @@
                             'project_id': project_id,
                         },
                         success: function (e) {
-                            if (e == 'ok') {
+                            if (e === 'ok') {
                                 layer.close(index);
                                 layer.msg('删除成功！');
                                 setTimeout(() => {
@@ -419,17 +546,180 @@
             });
         }
 
-        function user_modal_save(the, user_id) {
+        function save_milestone_or_category_title_change(the) {
+            let input = $(the);
+            let span = input.prev();
+            let a = input.next('div').children('a');
+            span.text(input.val());
+            span.show();
+            a.show();
+            input.hide();
+        }
+
+        function edit_milestone_or_category_title(the) {
+            $(the).hide();
+            $(the).parents('li').children('span[name=old_title]').next().hide().next().show().focus();
+        }
+
+        function hide_milestone_or_category(the) {
+            $(the).parents('li').hide();
+        }
+
+        function show_project_edit_modal(project_id) {
+            let input = $('#project_title_input' + project_id);
+            let milestone_ul = $('#milestone_ul' + project_id);
+            let category_ul = $('#category_ul' + project_id);
+            let color_picker = $('#color_picker' + project_id);
+            let select_users = $('#select_users' + project_id);
+            milestone_ul.children('li[name=temporary]').remove();
+            category_ul.children('li[name=temporary]').remove();
+            milestone_ul.next('input').val('');
+            category_ul.next('input').val('');
+            $('span[name=old_title]').each(function () {
+                let old_ele = $(this);
+                old_ele.next('span').text(old_ele.text());
+                old_ele.next('input').val(old_ele.text());
+            });
+            input.val(input.prev('span').text());
+            let $input = new Input(input);
+            input.on('focusout', function () {
+                if (!$input.validator.is_valid()) {
+                    input.css('border', '1px solid #ff0000');
+                    input.focus().select();
+                } else {
+                    input.css('border', '1px solid #DBDBDB');
+                }
+            });
+            let sortable = Sortable.create(milestone_ul.get(0), {
+                handle: '.fa-arrows-v',
+                animation: 150,
+                ghostClass: 'blue-background-class',
+
+            });
+
+            milestone_ul.next('input').bind('keypress', function (event) {
+                let input = $(this);
+                let project_id = input[0].id.split('milestoneNameInput')[1];
+                if (event.keyCode === 13) {
+                    add_milestone_or_category(project_id, 'milestone');
+                }
+            });
+
+            category_ul.next('input').bind('keypress', function (event) {
+                let input = $(this);
+                let project_id = input[0].id.split('categoryNameInput')[1];
+                if (event.keyCode === 13) {
+                    add_milestone_or_category(project_id, 'category');
+                }
+            });
+
+            if (milestone_ul.attr('data-old-order')) {
+                let old_order = milestone_ul.attr('data-old-order').split(',');
+                sortable.sort(old_order);
+            } else {
+                milestone_ul.attr('data-old-order', sortable.toArray());
+            }
+            if (!color_picker.attr('data-color')) {
+                Register_color_picker(project_id);
+            }
+            select_users.find('input[name=normal_user]').prop('checked', false);
+            select_users.find('input[name=project_user]').prop('checked', true);
+            milestone_ul.children('li').show();
+            category_ul.children('li').show();
+            $('#EditProjectModal' + project_id).attr('data-backdrop', 'static').modal('show');
+        }
+
+        function show_user_edit_modal(user_id) {
+            let form = $('#UserEditModalForm' + user_id);
+            form.find('[data-rule]').each(function () {
+                new Input($(this));
+            });
+            let password1 = $('#user_password1_input' + user_id);
+            let password2 = $('#user_password2_input' + user_id);
+            let error = password2.next('div.input-error');
+            password1.on('blur', function () {
+                password2.trigger('blur');
+            });
+            password2.on('blur', function () {
+                if (password1.val() === password2.val()) {
+                    error.hide();
+                } else {
+                    error.show();
+                }
+            });
+            $('#EditUserModal' + user_id).modal('show');
+        }
+
+        function show_user_add_modal() {
+            let form = $('#UserEditModalForm');
+            form.find('[data-rule]').each(function () {
+                new Input($(this));
+            });
+            let password1 = $('#add_user_password1_input');
+            let password2 = $('#add_user_password2_input');
+            let error = $('#password2-error');
+            password1.on('blur', function () {
+                password2.trigger('blur');
+            });
+            password2.on('blur', function () {
+                if (password1.val() === password2.val()) {
+                    error.hide();
+                } else {
+                    error.show();
+                }
+            });
+            $('#AddUserModal').modal('show');
+        }
+
+        function user_modal_save(user_id) {
             let form = $("#UserEditModalForm" + user_id);
+            let $inputs = form.find('[data-rule]');
+            let inputs_array = [];
+            $inputs.each(function () {
+                inputs_array.push(new Input($(this)));
+            });
+            $inputs.trigger('change');
+            let password1_input = $('#user_password1_input' + user_id);
+            let password2_input = $('#user_password2_input' + user_id);
+            password2_input.trigger('blur');
+            for (let i = 0; i < inputs_array.length; i++) {
+                let item = inputs_array[i];
+                if (user_id !== '' && item.get_name() == 'password1' && password1_input.val() === '' && password2_input.val() === '') {
+                    continue;
+                }
+                let r = item.validator.is_valid();
+                if (!r) {
+                    layer.msg('Please check out your input carefully !');
+                    return;
+                }
+            }
             let modal = $('#EditUserModal' + user_id);
             $.ajax({
                 url: "{{ url_for('setting.save_user_edit_modal') }}",
                 type: 'POST',
                 data: form.serialize(),
                 success: function (status) {
-                    if (status == 'ok') {
-                        modal.modal('toggle');
-                        layer.msg('修改成功！');
+                    if (status !== 'fail') {
+                        if (status === 'same username') {
+                            let username_input = $('#user_username_input' + user_id);
+                            let msg = 'You input the username already exists, please re-entry !';
+                            layer_error_msg(username_input, msg);
+                            return;
+                        }
+                        if (status === 'same email') {
+                            let email_input = $('#user_email_input' + user_id);
+                            let msg = 'You input the email adress already exists, please re-entry !';
+                            layer_error_msg(email_input, msg);
+                            return;
+                        }
+                        modal.modal('hide');
+                        if (status === 'edit')
+                            layer.msg('修改成功！');
+                        else if (status === 'add')
+                            layer.msg('添加成功！');
+                        setTimeout(() => {
+                            parent.location.reload();
+                        }, 300);
                     } else {
                         layer.msg('修改失败！')
                     }
@@ -437,14 +727,330 @@
                 error: function (error) {
                     console.log(error);
                 },
-                complete: function (done) {
-                    setTimeout(() => {
-                        parent.location.reload();
-                    }, 700);
+            });
+        }
+
+        function project_modal_save(project_id) {
+            let $project_title_input = $('#project_title_input' + project_id);
+            let input = new Input($project_title_input);
+            $project_title_input.trigger('change');
+            if (!input.validator.is_valid()) {
+                layer.msg('Project name is invalid, Please check out your input carefully !', {
+                    skin: 'layer-error-skin',
+                    area: ['430px', 'auto'],
+                    time: 1000,
+                    end: function () {
+                        $project_title_input.css('border', '1px solid #ff0000');
+                        $project_title_input.focus().select();
+                    }
+                });
+                return
+            }
+            let project_title = $project_title_input.val();
+            let exist_milestones_id_title = {};
+            let order_id_array = [];
+            let milestone_ul = $('#milestone_ul' + project_id);
+            let category_ul = $('#category_ul' + project_id);
+            let select_users = $('#select_users' + project_id);
+            milestone_ul.children('li:visible').each(function () {
+                let id = $(this)[0].id.split('milestone_li')[1];
+                order_id_array.push(id);
+                let title = $(this).children('span[name=milestone_title_span]').text();
+                exist_milestones_id_title[id] = title;
+            });
+            let milestone_input = milestone_ul.next('input');
+            milestone_input.on('change', function () {
+                $(this).css('border', '1px solid #dbdbdb');
+            });
+            if ($.isEmptyObject(exist_milestones_id_title)) {
+                layer.msg('At least one milestone is required !', {
+                    skin: 'layer-error-skin',
+                    time: 1000,
+                    end: function () {
+                        milestone_input.css('border', '1px solid #ff0000');
+                        milestone_input.focus().select();
+                    }
+                });
+                return
+            }
+            let wait_to_delete_milestone_id_array = [];
+            milestone_ul.children('li[name=forever]:hidden').each(function () {
+                let id = $(this)[0].id.split('milestone_li')[1];
+                wait_to_delete_milestone_id_array.push(id);
+            });
+
+            let exist_categories_id_title_color = {};
+            category_ul.children('li:visible').each(function () {
+                let id = $(this)[0].id.split('category_li')[1];
+                let title = $(this).children('span[name=category_title_span]').text();
+                let color = $(this).attr('style').split(';')[1].replace('background:', '');
+                exist_categories_id_title_color[id] = {
+                    'title': title,
+                    'color': color
+                };
+            });
+
+            let wait_to_delete_category_id_array = [];
+            category_ul.children('li[name=forever]:hidden').each(function () {
+                let id = $(this)[0].id.split('category_li')[1];
+                wait_to_delete_category_id_array.push(id);
+            });
+
+            let wait_remove_users_id_array = [];
+            select_users.find('input[name=project_user]').each(function () {
+                if (!$(this).is(':checked')) {
+                    let id = $(this)[0].id.split('inlineCheckbox')[1];
+                    wait_remove_users_id_array.push(id);
                 }
             });
 
+            let wait_add_users_id_array = [];
+            select_users.find('input').each(function () {
+                if ($(this).is(':checked')) {
+                    let id = $(this)[0].id.split('inlineCheckbox')[1];
+                    wait_add_users_id_array.push(id);
+                }
+            });
+
+            let data_json = {
+                'project_id': project_id,
+                'project_title': project_title,
+                'order_id_array': order_id_array,
+                'exist_milestones_id_title': exist_milestones_id_title,
+                'wait_to_delete_milestone_id_array': wait_to_delete_milestone_id_array,
+                'exist_categories_id_title_color': exist_categories_id_title_color,
+                'wait_to_delete_category_id_array': wait_to_delete_category_id_array,
+                'wait_remove_users_id_array': wait_remove_users_id_array,
+                'wait_add_users_id_array': wait_add_users_id_array
+            };
+
+            $.ajax({
+                type: "post",
+                url: "{{ url_for('setting.save_project_edit_modal') }}",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(data_json),
+                success: function (status) {
+                    if (status !== 'fail') {
+                        $('#EditProjectModal' + project_id).modal('hide');
+                        if (status === 'edit')
+                            layer.msg('修改成功！');
+                        else if (status === 'add')
+                            layer.msg('添加成功！');
+                        setTimeout(function () {
+                            parent.location.reload();
+                        }, 300);
+                    } else {
+                        layer.msg('修改失败，请稍后再试！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+                complete: function () {
+
+                }
+            });
         }
+
+        function layer_error_msg(ele, msg) {
+            layer.msg(msg, {
+                skin: 'layer-error-skin',
+                time: 2000,
+                end: function () {
+                    ele.css('border', '1px solid #ff0000');
+                    ele.focus().select();
+                    ele.on('change', function () {
+                        ele.css('border', '1px solid #dbdbdb');
+                    });
+                }
+            });
+        }
+
+        function is_valid(ele, msg) {
+            if (ele.val() === '') {
+                layer_error_msg(ele, msg);
+                return false;
+            }
+            return true;
+        }
+
+        function is_valid_array(inputs_array) {
+            for (let i = 0; i < inputs_array.length; i++) {
+                let item = inputs_array[i];
+                let r = item.validator.is_valid();
+                if (!r) {
+                    layer.msg('Please check out your input carefully !');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function change_user_password() {
+            let current_password = $('#password');
+            let password1_input = $('#password1');
+            let password2_input = $('#password2');
+            let form = $('#change_password_form');
+            let $inputs = form.find('[data-rule]');
+            let inputs_array = [];
+            $inputs.each(function () {
+                inputs_array.push(new Input($(this)));
+            });
+            $inputs.trigger('change');
+            password2_input.trigger('blur');
+            if (!is_valid(current_password, 'Please input current password !')) return;
+            if (!is_valid(password1_input, 'Please input new password !')) return;
+            if (!is_valid(password2_input, 'Please input password again !')) return;
+            if (!is_valid_array(inputs_array)) return;
+            console.log('1');
+            $.ajax({
+                url: "{{ url_for('setting.change_user_password') }}",
+                type: 'POST',
+                data: {
+                    'current_password': current_password.val(),
+                    'password': password1_input.val()
+                },
+                success: function (status) {
+                    if (status !== 'fail') {
+                        if (status === 'ok') {
+                            layer.msg('Password reset complete！');
+                            $('#change_password_form').find('input').val('');
+                        } else if (status === 'invalid') {
+                            let ele = $('#password');
+                            let msg = 'Current password is invalid, Please input again！';
+                            layer_error_msg(ele, msg);
+                        }
+                    } else {
+                        layer.msg('Password change unsuccessful, Please try again later！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+
+        }
+
+        function change_user_username_or_email(name) {
+            let info_input = $('#' + name);
+            let input_validator = new Input(info_input);
+            if (!input_validator.validator.is_valid()) {
+                let ele = info_input;
+                let msg = name + ' format is not correct !';
+                layer_error_msg(ele, msg);
+                return;
+            }
+            $.ajax({
+                url: "{{ url_for('setting.change_user_username_or_email') }}",
+                type: 'POST',
+                data: {
+                    'name': name,
+                    'info': info_input.val(),
+                },
+                success: function (status) {
+                    if (status !== 'fail') {
+                        if (status === 'ok') {
+                            layer.msg(name + ' change success！', {
+                                end: function () {
+                                    if (name === 'email') {
+                                        $('#users_table_div').load('{{ url_for("setting.ajax_load_user_table") }}');
+                                        $('#email').val('');
+                                    } else if (name === 'username')
+                                        parent.location.reload();
+                                }
+                            });
+                        } else if (status === 'same') {
+                            let msg = 'You input the ' + name + ' already exists, please re-entry !';
+                            let ele = info_input;
+                            layer_error_msg(ele, msg);
+                        }
+                    } else {
+                        layer.msg(name + ' change unsuccessful, please try again later！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+
+        /* function change_user_email() {
+             let email_input = $('#email');
+             let input_validator = new Input(email_input);
+             if (!input_validator.validator.is_valid()) {
+                 let ele = email_input;
+                 let msg = 'Mail address format is not correct !';
+                 layer_error_msg(ele, msg);
+                 return;
+             }
+             $.ajax({
+{#url: "{{ url_for('setting.change_user_email') }}",#}
+                type: 'POST',
+                data: {
+                    'email': email_input.val()
+                },
+                success: function (status) {
+                    if (status !== 'fail') {
+                        if (status === 'ok') {
+                            layer.msg('Email change success！', {
+                                end: function () {
+                                    $('#users_table_div').load('{{ url_for("setting.ajax_load_user_table") }}');
+                                    $('#email').val('');
+                                }
+                            });
+                        } else if (status === 'same') {
+                            let msg = 'You input the email address already exists, please re-entry !';
+                            let ele = $('#email');
+                            layer_error_msg(ele, msg);
+                        }
+                    } else {
+                        layer.msg('Email change unsuccessful, Please try again later！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }*/
+
+        /*function add_user_modal_save() {
+            let $inputs = $('#AddUserModal').find('[data-rule]');
+            let inputs_array = [];
+            $inputs.each(function () {
+                inputs_array.push(new Input($(this)));
+            });
+            $inputs.trigger('change');
+            $('#add_user_password2_input').trigger('blur');
+            for (let i = 0; i < inputs_array.length; i++) {
+                let item = inputs_array[i];
+                let r = item.validator.is_valid();
+                if (!r) {
+                    layer.msg('Please check out your input carefully !');
+                    return;
+                }
+            }
+            let form = $('#UserAddModalForm');
+            let modal = $('#AddUserModal');
+            $.ajax({
+                {#url: "{{ url_for('setting.save_user_edit_modal') }}",#}
+                type: 'POST',
+                data: form.serialize(),
+                success: function (status) {
+                    if (status === 'ok') {
+                        modal.modal('hide');
+                        layer.msg('添加成功！');
+                        setTimeout(() => {
+                            parent.location.reload();
+                        }, 300);
+                    } else {
+                        layer.msg('添加失败！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }*/
 
     </script>
 {% endblock %}
