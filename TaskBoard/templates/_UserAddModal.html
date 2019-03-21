@@ -1,0 +1,76 @@
+<div class="modal fade" tabindex="-1"
+     id="EditUserModal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close"
+                        data-dismiss="modal"
+                        aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title">Add User</h3>
+            </div>
+            <div class="modal-body">
+                <form id="UserEditModalForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input id="user_username_input" type="text"
+                               name="username" class="form-control"
+                               placeholder="Username" data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+                        <div id="username-input-error" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input id="user_password1_input" type="password"
+                               name="password1" class="form-control"
+                               placeholder="Password" oncopy="return false" onpaste="return false"
+                               oncontextmenu="return false"
+                               data-rule='pattern:"^.*(?=.{6,})(?=.*[A-Za-z])(?=.*[!@#$%^&*?\\(\\)\\-_\\.]).*$"'>
+                        <div id="password1-input-error" class="input-error">最少6位，包括至少1个字母，1个特殊字符</div>
+                    </div>
+                    <div class="form-group">
+                        <input id="user_password2_input" type="password"
+                               name="password2" class="form-control"
+                               placeholder="Verify Password" oncopy="return false" onpaste="return false"
+                               oncontextmenu="return false">
+                        <div id="password2-error" class="input-error">两次输入的密码不一致！</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input id="user_email_input" type="text" name="email"
+                               class="form-control"
+                               placeholder="Email"
+                               data-rule='pattern:"^([A-Za-z0-9_\\-\\.])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,4})$"'>
+                        <div id="email-input-error" class="input-error">邮箱格式有误</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Default Board</label>
+                        <select form="UserAddModalForm" class="form-control" name="default_project">
+                            <option value="None" selected>None</option>
+                            {% for project in projects %}
+                                <option value="{{ project.id }}">{{ project.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Board Access</label>
+                        <select class="form-control" name="access_project" multiple>
+                            {% for project in projects %}
+                                <option value={{ project.id }}>{{ project.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input name="is_admin" type="checkbox">
+                        <label>Administrator</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                        data-dismiss="modal">Close
+                </button>
+                <a type="button" class="btn btn-primary" onclick="user_modal_save('')">Add User</a>
+            </div>
+        </div>
+    </div>
+</div>
