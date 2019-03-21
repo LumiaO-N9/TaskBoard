@@ -14,43 +14,71 @@
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <div class="form-group">
                         <label>Change Username</label>
-                        <input type="text"
+                        <input id="user_username_input{{ user.id }}" type="text"
                                name="username" class="form-control"
-                               placeholder="Username" value="{{ user.username }}">
+                               placeholder="Username"
+                               value="{{ user.username }}"
+                               data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+                        <div id="username-input-error{{ user.id }}" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
                     </div>
                     <div class="form-group">
                         <label>Change Password</label>
-                        <input type="password"
+                        <input id="user_password1_input{{ user.id }}" type="password"
                                name="password1" class="form-control"
-                               placeholder="New Password" value="">
+                               placeholder="Password" value=""
+                               oncopy="return false" onpaste="return false"
+                               oncontextmenu="return false"
+                               data-rule='pattern:"^.*(?=.{6,})(?=.*[A-Za-z])(?=.*[!@#$%^&*?\\(\\)\\-_\\.]).*$"'>
+                        <div id="password1-input-error{{ user.id }}" class="input-error">最少6位，包括至少1个字母，1个特殊字符</div>
                     </div>
                     <div class="form-group">
-                        <input type="password"
-                               name="password2" class="form-control"
-                               placeholder="Verify Password">
+                        <input id="user_password2_input{{ user.id }}" type="password"
+                               name="password2" class="form-control" value=""
+                               placeholder="Verify Password" oncopy="return false" onpaste="return false"
+                               oncontextmenu="return false">
+                        <div id="password2-error{{ user.id }}" class="input-error">两次输入的密码不一致！</div>
                     </div>
                     <div class="form-group">
                         <label>Change Email</label>
-                        <input type="text" name="email"
+                        <input id="user_email_input{{ user.id }}" type="text" name="email"
                                class="form-control"
-                               placeholder="New Email" value="{{ user.email }}">
+                               placeholder="Email"
+                               value="{{ user.email }}"
+                               data-rule='pattern:"^([A-Za-z0-9_\\-\\.])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,4})$"'>
+                        <div id="email-input-error{{ user.id }}" class="input-error">邮箱格式有误</div>
                     </div>
                     <div class="form-group">
                         <label>Select Default Board</label>
-                        <select form="UserEditModalForm{{ user.id }}" class="form-control" name="default_board">
-                            <option value="{{ user.default_project.id|default('None') }}">{{ user.default_project.title|default('None') }}</option>
-                            {% for project in projects if project !=user.default_project %}
-                                <option value="{{ project.id }}">{{ project.title }}</option>
+                        <select form="UserEditModalForm{{ user.id }}" class="form-control" name="default_project">
+                            <option value="{{ user.default_project.id|default('None') }}"
+                                    selected>{{ user.default_project.title|default('None') }}</option>
+                            {% for project in projects %}
+                                {% if user.is_admin or project != user.default_project and (project == user.access_project or project in user.projects) %}
+                                    <option value="{{ project.id }}">{{ project.title }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Board Access</label>
-                        <select class="form-control" multiple>
+                        <select class="form-control" name="access_project" multiple>
                             {% for project in projects %}
-                                <option>{{ project.title }}</option>
+                                {% if project == user.access_project %}
+                                    <option value={{ project.id }} selected>{{ project.title }}</option>
+                                {% else %}
+                                    <option value={{ project.id }}>{{ project.title }}</option>
+                                {% endif %}
                             {% endfor %}
+                            <option value="None">None</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        {% if user.is_admin %}
+                            <input name="is_admin" type="checkbox" checked>
+                        {% else %}
+                            <input name="is_admin" type="checkbox">
+                        {% endif %}
+                        <label>Administrator</label>
                     </div>
                 </form>
             </div>
@@ -59,7 +87,7 @@
                         data-dismiss="modal">Close
                 </button>
                 <a type="button" class="btn btn-primary" href="javascript:" name="delete"
-                   onclick="user_modal_save(this, '{{ user.id }}')">Save
+                   onclick="user_modal_save('{{ user.id }}')">Save
                     changes
                 </a>
             </div>
