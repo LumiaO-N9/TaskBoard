@@ -5,3 +5,31 @@
         <span class="glyphicon glyphicon-remove" style="color: red;"></span>
     {% endif %}
 {% endmacro %}
+
+{% macro render_instance_in_modal(instance, name) %}
+        {% if name =='milestone' %}
+            <li name="forever" id="{{ name }}_li{{ instance.id }}" class="list-group-item" value="{{ instance.id }}">
+            <span class="fa fa-arrows-v" style="margin-left: -15px;padding-left: 10px">  |</span>
+        {% elif name =='category' %}
+            <li name="forever" id="{{ name }}_li{{ instance.id }}" class="list-group-item" value="{{ instance.id }}" style="text-transform: capitalize;background: {{ instance.color }}">
+        {% endif %}
+        <span name="old_title" hidden>{{ instance.title }}</span>
+        <span name="{{ name }}_title_span" id="{{ name }}_span{{ instance.id }}">{{ instance.title }}</span>
+        <input name="{{ name }}_input" onblur="save_milestone_or_category_title_change(this)"
+               onfocus="this.select()" class=""
+               id="{{ name }}_input{{ instance.id }}"
+               value="{{ instance.title }}"
+               style="width: auto;border-radius:4px;border:1px solid #DBDBDB;"
+               hidden>
+        <div class="pull-right">
+            <a id="{{ name }}_a{{ instance.id }}" name="edit"
+               onclick="edit_milestone_or_category_title(this)">
+                <span class="glyphicon glyphicon-edit"></span>
+            </a>
+            <a name="hide" onclick="hide_milestone_or_category(this)">
+                <span class="glyphicon glyphicon-trash" style="margin-left:4px"></span>
+            </a>
+        </div>
+    </li>
+{% endmacro %}
+
