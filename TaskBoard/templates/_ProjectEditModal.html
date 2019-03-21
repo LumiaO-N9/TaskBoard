@@ -7,72 +7,57 @@
                         data-dismiss="modal"
                         aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title" id="myModalLabel">Edit Project</h3>
+                <h3 class="modal-title">Edit Project</h3>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="form-group col-sm-12">
                         <label>Project Name</label>
-                        <input type="text" name="project_title" class="form-control" value="{{ project.title }}">
+                        <span id="old_project_title_span{{ project.id }}" hidden>{{ project.title }}</span>
+                        <input id="project_title_input{{ project.id }}" type="text" name="project_title_input{{ project.id }}"
+                               class="form-control" value="{{ project.title }}"
+                               data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+                        <div id="project_title_input{{ project.id }}-input-error" class="input-error">
+                            5到16位（字母，数字，下划线，减号），必须以字母开头
+                        </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-6 form-group">
                         <label>Milestones</label>
-                        <ul class="list-group">
-                            {% for milestone in project.milestones %}
-                                <li class="list-group-item">
-                                    {{ milestone.title }}
-                                    <div class="pull-right">
-                                        <a data-toggle="modal" data-target=""
-                                           name="edit">
-                                            <span class="glyphicon glyphicon-edit"></span>
-                                        </a>
-                                        <a href="javascript:" name="delete"
-                                           onclick="del_milestone(this, '{{ milestone.id }}')">
-                                                    <span class="glyphicon glyphicon-trash"
-                                                          style="margin-left:4px">
-                                                    </span>
-                                        </a>
-                                    </div>
-                                </li>
+                        <ul id="milestone_ul{{ project.id }}" name="milestones-list" class="list-group">
+                            {% from 'macros.html' import render_instance_in_modal %}
+                            {% for milestone in project.milestones|sort(attribute='order') %}
+                                {{ render_instance_in_modal(milestone,'milestone') }}
                             {% endfor %}
                         </ul>
                         <input type="text"
-                               name="MilestoneName" class="form-control"
-                               placeholder="Milestone Name" style="width: 85%;">
-                        <a href="javascript:" class="btn btn-default btn-md" style="margin-top: 5px;"
-                           onclick="add_milestone()"><span
+                               id="milestoneNameInput{{ project.id }}"
+                               name="MilestoneNameInput"
+                               class="form-control"
+                               placeholder="Milestone Name" style="width: 85%;"
+                        >
+                        <a class="btn btn-default btn-md" style="margin-top: 5px;"
+                           onclick="add_milestone_or_category('{{ project.id }}', 'milestone')"><span
                                 class="glyphicon glyphicon-plus"></span></a>
                     </div>
                     <div class="col-xs-6 form-group">
                         <label>Categories</label>
-                        <ul class="list-group">
+                        <ul id="category_ul{{ project.id }}" name="category-list" class="list-group">
+                            {% from 'macros.html' import render_instance_in_modal %}
                             {% for category in project.categories %}
-                                <li class="list-group-item list-group-item-info">
-                                    {{ category.title }}
-                                    <div class="pull-right">
-                                        <a data-toggle="modal" data-target=""
-                                           name="edit">
-                                            <span class="glyphicon glyphicon-edit"></span>
-                                        </a>
-                                        <a href="javascript:" name="delete"
-                                           onclick="del_category(this, '{{ category.id }}')">
-                                                    <span class="glyphicon glyphicon-trash"
-                                                          style="margin-left:4px">
-                                                    </span>
-                                        </a>
-                                    </div>
-                                </li>
+                                {{ render_instance_in_modal(category,'category') }}
                             {% endfor %}
                         </ul>
                         <input type="text"
-                               name="CategoryName" class="form-control  pull-left"
-                               placeholder="Category Name" style="width: 85%;" value="{{ project.title }}">
-                        <div name="color_picker" id="color_picker{{ project.id }}" style="margin-left: 3px;"></div>
-                        <a href="javascript:" class="btn btn-default btn-md"
+                               id="categoryNameInput{{ project.id }}" class="form-control  pull-left"
+                               name="CategoryNameInput"
+                               placeholder="Category Name" style="width: 85%;">
+                        <div name="color_picker_category" id="color_picker{{ project.id }}"
+                             style="margin-left: 3px;"></div>
+                        <a class="btn btn-default btn-md"
                            style="margin-top: 5px;display: block;width: 40.02px;"
-                           onclick="add_category()">
+                           onclick="add_milestone_or_category({{ project.id }},'category')">
                             <span class="glyphicon glyphicon-plus"></span>
                         </a>
                     </div>
@@ -81,16 +66,17 @@
 
                     <div class="form-group col-sm-12">
                         <label>Select Users</label>
-                        <div class="">
+                        <div id="select_users{{ project.id }}">
                             {% for user in users %}
                                 {% if user in project.users %}
                                     <label class="half-width">
-                                        <input type="checkbox" id="inlineCheckbox{{ user.id }}" value="{{ user.id }}"
+                                        <input name="project_user" type="checkbox" id="inlineCheckbox{{ user.id }}"
+                                               value="{{ user.id }}"
                                                checked> {{ user.username }}
                                     </label>
                                 {% else %}
                                     <label class="half-width">
-                                        <input type="checkbox" id="inlineCheckbox{{ user.id }}"
+                                        <input name="normal_user" type="checkbox" id="inlineCheckbox{{ user.id }}"
                                                value="{{ user.id }}"> {{ user.username }}
                                     </label>
                                 {% endif %}
@@ -98,13 +84,16 @@
                         </div>
                     </div>
                 </div>
+                <p class="small clearfix">
+                    <em>Administrators have access to all projects, whether or not they are selected here.</em>
+                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default"
                         data-dismiss="modal">Close
                 </button>
-                <a type="button" class="btn btn-primary" href="javascript:" name="delete"
-                   onclick="project_modal_save(this, '{{ project.id }}')">Save
+                <a type="button" class="btn btn-primary" name="delete"
+                   onclick="project_modal_save('{{ project.id }}')">Save
                     changes
                 </a>
             </div>
