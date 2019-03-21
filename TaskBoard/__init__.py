@@ -92,11 +92,11 @@ def register_commands(app):
         db.drop_all()
         db.create_all()
 
-        click.echo('Generating the administrator...')
-        fake_admin_user()
-
         click.echo('Generating %d projects...' % project)
         fake_Projects(project)
+
+        click.echo('Generating the administrator...')
+        fake_admin_user()
 
         click.echo('Generating %d users...' % user)
         fake_Users(user)
