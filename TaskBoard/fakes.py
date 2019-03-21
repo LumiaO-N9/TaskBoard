@@ -7,6 +7,15 @@ import random
 fake = Faker()
 
 
+def fake_Projects(count=3):
+    for i in range(count):
+        project = Project(
+            title=fake.word()
+        )
+        db.session.add(project)
+    db.session.commit()
+
+
 def fake_admin_user():
     user = User(
         username='admin',
@@ -18,25 +27,20 @@ def fake_admin_user():
     db.session.commit()
 
 
-def fake_Projects(count=3):
-    for i in range(count):
-        project = Project(
-            title=fake.word()
-        )
-        db.session.add(project)
-    db.session.commit()
-
-
 def fake_Users(count=10):
     for i in range(count):
         user = User(
             username='worker%d' % i,
-            default_project_id=Project.query.get(random.randint(1, Project.query.count())).id,
+            default_project=Project.query.get(random.randint(1, Project.query.count())),
+            access_project=Project.query.get(random.randint(1, Project.query.count())),
             email='10000%d@example.com' % i,
         )
-        user.projects.append(Project.query.get(user.default_project_id))
-        user.projects.append((Project.query.get((user.default_project_id % Project.query.count()) + 1)))
         user.set_password('TaskBoard')
+        if user.access_project == user.default_project:
+            user.projects.append(user.access_project)
+        else:
+            user.projects.append(user.default_project)
+            user.projects.append(user.access_project)
         db.session.add(user)
     db.session.commit()
 
@@ -46,6 +50,7 @@ def fake_milestones(count=5):
         for j in range(random.randint(count - 1, count)):
             milestone = Milestone(
                 title=fake.word(),
+                order=j,
                 project=Project.query.get(i + 1)
             )
             db.session.add(milestone)
