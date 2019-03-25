@@ -92,13 +92,13 @@ def change_project_status():
 @setting_bp.route('/sort-by-name')
 def sort_by_name():
     projects = Project.query.order_by(Project.title).all()
-    return render_template('_ProjectsTable.html', projects=projects)
+    return render_template('setting/_ProjectsTable.html', projects=projects)
 
 
 @setting_bp.route('/sort-by-date')
 def sort_by_date():
     projects = Project.query.order_by(Project.create_time).all()
-    return render_template('_ProjectsTable.html', projects=projects)
+    return render_template('setting/_ProjectsTable.html', projects=projects)
 
 
 @setting_bp.route('/del-user-by-id', methods=['POST'])
@@ -206,14 +206,14 @@ def save_user_edit_modal():
 def ajax_load_project_table():
     projects = Project.query.order_by(Project.title).all()
     users = User.query.order_by(User.is_admin.desc()).all()
-    return render_template('_ProjectsTable.html', projects=projects, users=users)
+    return render_template('setting/_ProjectsTable.html', projects=projects, users=users)
 
 
 @setting_bp.route('/ajax-load-user-table')
 def ajax_load_user_table():
     projects = Project.query.order_by(Project.title).all()
     users = User.query.order_by(User.is_admin.desc()).all()
-    return render_template('_UsersTable.html', projects=projects, users=users)
+    return render_template('setting/_UsersTable.html', projects=projects, users=users)
 
 
 @setting_bp.route('/save-project-edit-modal', methods=["POST"])

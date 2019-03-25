@@ -136,7 +136,7 @@
                                 <option value="{{ current_user.default_project.id|default('None') }}"
                                         selected>{{ current_user.default_project.title|default('None') }}</option>
                                 {% for project in projects %}
-                                    {% if current_user.is_admin or project != current_user.default_project and (project == current_user.access_project or project in current_user.projects) %}
+                                    {% if (current_user.is_admin or project in current_user.projects) and project != current_user.default_project  %}
                                         <option value="{{ project.id }}">{{ project.title }}</option>
                                     {% endif %}
                                 {% endfor %}
@@ -148,7 +148,7 @@
                         <div class="col-sm-12">
                             <div class="header"><h4>TaskBoard Users</h4></div>
                             <div id="users_table_div" class="table-responsive">
-                                {% include '_UsersTable.html' %}
+                                {% include 'setting/_UsersTable.html' %}
                             </div>
                             {% if current_user.is_admin %}
                                 <div class="form-group">
@@ -156,7 +156,7 @@
                                         <span class="glyphicon glyphicon-plus"></span> Add User
                                     </a>
                                 </div>
-                                {% include '_UserAddModal.html' %}
+                                {% include 'setting/_UserAddModal.html' %}
                             {% endif %}
                         </div>
                     </div>
@@ -193,7 +193,7 @@
                         </div>
                         <div class="col-sm-12">
                             <div id="projects_table_div" class="table-responsive">
-                                {% include '_ProjectsTable.html' %}
+                                {% include 'setting/_ProjectsTable.html' %}
                             </div>
                             {% if current_user.is_admin %}
                                 <div class="form-group">
@@ -201,7 +201,7 @@
                                             class="glyphicon glyphicon-plus"></span> Add Project
                                     </button>
                                 </div>
-                                {% include '_ProjectAddModal.html' %}
+                                {% include 'setting/_ProjectAddModal.html' %}
                             {% endif %}
                         </div>
                     </div>
@@ -225,14 +225,7 @@
             Register_password_validator();
             Register_username_validator();
             Register_email_validator();
-            $.ajaxSetup({
-                beforeSend: function (xhr, settings) {
-                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                        let csrftoken = $('meta[name=csrf-token]').attr('content');
-                        xhr.setRequestHeader("X-CSRFToken", csrftoken)
-                    }
-                }
-            });
+
 
 
             $('label[name="status"] input').change(Register_status_change);
