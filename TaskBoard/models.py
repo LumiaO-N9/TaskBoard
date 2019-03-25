@@ -21,6 +21,7 @@ class User(db.Model, UserMixin):
     access_project = db.relationship('Project', back_populates='access_users', foreign_keys=[access_project_id])
     projects = db.relationship('Project', secondary=association_table, back_populates='users')
     tasks = db.relationship('Task', back_populates='user')
+    comments = db.relationship('Comment')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -68,6 +69,7 @@ class Task(db.Model):
     milestone = db.relationship('Milestone', back_populates='tasks')
     category = db.relationship('Category', back_populates='tasks')
     user = db.relationship('User', back_populates='tasks')
+    comments = db.relationship('Comment')
 
 
 class Category(db.Model):
@@ -77,3 +79,11 @@ class Category(db.Model):
     color = db.Column(db.String(30), default='#d9edf7')
     project = db.relationship('Project', back_populates='categories')
     tasks = db.relationship('Task', back_populates='category')
+
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(200))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
+    is_edited = db.Column(db.Boolean, default=False)

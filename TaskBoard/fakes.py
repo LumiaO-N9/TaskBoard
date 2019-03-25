@@ -1,4 +1,4 @@
-from TaskBoard.models import User, Project, Milestone, Task, Category
+from TaskBoard.models import User, Project, Milestone, Task, Category, Comment
 from TaskBoard.extensions import db
 from faker import Faker
 from random import choice
@@ -81,4 +81,16 @@ def fake_tasks(count=4):
             task.category = choice(task.milestone.project.categories)
             task.user = choice(task.milestone.project.users)
             db.session.add(task)
+    db.session.commit()
+
+
+def fake_comments(count=3):
+    for i in range(Task.query.count()):  # 为每个Task创建0~count个comment
+        for j in range(random.randint(0, count)):
+            comment = Comment(
+                text=fake.text(100),
+                task_id=Task.query.get(i + 1).id
+            )
+            comment.user_id = choice(User.query.all()).id
+            db.session.add(comment)
     db.session.commit()

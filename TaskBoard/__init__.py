@@ -85,10 +85,11 @@ def register_commands(app):
     @click.option('--milestone', default=5, help='Quantity of milestones, default is 5.')
     @click.option('--category', default=4, help='Quantity of categories, default is 4.')
     @click.option('--task', default=4, help='Quantity of tasks, default is 4.')
-    def forge(project, user, milestone, category, task):
+    @click.option('--comment', default=3, help='Quantity of comments, default is 3.')
+    def forge(project, user, milestone, category, task, comment):
         """Generate fake data."""
         from TaskBoard.fakes import fake_admin_user, fake_Projects, fake_Users, fake_milestones, fake_categories, \
-            fake_tasks
+            fake_tasks, fake_comments
         db.drop_all()
         db.create_all()
 
@@ -109,5 +110,8 @@ def register_commands(app):
 
         click.echo('Generating %d tasks...' % task)
         fake_tasks(task)
+
+        click.echo('Generating %d comments...' % comment)
+        fake_comments(comment)
 
         click.echo('Done.')
