@@ -25,7 +25,6 @@ def login():
             if user.validate_password(password):
                 duration = datetime.timedelta(days=7)
                 login_user(user, remember, duration=duration)
-                flash('Welcome back.', 'info')
                 return redirect_back()
             flash('Invalid username or password.', 'warning')
         else:
