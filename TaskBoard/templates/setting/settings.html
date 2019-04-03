@@ -136,7 +136,7 @@
                                 <option value="{{ current_user.default_project.id|default('None') }}"
                                         selected>{{ current_user.default_project.title|default('None') }}</option>
                                 {% for project in projects %}
-                                    {% if (current_user.is_admin or project in current_user.projects) and project != current_user.default_project  %}
+                                    {% if (current_user.is_admin or project in current_user.projects) and project != current_user.default_project %}
                                         <option value="{{ project.id }}">{{ project.title }}</option>
                                     {% endif %}
                                 {% endfor %}
@@ -225,7 +225,6 @@
             Register_password_validator();
             Register_username_validator();
             Register_email_validator();
-
 
 
             $('label[name="status"] input').change(Register_status_change);
@@ -403,30 +402,42 @@
             }
         }
 
-        function add_milestone_or_category(project_id, name) {
-            let ul = $('#' + name + '_ul' + project_id);
-            let input = $('#' + name + 'NameInput' + project_id)
-            input.css('border', '1px solid #dbdbdb');
+        function check_if_same(ul, input, name) {
             let title_array = [];
             let id_array = [];
+            let last_li_id = '1';
             ul.find('span[name=' + name + '_title_span]:visible').each(function () {
                 title_array.push($(this).text());
                 id_array.push($(this)[0].id.split(name + '_span')[1]);
             });
-            let last_li_id = '1';
+            console.log(title_array);
+            let title = input.val();
+            if (title.trim() === '') {
+                return false;
+            }
+            if (title_array.indexOf(title.trim()) > -1) {
+                let msg = 'This Project is already has the same name ' + name + ', Please check another one !';
+                let ele = input;
+                layer_error_msg(ele, msg);
+                return false;
+            }
             while (id_array.indexOf(last_li_id) > -1) {   // 解决id冲突
                 last_li_id = (parseInt(last_li_id) + 1).toString();
             }
+            return last_li_id;
+        }
+
+        function add_milestone_or_category(project_id, name) {
+            let ul = $('#' + name + '_ul' + project_id);
+            console.log(ul);
+            let input = $('#' + name + 'NameInput' + project_id)
+            input.css('border', '1px solid #dbdbdb');
+            let last_li_id = check_if_same(ul, input, name);
             let title = input.val();
-            if (title.trim() === '') {
+            if (last_li_id) {
+                input.val('');
+            } else
                 return;
-            }
-            if (title_array.indexOf(title.trim()) > -1) {
-                layer.msg('This Project is already has the same name ' + name + ', Please check another one !');
-                input.select();
-                return;
-            }
-            input.val('');
             let instance = {
                 id: last_li_id,
                 title: title
@@ -443,7 +454,7 @@
             ul.append(li_str + `
                  <span name="old_title" hidden>${instance.title}</span>
                 <span name="${name}_title_span" id="${name}_span${instance.id}">${instance.title}</span>
-                <input name="${name}_input" onblur="save_milestone_or_category_title_change(this)"
+                <input name="${name}_input" onblur="save_milestone_or_category_title_change(this,${name})"
                        onfocus="this.select()" class=""
                        id="${name}_input${instance.id}"
                        value="${instance.title}"
@@ -539,14 +550,19 @@
             });
         }
 
-        function save_milestone_or_category_title_change(the) {
+        function save_milestone_or_category_title_change(the, name) {
             let input = $(the);
-            let span = input.prev();
-            let a = input.next('div').children('a');
-            span.text(input.val());
-            span.show();
-            a.show();
-            input.hide();
+            let ul = input.parents('ul').eq(0);
+            if (check_if_same(ul, input, name)) {
+                let span = input.prev();
+                let a = input.next('div').children('a');
+                span.text(input.val());
+                span.show();
+                a.show();
+                input.hide();
+            } else {
+                return;
+            }
         }
 
         function edit_milestone_or_category_title(the) {
