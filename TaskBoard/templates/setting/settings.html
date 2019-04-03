@@ -446,15 +446,15 @@
             let color = '';
             if (name === 'milestone') {
                 li_str = `<li name ="temporary" id="milestone_li${instance.id}" class="list-group-item" value="${instance.id}">
-                <span class="fa fa-arrows-v" style="margin-left: -15px;padding-left: 10px">  |</span>`;
+                <span class="fa fa-arrows-v pull-left" style="margin-left: -15px;padding-left: 10px">  |</span>`;
             } else if (name === 'category') {
                 color = $('#color_picker' + project_id).attr('data-color');
                 li_str = `<li name ="temporary" id="category_li${instance.id}" class="list-group-item" value="${instance.id}" style="text-transform: capitalize;background: ${color}">`;
             }
             ul.append(li_str + `
                  <span name="old_title" hidden>${instance.title}</span>
-                <span name="${name}_title_span" id="${name}_span${instance.id}">${instance.title}</span>
-                <input name="${name}_input" onblur="save_milestone_or_category_title_change(this,${name})"
+                <span name="${name}_title_span" id="${name}_span${instance.id}"  style="width: 170px;display: inline-block;word-wrap:break-word;">${instance.title}</span>
+                <input name="${name}_input" onblur="save_milestone_or_category_title_change(this,'${name}')"
                        onfocus="this.select()" class=""
                        id="${name}_input${instance.id}"
                        value="${instance.title}"

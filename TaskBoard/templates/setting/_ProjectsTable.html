@@ -14,7 +14,7 @@
                 data-status="{{ project.status }}">
                 <td id="project_title{{ project.id }}">{{ project.title }}</td>
                 <td>
-                    <ul class="list-group">
+                    <ul class="list-group" style="display: block;width: 200px;word-wrap: break-word">
                         {% for milestone in project.milestones|sort(attribute='order') %}
                             <li class="list-group-item list-group-item-success">
                                 <span class="badge">{{ milestone.tasks|length }}</span>
@@ -24,7 +24,7 @@
                     </ul>
                 </td>
                 <td>
-                    <ul class="list-group">
+                    <ul class="list-group" style="display: block;width: 250px;">
                         {% for category in project.categories %}
                             <li class="list-group-item" style="background: {{ category.color }}">
                                 {{ category.title }}
