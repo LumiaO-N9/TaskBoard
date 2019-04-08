@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from TaskBoard.settings import config
-from TaskBoard.extensions import db, login_manager, csrf, bootstrap
+from TaskBoard.extensions import db, login_manager, csrf, bootstrap, moment
 from TaskBoard.blueprints import auth, taskboard, setting
 from TaskBoard.models import User, Project, Milestone, Category, Task
 from flask_wtf.csrf import CSRFError
@@ -31,6 +31,7 @@ def register_extensions(app):
     login_manager.init_app(app)
     csrf.init_app(app)
     bootstrap.init_app(app)
+    moment.init_app(app)
 
 
 def register_blueprints(app):
