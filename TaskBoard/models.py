@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
     access_project = db.relationship('Project', back_populates='access_users', foreign_keys=[access_project_id])
     projects = db.relationship('Project', secondary=association_table, back_populates='users')
     tasks = db.relationship('Task', back_populates='user')
-    comments = db.relationship('Comment')
+    comments = db.relationship('Comment', back_populates='user')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -46,7 +46,7 @@ class Project(db.Model):
 class Milestone(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(60))
-    order = db.Column(db.Integer);
+    order = db.Column(db.Integer)
     create_time = db.Column(db.DateTime, default=datetime.utcnow)
     update_time = db.Column(db.DateTime, default=datetime.utcnow)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
@@ -69,7 +69,7 @@ class Task(db.Model):
     milestone = db.relationship('Milestone', back_populates='tasks')
     category = db.relationship('Category', back_populates='tasks')
     user = db.relationship('User', back_populates='tasks')
-    comments = db.relationship('Comment')
+    comments = db.relationship('Comment', back_populates='task')
 
 
 class Category(db.Model):
@@ -87,3 +87,7 @@ class Comment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
     is_edited = db.Column(db.Boolean, default=False)
+    create_time = db.Column(db.DateTime, default=datetime.utcnow)
+    update_time = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', back_populates='comments')
+    task = db.relationship('Task', back_populates='comments')
