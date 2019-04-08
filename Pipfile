@@ -16,6 +16,7 @@ flask-wtf = "*"
 bootstrap-flask = "*"
 flask-login = "*"
 sqlalchemy = "*"
+flask-moment = "*"
 
 [requires]
 python_version = "3.7"
