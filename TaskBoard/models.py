@@ -93,7 +93,7 @@ class Comment(db.Model):
     task = db.relationship('Task', back_populates='comments')
 
 
-class FileName(db.Model):
+class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     source_name = db.Column(db.String(60))
     security_name = db.Column(db.String(60))
