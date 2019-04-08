@@ -91,3 +91,11 @@ class Comment(db.Model):
     update_time = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments')
     task = db.relationship('Task', back_populates='comments')
+
+
+class FileName(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    source_name = db.Column(db.String(60))
+    security_name = db.Column(db.String(60))
+    create_time = db.Column(db.DateTime, default=datetime.utcnow)
+    update_time = db.Column(db.DateTime, default=datetime.utcnow)
