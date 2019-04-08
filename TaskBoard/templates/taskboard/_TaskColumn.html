@@ -1,0 +1,98 @@
+<div class="task_title">
+    <span class="line" id="line3"></span>
+    <span class="title text-capitalize">{{ task.title }}</span>
+    <span class="line" id="line4"></span>
+</div>
+<div class="task_column_panel" class="panel" style="margin-top: auto;">
+    <div class="panel-body" style="background: {{ task.color }};">
+        <div class="row">
+            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Description :</h4>
+            <div class="col-sm-12"><p>{{ task.description }}</p></div>
+            <div class="col-sm-12"
+                 style="font-weight: bold;margin-top: 20px;text-shadow: 0px 0px 3px rgba(255, 81, 28, 1);">
+                Due:{{ task.due_date }}</div>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-sm-4">
+                <div class="header">
+                    <h4 style="font-weight: bold;">Assigned To :<span
+                            style="font-weight: normal;"> {{ task.user.username }}</span></h4>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="header">
+                    <h4 style="font-weight: bold;">Category :<span
+                            style="font-weight: normal;"> {{ task.category.title }}</span></h4>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="header">
+                    <h4 style="font-weight: bold;">Milestone :<span
+                            style="font-weight: normal;"> {{ task.milestone.title }}</span></h4>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Add Attachment :</h4>
+            <div class="layui-upload-drag" id="upload_attachment" style="margin-left: 20px;">
+                <i class="layui-icon"></i>
+                <p>点击上传，或将文件拖拽到此处</p>
+            </div>
+            <button style="display: block;margin-top: 10px;margin-left: 20px;" type="button" class="layui-btn"
+                    id="upload_btn">开始上传
+            </button>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Comments :</h4>
+            <div class="comment">
+                {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
+            {% if task.comments %}
+                <ul class="list-group">
+                    {% for comment in task.comments %}
+                        <li class="list-group-item">
+                            <div id="comment_text{{ comment.id }}" class="comment-text"
+                                 style="width:85%;display: inline-block;word-wrap:break-word;">
+                                <span>{{ comment.text }}</span>
+                                <p style="margin-top: 10px;display: block">
+                                    <i class="fa fa-user-o" style="font-weight: bold;"> {{ comment.user.username }}</i>
+                                    <i id="comment_tip{{ comment.id }}" class="fa fa-calendar-check-o"
+                                       style="font-weight: bold;margin-left: 6px;"
+                                       data-timestamp="{{ comment.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(comment.update_time).fromNow(refresh=True) }}</i>
+                                </p>
+                            </div>
+                            <div class="comment-action pull-right">
+                                {% if current_user.is_admin or current_user.access_project == task.milestone.project or current_user==comment.user %}
+                                    <a onclick="edit_task_comment(this,'{{ comment.id }}')" name="edit">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                    </a>
+                                    <a name="delete"
+                                       onclick="delete_task_comment(this,'{{ comment.id }}','{{ task.id }}')">
+                                        <span class="glyphicon glyphicon-trash" style="margin-left:8px"></span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center">There is no comment in this task, please add one !</p>
+            {% endif %}
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px;">
+            <h4 id="add_comment_h4" style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Add Comment :</h4>
+            <div id="comment_textarea_div" style="margin: 10px 10px 10px 10px;">
+                <input id="store_comment_id" value="add" hidden/>
+                <textarea id="comment_textarea" class="form-control" rows="3"></textarea>
+                <div onclick="submit_comment(this,'{{ task.id }}')" id="comment_textarea_submit"
+                     class="btn btn-info pull-right" style="margin-top: 10px;"><i
+                        class="fa fa-comment-o"></i><span> Submit Comment</span>
+                </div>
+                <div onclick="edit_comment_cancel()" id="comment_textarea_cancel" class="btn btn-default pull-right"
+                     style="margin-top: 10px;margin-right: 10px;display: none;"><i
+                        class="fa fa-times"></i><span> Cancel</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

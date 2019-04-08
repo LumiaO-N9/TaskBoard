@@ -1,0 +1,29 @@
+<div class="project_title">
+    <span class="line" id="line1"></span>
+    <span class="title text-capitalize">{{ project.title }}</span>
+    <span class="line" id="line2"></span>
+</div>
+<div class="layui-collapse">
+    {% for milestone in project.milestones %}
+        <div class="layui-colla-item">
+            <h2 class="layui-colla-title text-capitalize"
+                style="font-weight: bold;font-size: 16px">{{ milestone.title }}</h2>
+            <div id="layui_colla_content{{ milestone.id }}" class="layui-colla-content" style="padding:0px;">
+                {% if milestone.tasks %}
+                    {% for task in milestone.tasks %}
+                        <div id="task_card{{ task.id }}" class="layui-card" style="background: {{ task.color }};">
+                            <div class="layui-card-header" style="font-weight: bold;">{{ task.title }}</div>
+                            <div class="layui-card-body">{{ task.description }}</div>
+                        </div>
+                        <hr class="layui-bg-orange">
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center"
+                         style="font-size: 15px;font-weight: bold;margin-top: 20px;margin-bottom: 20px;">No task in this
+                        milestone, please add one !
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
