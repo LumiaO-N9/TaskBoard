@@ -8,6 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css">
     {% block style %}
 
     {% endblock %}
@@ -19,11 +20,22 @@
 
 {% endblock %}
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/popper.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/layer.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='js/validator/js/validator.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='js/validator/js/input.js') }}"></script>
+<script type="text/javascript">
+    $(function () {
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    let csrftoken = $('meta[name=csrf-token]').attr('content');
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken)
+                }
+            }
+        });
+    });
+</script>
 {% block scripts %}
 {% endblock %}
 </body>
