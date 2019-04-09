@@ -32,6 +32,43 @@
                 </div>
             </div>
         </div>
+        {% if task.files %}
+            <div class="row" style="margin-top: 20px;">
+                <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Attachments :</h4>
+                <div class="attachments">
+                    {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
+                    <ul class="list-group">
+                        {% for file in task.files %}
+                            <li class="list-group-item">
+                                <div id="file_name{{ file.id }}" class="file-name"
+                                     style="width:85%;display: inline-block;word-wrap:break-word;">
+                                    <span>{{ file.source_name }}</span>
+                                    <p style="margin-top: 10px;display: block">
+                                        <i class="fa fa-user-o"
+                                           style="font-weight: bold;"> {{ file.user.username }}</i>
+                                        <i id="file_tip{{ file.id }}" class="fa fa-calendar-check-o"
+                                           style="font-weight: bold;margin-left: 6px;"
+                                           data-timestamp="{{ file.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(file.update_time).fromNow(refresh=True) }}</i>
+                                    </p>
+                                </div>
+                                <div class="file-action pull-right">
+                                    <a href="{{ url_for('taskboard.download_task_attachment', file_id = file.id ,filename=file.security_name) }}"
+                                       name="download">
+                                        <span class="glyphicon glyphicon-download-alt"></span>
+                                    </a>
+                                    {% if current_user.is_admin or current_user.access_project == task.milestone.project or current_user==file.user %}
+                                        <a name="delete"
+                                           onclick="delete_task_attachment(this,'{{ file.id }}','{{ file.source_name }}','{{ file.security_name }}', '{{ task.id }}')">
+                                            <span class="glyphicon glyphicon-trash" style="margin-left:8px"></span>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
         <div class="row" style="margin-top: 20px;">
             <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Add Attachment :</h4>
             <div class="layui-upload-drag" id="upload_attachment" style="margin-left: 20px;">
@@ -42,43 +79,43 @@
                     id="upload_btn">开始上传
             </button>
         </div>
-        <div class="row" style="margin-top: 20px;">
-            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Comments :</h4>
-            <div class="comment">
-                {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
-            {% if task.comments %}
-                <ul class="list-group">
-                    {% for comment in task.comments %}
-                        <li class="list-group-item">
-                            <div id="comment_text{{ comment.id }}" class="comment-text"
-                                 style="width:85%;display: inline-block;word-wrap:break-word;">
-                                <span>{{ comment.text }}</span>
-                                <p style="margin-top: 10px;display: block">
-                                    <i class="fa fa-user-o" style="font-weight: bold;"> {{ comment.user.username }}</i>
-                                    <i id="comment_tip{{ comment.id }}" class="fa fa-calendar-check-o"
-                                       style="font-weight: bold;margin-left: 6px;"
-                                       data-timestamp="{{ comment.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(comment.update_time).fromNow(refresh=True) }}</i>
-                                </p>
-                            </div>
-                            <div class="comment-action pull-right">
-                                {% if current_user.is_admin or current_user.access_project == task.milestone.project or current_user==comment.user %}
-                                    <a onclick="edit_task_comment(this,'{{ comment.id }}')" name="edit">
-                                        <span class="glyphicon glyphicon-edit"></span>
-                                    </a>
-                                    <a name="delete"
-                                       onclick="delete_task_comment(this,'{{ comment.id }}','{{ task.id }}')">
-                                        <span class="glyphicon glyphicon-trash" style="margin-left:8px"></span>
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-center">There is no comment in this task, please add one !</p>
-            {% endif %}
+        {% if task.comments %}
+
+            <div class="row" style="margin-top: 20px;">
+                <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Comments :</h4>
+                <div class="comment">
+                    {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
+                    <ul class="list-group">
+                        {% for comment in task.comments %}
+                            <li class="list-group-item">
+                                <div id="comment_text{{ comment.id }}" class="comment-text"
+                                     style="width:85%;display: inline-block;word-wrap:break-word;">
+                                    <span>{{ comment.text }}</span>
+                                    <p style="margin-top: 10px;display: block">
+                                        <i class="fa fa-user-o"
+                                           style="font-weight: bold;"> {{ comment.user.username }}</i>
+                                        <i id="comment_tip{{ comment.id }}" class="fa fa-calendar-check-o"
+                                           style="font-weight: bold;margin-left: 6px;"
+                                           data-timestamp="{{ comment.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(comment.update_time).fromNow(refresh=True) }}</i>
+                                    </p>
+                                </div>
+                                <div class="comment-action pull-right">
+                                    {% if current_user.is_admin or current_user.access_project == task.milestone.project or current_user==comment.user %}
+                                        <a onclick="edit_task_comment(this,'{{ comment.id }}')" name="edit">
+                                            <span class="glyphicon glyphicon-edit"></span>
+                                        </a>
+                                        <a name="delete"
+                                           onclick="delete_task_comment(this,'{{ comment.id }}','{{ task.id }}')">
+                                            <span class="glyphicon glyphicon-trash" style="margin-left:8px"></span>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
-        </div>
+        {% endif %}
         <div class="row" style="margin-top: 20px;">
             <h4 id="add_comment_h4" style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Add Comment :</h4>
             <div id="comment_textarea_div" style="margin: 10px 10px 10px 10px;">
