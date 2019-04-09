@@ -171,7 +171,9 @@
                     let upload_ele = $('#upload_attachment');
                     upload.render({
                         elem: upload_ele,
-                        url: '/upload/',
+                        url: '{{ url_for('taskboard.task_attachment_upload') }}',
+                        field: 'attachment',
+                        data: {'task_id': task_id},
                         auto: false,
                         size: 10000,
                         accept: 'file', //普通文件
@@ -179,6 +181,10 @@
                         bindAction: '#upload_btn',
                         done: function (res) {
                             console.log(res)
+                            layer.msg("File Upload Success")
+                            setTimeout(() => {
+                                LoadTaskById(task_id);
+                            }, 300);
                         }
                     });
                 });
@@ -288,6 +294,44 @@
                 },
             });
 
+        }
+
+        function delete_task_attachment(the, file_id, file_source_name, file_security_name, task_id) {
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: '删除附件',
+                content: '<div class="text-center" style="margin-top:20px"><p>是否确定删除文件 <span class="label label-danger">' +
+                    file_source_name + '</span> ?</p></div>',
+                btn: ['删除', '取消'],
+                anim: 6,
+                offset: '150px',
+                yes: function (index) {
+                    $.ajax({
+                        url: "{{ url_for('taskboard.delete_task_attachment') }}",
+                        type: 'POST',
+                        data: {
+                            file_id: file_id,
+                            file_security_name: file_security_name,
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('删除成功！');
+                                setTimeout(() => {
+                                    LoadTaskById(task_id);
+                                }, 300);
+                            } else {
+                                layer.msg('删除失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
         }
 
         function delete_task_comment(the, comment_id, task_id) {
