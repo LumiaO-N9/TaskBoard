@@ -1,10 +1,17 @@
-from flask import Blueprint, render_template, jsonify, abort, request
+from flask import Blueprint, render_template, jsonify, abort, request, current_app, send_from_directory, url_for
 from flask_login import login_required, current_user
-from TaskBoard.models import User, Project, Milestone, Category, Task, Comment
+from TaskBoard.models import User, Project, Milestone, Category, Task, Comment, File
 from TaskBoard.extensions import db
 from datetime import datetime
+import uuid, os
 
 taskboard_bp = Blueprint('taskboard', __name__)
+
+
+def random_filename(filename):
+    ext = os.path.splitext(filename)[1]
+    new_filename = uuid.uuid4().hex + ext
+    return new_filename
 
 
 @taskboard_bp.before_request
@@ -42,6 +49,57 @@ def render_task_column():
             print(e)
             abort(500)
     return render_template('taskboard/NoDefaultProject.html')
+
+
+@taskboard_bp.route('/task-attachment-upload', methods=['POST'])
+def task_attachment_upload():
+    attachment = request.files.get('attachment')
+    task_id = request.form.get('task_id', None)
+    user_id = current_user.id
+    filename = attachment.filename
+    new_filename = random_filename(filename)
+    try:
+        file = File(source_name=filename, security_name=new_filename, user_id=user_id, task_id=task_id)
+        db.session.add(file)
+        db.session.commit()
+        attachment.save(os.path.join(current_app.config['ATTACHMENT_UPLOAD_PATH'], new_filename))
+        response_json = {
+            'code': 200,
+            'msg': 'ok'
+        }
+        return jsonify(response_json)
+    except Exception as e:
+        print(e)
+        abort(500)
+
+
+@taskboard_bp.route('/download-task-attachment/<int:file_id>/<string:filename>')
+def download_task_attachment(file_id, filename):
+    print(filename)
+    try:
+        file = File.query.get(file_id)
+        return send_from_directory(current_app.config['ATTACHMENT_UPLOAD_PATH'], filename, as_attachment=True,
+                                   attachment_filename=file.source_name)
+    except Exception as e:
+        print(e)
+        abort(500)
+
+
+@taskboard_bp.route('/delete-task-attachment', methods=['POST'])
+def delete_task_attachment():
+    file_id = request.form.get('file_id', None)
+    file_security_name = request.form.get('file_security_name', None)
+    try:
+        file = File.query.get(file_id)
+        db.session.delete(file)
+        db.session.commit()
+        path = os.path.join(current_app.config['ATTACHMENT_UPLOAD_PATH'], file_security_name)
+        if os.path.exists(path):
+            os.remove(path)
+        return 'ok'
+    except Exception as e:
+        print(e)
+        abort(500)
 
 
 @taskboard_bp.route('/edit-or-add-comment', methods=['POST'])
