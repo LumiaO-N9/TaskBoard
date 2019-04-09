@@ -22,6 +22,7 @@ class User(db.Model, UserMixin):
     projects = db.relationship('Project', secondary=association_table, back_populates='users')
     tasks = db.relationship('Task', back_populates='user')
     comments = db.relationship('Comment', back_populates='user')
+    files = db.relationship('File', back_populates='user')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -70,6 +71,7 @@ class Task(db.Model):
     category = db.relationship('Category', back_populates='tasks')
     user = db.relationship('User', back_populates='tasks')
     comments = db.relationship('Comment', back_populates='task')
+    files = db.relationship('File', back_populates='task')
 
 
 class Category(db.Model):
@@ -95,7 +97,11 @@ class Comment(db.Model):
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
     source_name = db.Column(db.String(60))
     security_name = db.Column(db.String(60))
     create_time = db.Column(db.DateTime, default=datetime.utcnow)
     update_time = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', back_populates='files')
+    task = db.relationship('Task', back_populates='files')
