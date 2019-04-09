@@ -4,6 +4,7 @@
 {% block style %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/default/style.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layui.css') }}" type="text/css">
+    {#    <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery.contextMenu.min.css') }}" type="text/css">#}
     <style type="text/css">
         .panel {
             margin-top: -20px;
@@ -86,25 +87,31 @@
 {% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/jstree.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/layui.js') }}"></script>
+    {#    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.contextMenu.min.js') }}"></script>#}
+    {#    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.ui.position.js') }}"></script>#}
     <script type="text/javascript">
+        let size = {
+            width: window.innerWidth || document.body.clientWidth,
+            height: window.innerHeight || document.body.clientHeight
+        };
         $(function () {
             $('#board').addClass('active').children('a').removeAttr('href');
-            $('#milestone-panel-body').load('{{ url_for("taskboard.render_milestone_column") }}',
-                {'project_id': "{{ current_user.default_project_id }}"},
+            LoadMileStone('{{ current_user.default_project_id }}', false, 0);
+            /*
+
+            {#$('#milestone-panel-body').load('{{ url_for("taskboard.render_milestone_column") }}',#}
+                {'project_id': ""},
                 function () {
-                    setProjectLineWidth();
+                    // setProjectLineWidth();
+                    setLineWidthByClass('project');
                     $('div[id^=task_card]').on('click', LoadTaskColumn);
+                    $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
                     layui.use('element', function () {
                         layui.element.init();
                     });
-                });
-            let size = {
-                width: window.innerWidth || document.body.clientWidth,
-                height: window.innerHeight || document.body.clientHeight
-            };
+                });*/
             $('#tree-panel-body').css('height', size.height - 50 - 38);
             $('.panel').css('height', size.height - 50);
-            $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
             //$('#milestone_panel').css('width', (size.width - 400) / 2);
             //$('#task_panel').css('width', (size.width - 400) / 2);
             $('#tree-panel-body').jstree({
@@ -117,54 +124,143 @@
                     },
                     'check_callback': true,
                 },
-                'plugins': ['contextmenu']
-            }).on("select_node.jstree", function (e, data) {
-                let node = data.node;
-                let id = node.id;
-                let project_node;
-                let project_id;
-                let milestone_node_id = 'None';
-                if ((new RegExp('task_node')).test(id)) {
-                    project_node = $('#' + id).parents('li[id^=project_node]');
-                    project_id = project_node[0].id.split('project_node')[1];
-                    milestone_node_id = $('#' + id).parents('li[id^=milestone_node]')[0].id.split('milestone_node')[1];
-                } else if ((new RegExp('milestone_node')).test(id)) {
-                    project_node = $('#' + id).parents('li[id^=project_node]');
-                    project_id = project_node[0].id.split('project_node')[1];
-                    milestone_node_id = id.split('milestone_node')[1];
-                } else if ((new RegExp('project_node')).test(id)) {
-                    project_id = id.split('project_node')[1];
-                } else {
-                    return;
+                'plugins': ['contextmenu'],
+                "contextmenu": {
+                    'items': function ($node) {
+                        return customMenu($node);
+                    }
                 }
-                $('#milestone-panel-body').load('{{ url_for("taskboard.render_milestone_column") }}', {'project_id': project_id}, function () {
-                    $('div[id^=task_card]').on('click', LoadTaskColumn);
-                    $('#layui_colla_content' + milestone_node_id).addClass('layui-show');
-                    $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
-                    setProjectLineWidth();
-                    layui.use('element', function () {
-                        layui.element.init();
-                    });
-                });
+            }).on("select_node.jstree", function (e, data) {
+                TreeNodeClickEvent(data);
             });
             /*.on('loaded.jstree', function () {
-                $('#tree-panel-body').jstree('open_all');
+                //$('#tree-panel-body').jstree('open_all');
+                let project_nodes = $('li[id^=project_node]');
+                console.log(project_nodes);
+                project_nodes.each(function () {
+                    let selector = $(this);
+                    console.log(selector[0].id);
+                    $.contextMenu({
+                        selector: selector[0].id,
+                        items: {
+                            'edit': {
+                                name: 'Edit',
+                                icon: 'fa-pencil-square-o',
+                                callback: function (itemKey, opt, e) {
+                                    console.log(itemKey);
+                                    console.log(opt.$trigger[0].id);
+                                    console.log(e);
+                                    return false;
+                                }
+                            }
+                        }
+                    });
+                });
+
             });*/
 
             window.onresize = function () {
-                setProjectLineWidth();
-                setTaskLineWidth();
+                setLineWidthByClass('project');
+                setLineWidthByClass('task');
+                /*setProjectLineWidth();
+                setTaskLineWidth();*/
             }
         });
 
+        function customMenu($node) {
+            let tree = $('#tree-panel-body').jstree(true);
+            let items = {
+                "Edit": {
+                    "separator_before": false,
+                    "separator_after": true,
+                    "label": "Create",
+                    "action": function (data) {
+                        $node = tree.create_node($node, {
+                            text: 'New File',
+                            type: 'file',
+                            icon: 'glyphicon glyphicon-file'
+                        });
+                        tree.deselect_all();
+                        tree.select_node($node);
+                    },
+                },
+                "Rename": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Rename",
+                    "action": function (data) {
+                        tree.edit($node);
+                    }
+                },
+                "Remove": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Remove",
+                    "action": function (obj) {
+                        tree.delete_node($node);
+                    }
+                }
+            }
+            return items;
+        }
+
+        function TreeNodeClickEvent(data) {
+            let node = data.node;
+            let id = node.id;
+            let project_node;
+            let project_id;
+            let milestone_node_id = 'None';
+            if ((new RegExp('task_node')).test(id)) {
+                LoadTaskById(id.split('task_node')[1]);
+                project_node = $('#' + id).parents('li[id^=project_node]');
+                project_id = project_node[0].id.split('project_node')[1];
+                milestone_node_id = $('#' + id).parents('li[id^=milestone_node]')[0].id.split('milestone_node')[1];
+            } else if ((new RegExp('milestone_node')).test(id)) {
+                project_node = $('#' + id).parents('li[id^=project_node]');
+                project_id = project_node[0].id.split('project_node')[1];
+                milestone_node_id = id.split('milestone_node')[1];
+            } else if ((new RegExp('project_node')).test(id)) {
+                project_id = id.split('project_node')[1];
+            } else {
+                return;
+            }
+            $('#tree-panel-body').jstree('open_node', node);
+            LoadMileStone(project_id, true, milestone_node_id);
+            /*$('#milestone-panel-body').load('
+
+
+
+            {#            {{ url_for("taskboard.render_milestone_column") }}', {'project_id': project_id}, function () {#}
+                $('div[id^=task_card]').on('click', LoadTaskColumn);
+                $('#layui_colla_content' + milestone_node_id).addClass('layui-show');
+                $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
+                // setProjectLineWidth();
+                setLineWidthByClass('project');
+                layui.use('element', function () {
+                    layui.element.init();
+                });
+            });*/
+        }
+
+        function LoadMileStone(project_id, show, milestone_node_id) {
+            $('#milestone-panel-body').load('{{ url_for("taskboard.render_milestone_column") }}', {'project_id': project_id}, function () {
+                $('div[id^=task_card]').on('click', LoadTaskColumn);
+                if (show)
+                    $('#layui_colla_content' + milestone_node_id).addClass('layui-show');
+                $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
+                // setProjectLineWidth();
+                setLineWidthByClass('project');
+                layui.use('element', function () {
+                    layui.element.init();
+                });
+            });
+        }
+
         function LoadTaskById(task_id) {
             $('#task-panel-body').load('{{ url_for("taskboard.render_task_column") }}', {'task_id': task_id}, function () {
-                setTaskLineWidth();
+                // setTaskLineWidth();
+                setLineWidthByClass('task');
                 Register_time_tip();
-                let size = {
-                    width: window.innerWidth || document.body.clientWidth,
-                    height: window.innerHeight || document.body.clientHeight
-                };
                 $('.task_column_panel').css('height', size.height - 50 - 38 - 60);
                 layui.use('upload', function () {
                     let upload = layui.upload;
@@ -197,7 +293,14 @@
             LoadTaskById(task_id);
         }
 
-        function setProjectLineWidth() {
+        function setLineWidthByClass(css_class) {
+            let ele_title = $('.' + css_class + '_title');
+            let title = ele_title.children('.title');
+            let width = (parseInt(ele_title.css('width')) - parseInt(title.css('width')) - 10) / 2;
+            ele_title.children('.line').css('width', width);
+        }
+
+        /*function setProjectLineWidth() {
             let project_title = $('.project_title');
             let title = project_title.children('.title');
             let width = (parseInt(project_title.css('width')) - parseInt(title.css('width')) - 10) / 2;
@@ -211,7 +314,7 @@
             let width = (parseInt(task_title.css('width')) - parseInt(title.css('width')) - 10) / 2;
             task_title.children('#line3').css('width', width);
             task_title.children('#line4').css('width', width);
-        }
+        }*/
 
         function Register_time_tip() {
             let tip_index;
