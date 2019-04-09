@@ -6,6 +6,11 @@ import random
 
 fake = Faker()
 
+color_array = ['#dff0d8', '#d9edf7', '#fcf8e3', '#f2dede']
+
+
+# '#ffffff', '#337ab7', '#5cb85c', '#5bc0de', '#f0ad4e', '#d9534f']
+
 
 def fake_Projects(count=3):
     for i in range(count):
@@ -62,7 +67,8 @@ def fake_categories(count=4):
         for j in range(random.randint(count - 2, count)):
             category = Category(
                 title=fake.name(),
-                project=Project.query.get(i + 1)
+                project=Project.query.get(i + 1),
+                color=choice(color_array)
             )
             db.session.add(category)
     db.session.commit()
@@ -74,6 +80,7 @@ def fake_tasks(count=4):
             task = Task(
                 title=fake.name(),
                 description=fake.text(166),
+                color=choice(color_array),
                 due_date=fake.date_this_year(before_today=False, after_today=True),
                 points=random.randint(0, 10),
                 milestone=Milestone.query.get(i + 1)
