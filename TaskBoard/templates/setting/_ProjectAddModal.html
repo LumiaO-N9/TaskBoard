@@ -15,7 +15,7 @@
                         <label>Project Name</label>
                         <span id="old_project_title_span" hidden></span>
                         <input id="project_title_input" type="text" name="project_title"
-                               class="form-control" data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+                               class="form-control" data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"' placeholder="Project Name">
                         <div id="project_title-input-error" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
                     </div>
                 </div>
@@ -70,8 +70,7 @@
                         data-dismiss="modal">Close
                 </button>
                 <a type="button" class="btn btn-primary" name="delete"
-                   onclick="project_modal_save('')">Save
-                    changes
+                   onclick="project_modal_save('')">Add Project
                 </a>
             </div>
         </div>
