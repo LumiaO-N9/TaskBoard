@@ -2,6 +2,7 @@
     <span class="line" id="line1"></span>
     <span class="title text-capitalize">{{ project.title }}</span>
     <span class="line" id="line2"></span>
+    <span id="store_project_id_for_ajax" hidden>{{ project.id }}</span>
 </div>
 <div class="layui-collapse">
     {% for milestone in project.milestones %}
