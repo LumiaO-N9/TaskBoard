@@ -1,0 +1,14 @@
+{% if current_user.is_admin %}
+    {% include 'setting/_ProjectAddModal.html' %}
+{% endif %}
+<div class="row text-center">
+    <div class="col-md-5 col-md-offset-3  text-center setting-widget">
+        <h2>No Project</h2>
+        <p>There is not exist any project. You may click the button below to add one project or add one in your
+            Settings</p>
+        <p>And then you can manage the project in this page .</p>
+        <button id="add_project_when_none" class="btn btn-default" onclick="show_project_edit_modal('')">
+            <span class="glyphicon glyphicon-plus"></span> Add Project
+        </button>
+    </div>
+</div>
