@@ -70,7 +70,7 @@ class Task(db.Model):
     milestone = db.relationship('Milestone', back_populates='tasks')
     category = db.relationship('Category', back_populates='tasks')
     user = db.relationship('User', back_populates='tasks')
-    comments = db.relationship('Comment', back_populates='task')
+    comments = db.relationship('Comment', back_populates='task', cascade='all,delete-orphan')
     files = db.relationship('File', back_populates='task')
 
 
