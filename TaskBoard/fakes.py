@@ -15,7 +15,7 @@ color_array = ['#dff0d8', '#d9edf7', '#fcf8e3', '#f2dede']
 def fake_Projects(count=3):
     for i in range(count):
         project = Project(
-            title=fake.word()
+            title=fake.word().title()
         )
         db.session.add(project)
     db.session.commit()
@@ -54,7 +54,7 @@ def fake_milestones(count=5):
     for i in range(Project.query.count()):  # 为每个project创建count-1或者count个Milestone
         for j in range(random.randint(count - 1, count)):
             milestone = Milestone(
-                title=fake.word(),
+                title=fake.word().title(),
                 order=j,
                 project=Project.query.get(i + 1)
             )
