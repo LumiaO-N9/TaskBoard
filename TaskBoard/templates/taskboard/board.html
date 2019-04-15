@@ -33,7 +33,7 @@
             text-align: center;
         }
 
-        .layui-collapse, .task_column_panel {
+        .layui-collapse, .task_column_panel, #tree-panel-body {
             overflow: scroll;
             overflow-x: hidden;
         }
@@ -50,6 +50,32 @@
             vertical-align: middle;
         }
 
+        .setting-widget {
+            border: 1px solid rgba(51, 51, 51, .2);
+            border-radius: 5px;
+            background-color: #F8F8F8;
+            box-shadow: 0px 0px 3px 0px rgba(51, 51, 51, .2);
+        }
+
+        .setting-widget p {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .setting-widget button {
+            margin-bottom: 20px;
+        }
+
+        /*#Color_picker {
+            display: block;
+            height: 34px;
+            padding: 6px 12px;
+            background-color: #fff;
+            border: solid 1px #ccc;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        }*/
 
         body {
             overflow: hidden;
@@ -58,14 +84,23 @@
 {% endblock %}
 {% block content %}
     {% include '_navbar.html' %}
-    <div class="container-fluid">
+    <div id="board_container" class="container-fluid">
+        {% include 'taskboard/_TaskAddModal.html' %}
         <div class="row">
             <div id="project_panel" class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Project Tree</h3>
+                    <h3 class="panel-title" style="padding-right: 0px;">Project Tree
+                        {#                        <a id="add_project_when_none"#}
+                        {#                           style="display: none;font-weight: normal;font-size: 10px;float: right;margin-top: -6px;"#}
+                        {#                           class="btn btn-default"#}
+                        {#                           onclick="show_project_edit_modal('')"><span#}
+                        {#                                class="glyphicon glyphicon-plus"></span> Add Project#}
+                        {#                        </a>#}
+                    </h3>
                 </div>
                 <div id="tree-panel-body" class="panel-body">
                 </div>
+
             </div>
             <div id="milestone_panel" class="panel panel-default">
                 <div class="panel-heading">
@@ -82,6 +117,9 @@
                 </div>
             </div>
         </div>
+        {% if current_user.is_admin %}
+            {% include 'setting/_ProjectAddModal.html' %}
+        {% endif %}
     </div>
 {% endblock %}
 {% block scripts %}
@@ -94,26 +132,579 @@
             width: window.innerWidth || document.body.clientWidth,
             height: window.innerHeight || document.body.clientHeight
         };
+        let project_Reg = new RegExp('project_node');
+        let milestone_Reg = new RegExp('milestone_node');
+        let task_Reg = new RegExp('task_node');
+
         $(function () {
             $('#board').addClass('active').children('a').removeAttr('href');
             LoadMileStone('{{ current_user.default_project_id }}', false, 0);
-            /*
-
             {#$('#milestone-panel-body').load('{{ url_for("taskboard.render_milestone_column") }}',#}
-                {'project_id': ""},
-                function () {
-                    // setProjectLineWidth();
-                    setLineWidthByClass('project');
-                    $('div[id^=task_card]').on('click', LoadTaskColumn);
-                    $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
-                    layui.use('element', function () {
-                        layui.element.init();
-                    });
-                });*/
+            {#    {'project_id': ""},#}
+            {#    function () {#}
+            {#        // setProjectLineWidth();#}
+            {#        setLineWidthByClass('project');#}
+            {#        $('div[id^=task_card]').on('click', LoadTaskColumn);#}
+            {#        $('.layui-collapse').css('height', size.height - 50 - 38 - 60);#}
+            {#        layui.use('element', function () {#}
+            {#            layui.element.init();#}
+            {#        });#}
+            {#    });#}
             $('#tree-panel-body').css('height', size.height - 50 - 38);
             $('.panel').css('height', size.height - 50);
             //$('#milestone_panel').css('width', (size.width - 400) / 2);
             //$('#task_panel').css('width', (size.width - 400) / 2);
+            LoadTree();
+
+
+            window.onresize = function () {
+                setLineWidthByClass('project');
+                setLineWidthByClass('task');
+                /*setProjectLineWidth();
+                setTaskLineWidth();*/
+            }
+        });
+
+        function GenerateLabelByNode(node) {
+            let node_id = $(node)[0].id;
+            let label = 'Add';
+            if (milestone_Reg.test(node_id))
+                label = 'Add Task';
+            else if (project_Reg.test(node_id))
+                label = 'Add MileStone';
+            return label;
+        }
+
+        /*function disableTaskAdd(node) {
+            let node_id = $(node)[0].id;
+            if (task_Reg.test(node_id))
+                return true;
+            return false;
+        }*/
+
+        function disableUnformatPaste(node) {
+            let node_id = $(node)[0].id;
+            let tree = $(node).jstree(true);
+            let paste_buffer;
+            if (tree.can_paste()) {
+                paste_buffer = tree.get_buffer();
+                let paste_buffer_id = paste_buffer.node[0].id;
+                if (task_Reg.test(paste_buffer_id)) {
+                    if (milestone_Reg.test(node_id)) {
+                        return false;
+                    }
+                    /*if ((new RegExp('task_node')).test(node_id)) {
+                        console.log('false sss');
+                        return false;
+                    }*/
+                }
+                if (milestone_Reg.test(paste_buffer_id)) {
+                    if (project_Reg.test(node_id)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function customMenu(node) {
+            // let tree = $('#tree-panel-body').jstree(true);
+            /*let items = {
+                "Edit": {
+                    "separator_before": false,
+                    "separator_after": true,
+                    "label": "Create",
+                    "action": function (data) {
+                        $node = tree.create_node($node, {
+                            text: 'New File',
+                            type: 'file',
+                            icon: 'glyphicon glyphicon-file'
+                        });
+                        tree.deselect_all();
+                        tree.select_node($node);
+                    },
+                },
+                "Rename": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Rename",
+                    "action": function (data) {
+                        tree.edit($node);
+                        let nod = tree.get_node('#project_node1');
+                        console.log(nod);
+                        console.log(data);
+                    }
+                },
+                "Remove": {
+                    "separator_before": false,
+                    "separator_after": false,
+                    "label": "Remove",
+                    "action": function (obj) {
+                        tree.delete_node($node);
+                    }
+                }
+            }*/
+            //items : function (o, cb) { // Could be an object directly
+
+            let items = {
+                "cut": {
+                    "separator_before": false,
+                    "icon": "fa fa-scissors",
+                    "separator_after": false,
+                    "label": "Cut",
+                    "action": function (data) {
+                        let inst = $.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                        if (inst.is_selected(obj)) {
+                            inst.cut(inst.get_top_selected());
+                        } else {
+                            inst.cut(obj);
+                        }
+                    }
+                },
+                "copy": {
+                    "separator_before": false,
+                    "icon": 'fa fa-clone',
+                    "separator_after": false,
+                    "label": "Copy",
+                    "action": function (data) {
+                        let inst = $.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                        if (inst.is_selected(obj)) {
+                            inst.copy(inst.get_top_selected());
+                        } else {
+                            inst.copy(obj);
+                        }
+                    }
+                },
+                "paste": {
+                    "separator_before": false,
+                    "icon": "fa fa-clipboard",
+                    "_disabled": disableUnformatPaste(node),
+                    "separator_after": false,
+                    "label": "Paste",
+                    "action": function (data) {
+                        let inst = $.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                        /*let edit_obj = inst.get_buffer();
+                        inst.paste(obj);
+                        inst.edit(edit_obj, null, function () {
+                            console.log('ajax asynchronous data to back endpoint');
+                        });*/
+                        let node_buffer = inst.get_buffer();
+                        let mode = node_buffer.mode;
+                        let node_id = node_buffer.node[0].id;
+                        let type_and_id = getTypeAndId(node_id);
+                        let node_type = type_and_id.node_type;
+                        let id = type_and_id.id;
+                        let target_id_text = $(node)[0].id;
+                        {#let target_id = $(node)[0].id.split(node_type + '_node')[1];#}
+                        let target_id = getTypeAndId(target_id_text).id
+                        let buffer_node = node_buffer.node;
+                        let name = buffer_node[0].text;
+                        if (mode === 'move_node') {
+                            $.ajax({
+                                url: "{{ url_for('taskboard.move_node') }}",
+                                type: 'POST',
+                                data: {
+                                    'type': node_type,
+                                    'id': id,
+                                    //'target_id_text': target_id_text
+                                    'target_id': target_id
+                                },
+                                success: function (e) {
+                                    if (e === 'ok') {
+                                        layer.msg(node_type + ' ' + name + '移动成功！');
+                                    } else {
+                                        layer.msg('Move failed！');
+                                        return;
+                                    }
+                                    inst.refresh();
+                                    AjaxReloadPageAfterContextMenu(node_type, id, "paste");
+                                },
+                                error: function (error) {
+                                    layer.msg('Something wrong in server！');
+                                    console.log(error);
+                                },
+                            });
+                        } else if (mode === 'copy_node') {
+                            inst.create_node(obj, node_buffer.node[0].text, "last", function (new_node) {
+                                try {
+                                    {#check_if_same_name_exist(new_node.parent);#}
+                                    {#inst.edit(new_node, null,);#}
+                                    inst.edit(new_node, null, function (ob) {
+                                        let new_name = ob.text;
+                                        $.ajax({
+                                            url: "{{ url_for('taskboard.copy_node') }}",
+                                            type: 'POST',
+                                            data: {
+                                                'type': node_type,
+                                                'id': id,
+                                                'new_name': new_name,
+                                                'target_id': target_id
+                                            },
+                                            success: function (e) {
+                                                if (e === 'ok') {
+                                                    layer.msg(node_type + ' ' + name + '复制成功！');
+                                                } else {
+                                                    layer.msg('Copy failed！');
+                                                    return;
+                                                }
+                                                inst.refresh();
+                                                AjaxReloadPageAfterContextMenu(node_type, id, "paste");
+                                            },
+                                            error: function (error) {
+                                                layer.msg('Something wrong in server！');
+                                                console.log(error);
+                                            },
+                                        });
+                                    });
+                                } catch (ex) {
+                                    setTimeout(function () {
+                                        inst.edit(new_node);
+                                    }, 0);
+                                }
+                            });
+                        }
+                    }
+                },
+                "add": {
+                    "separator_before": false,
+                    "icon": "fa fa-plus",
+                    "separator_after": false,
+                    {#"_disabled": disableTaskAdd(node), //(this.check("create_node", data.reference, {}, "last")),#}
+                    "_disabled": false,
+                    "label": GenerateLabelByNode(node),
+                    "action": function (data) {
+                        if (data.item.label == 'Add Task') {
+                            task_modal_show(node, 'add');
+                            return;
+                        }
+                        let inst = $.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                        inst.create_node(obj, {}, "last", function (new_node) {
+                            try {
+                                let parent_node_id_text = new_node.parent;
+                                let parent_id = getTypeAndId(parent_node_id_text).id;
+                                inst.edit(new_node, null, function (ob) {
+                                    let new_name = ob.text;
+                                    $.ajax({
+                                        url: "{{ url_for('taskboard.add_milestone_node') }}",
+                                        type: 'POST',
+                                        data: {
+                                            'new_name': new_name,
+                                            'parent_id': parent_id
+                                        },
+                                        success: function (e) {
+                                            if (e === 'ok') {
+                                                layer.msg('milestone ' + new_name + ' 修改成功！');
+                                            } else {
+                                                layer.msg('Add Milestone Failed！');
+                                                return;
+                                            }
+                                            inst.refresh_node(obj);
+                                            AjaxReloadPageAfterContextMenu('milestone', '', 'add milestone');
+                                        },
+                                        error: function (error) {
+                                            layer.msg('Something wrong in server！');
+                                            console.log(error);
+                                        },
+                                    });
+                                });
+                            } catch (ex) {
+                                setTimeout(function () {
+                                    inst.edit(new_node);
+                                }, 0);
+                            }
+                        });
+                    }
+                },
+                "rename": {
+                    "separator_before": false,
+                    "icon": "fa fa-font",
+                    "separator_after": false,
+                    "_disabled": false, //(this.check("rename_node", data.reference, this.get_parent(data.reference), "")),
+                    "label": "Rename",
+                    /*!
+                    "shortcut"			: 113,
+                    "shortcut_label"	: 'F2',
+                    "icon"				: "glyphicon glyphicon-leaf",
+                    */
+                    "action": function (data) {
+                        let inst = $.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                        inst.edit(obj, null, function (ob) {
+                            let new_name = ob.text;
+                            let node_id = ob.id;
+                            let type_and_id = getTypeAndId(node_id);
+                            let id = type_and_id.id;
+                            let node_type = type_and_id.node_type;
+                            $.ajax({
+                                url: "{{ url_for('taskboard.rename_node') }}",
+                                type: 'POST',
+                                data: {
+                                    'type': node_type,
+                                    'id': id,
+                                    'new_name': new_name
+                                },
+                                success: function (e) {
+                                    if (e === 'ok') {
+                                        layer.msg(node_type + ' name 修改成功！');
+                                    } else {
+                                        layer.msg('Rename failed！');
+                                        return;
+                                    }
+                                    inst.refresh_node(obj);
+                                    AjaxReloadPageAfterContextMenu(node_type, id, 'rename');
+                                },
+                                error: function (error) {
+                                    layer.msg('Something wrong in server！');
+                                    console.log(error);
+                                },
+                            });
+                        });
+                    }
+                },
+                "remove": {
+                    "separator_before": false,
+                    "icon": "fa fa-trash-o",
+                    "separator_after": false,
+                    "_disabled": false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+                    "label": "Delete",
+                    "action": function (data) {
+                        let inst = $.jstree.reference(data.reference),
+                            obj = inst.get_node(data.reference);
+                        delete_node_or_task(obj);
+
+                    }
+                },
+                "create_project": {
+                    "separator_before": true,
+                    "icon": "fa fa-pinterest-p",
+                    "separator_after": false,
+                    "_disabled": false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+                    "label": "New Project",
+                    "action": function () {
+                        show_project_edit_modal('');
+                    }
+                }
+                /*"ccp": {
+                    "separator_before": true,
+                    "icon": false,
+                    "separator_after": false,
+                    "label": "Edit",
+                    "action": false,
+                    "submenu": {
+                        "cut": {
+                            "separator_before": false,
+                            "separator_after": false,
+                            "label": "Cut",
+                            "action": function (data) {
+                                let inst = $.jstree.reference(data.reference),
+                                    obj = inst.get_node(data.reference);
+                                if (inst.is_selected(obj)) {
+                                    inst.cut(inst.get_top_selected());
+                                } else {
+                                    inst.cut(obj);
+                                }
+                            }
+                        },
+                        "copy": {
+                            "separator_before": false,
+                            "icon": false,
+                            "separator_after": false,
+                            "label": "Copy",
+                            "action": function (data) {
+                                let inst = $.jstree.reference(data.reference),
+                                    obj = inst.get_node(data.reference);
+                                if (inst.is_selected(obj)) {
+                                    inst.copy(inst.get_top_selected());
+                                } else {
+                                    inst.copy(obj);
+                                }
+                            }
+                        },
+                        "paste": {
+                            "separator_before": false,
+                            "icon": false,
+                            "_disabled": disableUnformatPaste(node),
+                            "separator_after": false,
+                            "label": "Paste",
+                            "action": function (data) {
+                                console.log(data.reference);
+                                let inst = $.jstree.reference(data.reference),
+                                    obj = inst.get_node(data.reference);
+                                console.log(inst);
+                                inst.paste(obj);
+                                inst.edit(inst.get_children_dom(obj).last(), null, function () {
+                                    console.log('ajax asynchronous data to back endpoint');
+                                });
+                            }
+                        }
+                    }
+                }*/
+            };
+            let id = $(node)[0].id;
+            let node_id;
+            if (task_Reg.test(id)) {
+                node_id = $('#' + id).parents('li[id^=project_node]')[0].id.split('project_node')[1];
+            } else if (milestone_Reg.test(id)) {
+                node_id = $('#' + id).parents('li[id^=project_node]')[0].id.split('project_node')[1];
+            } else if (project_Reg.test(id)) {
+                node_id = id.split('project_node')[1];
+            }
+            if ('{{ current_user.is_admin }}' !== 'True' && '{{ current_user.access_project_id }}' !== node_id)
+                return {};
+            if (task_Reg.test(id))
+                delete items.add;
+            if (project_Reg.test($(node)[0].id)) {
+                delete items.copy;
+                delete items.cut;
+            }
+            return items;
+        }
+
+        function getTypeAndId(node_id) {
+            let type_and_id;
+            let node_type, id;
+            if (task_Reg.test(node_id)) {
+                node_type = 'task';
+                id = node_id.split('task_node')[1];
+            } else if (milestone_Reg.test(node_id)) {
+                node_type = 'milestone';
+                id = node_id.split('milestone_node')[1];
+            } else if (project_Reg.test(node_id)) {
+                node_type = 'project';
+                id = node_id.split('project_node')[1];
+            }
+            type_and_id = {'id': id, 'node_type': node_type}
+            return type_and_id;
+        }
+
+        function check_if_same_name_exist(node_parent_id, new_name) {
+            let exist_names_array = [];
+            $('#' + node_parent_id).children('ul').children('li').each(function () {
+                let ele = $(this);
+                exist_names_array.push(ele.children('a').text());
+            });
+            if (exist_names_array.indexOf(new_name) === -1)
+                return false;
+            return true;
+        }
+
+        /*function storeProjectMilestoneTaskId(node_type, id,) {
+            let project_node_id;
+            let milestone_node_id;
+            let task_node_id;
+            let node_collection;
+            if (node_type === 'task') {
+                task_node_id = id;
+                milestone_node_id = $('#' + node_type + '_node' + id).parents('li[id^=milestone_node]')[0].id.split('milestone_node')[1];
+                project_node_id = $('#' + node_type + '_node' + id).parents('li[id^=project_node]')[0].id.split('project_node')[1];
+            } else if (node_type === 'milestone') {
+                milestone_node_id = id;
+                project_node_id = $('#' + node_type + '_node' + id).parents('li[id^=project_node]')[0].id.split('project_node')[1];
+            } else if (node_type === 'project') {
+                project_node_id = id;
+            }
+            node_collection = {
+                'project_node_id': project_node_id,
+                'milestone_node_id': milestone_node_id,
+                'task_node_id': task_node_id
+            }
+            console.log(node_collection);
+            return node_collection;
+        }*/
+
+        /*function forContextMenuAjaxReload(node_type, node_collection, action) {
+            let project_node_id = node_collection.project_node_id;
+            let milestone_node_id = node_collection.milestone_node_id;
+            let task_node_id = node_collection.task_node_id;
+            if (action === 'delete') {
+                if (node_type === 'task') {
+                    LoadMileStone(project_node_id, true, milestone_node_id);
+                } else if (node_type === 'milestone') {
+                    LoadMileStone(project_node_id, true, milestone_node_id);
+                } else if (node_type === 'project') {
+                    LoadMileStone(project_node_id, false, null);
+                }
+                return;
+            }
+            if (node_type === 'task') {
+                LoadMileStone(project_node_id, true, milestone_node_id);
+                LoadTaskById(task_node_id);
+            } else if (node_type === 'milestone') {
+                LoadMileStone(project_node_id, true, milestone_node_id);
+            } else if (node_type === 'project') {
+                LoadMileStone(project_node_id, false, null);
+            }
+        }*/
+
+        function AjaxReloadPageAfterContextMenu(node_type, id, action) {
+            let project_id = $('#store_project_id_for_ajax').text();
+            let task_id = $('#store_task_id_for_ajax').text();
+            let is_show_milestone_array = [];
+            $('.layui-show').each(function () {
+                is_show_milestone_array.push($(this)[0].id.split('layui_colla_content')[1]);
+            });
+            if (node_type === 'project') {
+                if (action === 'delete')
+                    LoadMileStone('', false, []);
+                else {
+                    LoadMileStone(project_id, true, is_show_milestone_array);
+                    LoadTaskById(task_id);
+                }
+            } else if (node_type === 'milestone') {
+                if (action === 'delete') {
+                    is_show_milestone_array.splice(is_show_milestone_array.indexOf(id), 1);
+                }
+                LoadMileStone(project_id, true, is_show_milestone_array);
+                LoadTaskById(task_id);
+            } else if (node_type === 'task') {
+                if (action === 'delete') {
+                    task_id = '';
+                }
+                LoadMileStone(project_id, true, is_show_milestone_array);
+                LoadTaskById(task_id);
+            }
+        }
+
+        function TreeNodeClickEvent(data) {
+            let node = data.node;
+            let id = node.id;
+            let project_node;
+            let project_id;
+            let milestone_node_id = 'None';
+            if (task_Reg.test(id)) {
+                LoadTaskById(id.split('task_node')[1]);
+                project_node = $('#' + id).parents('li[id^=project_node]');
+                project_id = project_node[0].id.split('project_node')[1];
+                milestone_node_id = $('#' + id).parents('li[id^=milestone_node]')[0].id.split('milestone_node')[1];
+            } else if (milestone_Reg.test(id)) {
+                project_node = $('#' + id).parents('li[id^=project_node]');
+                project_id = project_node[0].id.split('project_node')[1];
+                milestone_node_id = id.split('milestone_node')[1];
+            } else if (project_Reg.test(id)) {
+                project_id = id.split('project_node')[1];
+            } else {
+                return;
+            }
+            let tree = $('#tree-panel-body').jstree(true);
+            tree.open_node(node);
+            {#$('#tree-panel-body').jstree('open_node', node);#}
+            LoadMileStone(project_id, true, [milestone_node_id]);
+        }
+
+        function whether_show_add_button() {
+            let is_no_project = $('#tree-panel-body').children('.jstree-container-ul.jstree-children.jstree-contextmenu')[0].hasChildNodes();
+            if (!is_no_project) {
+                console.log('xx');
+                $('#add_project_when_none').show();
+                $('#board_container').load('{{ url_for("taskboard.none_project") }}');
+            }
+        }
+
+        function LoadTree() {
             $('#tree-panel-body').jstree({
                 'core': {
                     'data': {
@@ -126,13 +717,11 @@
                 },
                 'plugins': ['contextmenu'],
                 "contextmenu": {
-                    'items': function ($node) {
-                        return customMenu($node);
-                    }
+                    'items': customMenu
                 }
             }).on("select_node.jstree", function (e, data) {
                 TreeNodeClickEvent(data);
-            });
+            }).on('refresh.jstree', whether_show_add_button).on('loaded.jstree', whether_show_add_button);
             /*.on('loaded.jstree', function () {
                 //$('#tree-panel-body').jstree('open_all');
                 let project_nodes = $('li[id^=project_node]');
@@ -158,95 +747,16 @@
                 });
 
             });*/
-
-            window.onresize = function () {
-                setLineWidthByClass('project');
-                setLineWidthByClass('task');
-                /*setProjectLineWidth();
-                setTaskLineWidth();*/
-            }
-        });
-
-        function customMenu($node) {
-            let tree = $('#tree-panel-body').jstree(true);
-            let items = {
-                "Edit": {
-                    "separator_before": false,
-                    "separator_after": true,
-                    "label": "Create",
-                    "action": function (data) {
-                        $node = tree.create_node($node, {
-                            text: 'New File',
-                            type: 'file',
-                            icon: 'glyphicon glyphicon-file'
-                        });
-                        tree.deselect_all();
-                        tree.select_node($node);
-                    },
-                },
-                "Rename": {
-                    "separator_before": false,
-                    "separator_after": false,
-                    "label": "Rename",
-                    "action": function (data) {
-                        tree.edit($node);
-                    }
-                },
-                "Remove": {
-                    "separator_before": false,
-                    "separator_after": false,
-                    "label": "Remove",
-                    "action": function (obj) {
-                        tree.delete_node($node);
-                    }
-                }
-            }
-            return items;
         }
 
-        function TreeNodeClickEvent(data) {
-            let node = data.node;
-            let id = node.id;
-            let project_node;
-            let project_id;
-            let milestone_node_id = 'None';
-            if ((new RegExp('task_node')).test(id)) {
-                LoadTaskById(id.split('task_node')[1]);
-                project_node = $('#' + id).parents('li[id^=project_node]');
-                project_id = project_node[0].id.split('project_node')[1];
-                milestone_node_id = $('#' + id).parents('li[id^=milestone_node]')[0].id.split('milestone_node')[1];
-            } else if ((new RegExp('milestone_node')).test(id)) {
-                project_node = $('#' + id).parents('li[id^=project_node]');
-                project_id = project_node[0].id.split('project_node')[1];
-                milestone_node_id = id.split('milestone_node')[1];
-            } else if ((new RegExp('project_node')).test(id)) {
-                project_id = id.split('project_node')[1];
-            } else {
-                return;
-            }
-            $('#tree-panel-body').jstree('open_node', node);
-            LoadMileStone(project_id, true, milestone_node_id);
-            /*$('#milestone-panel-body').load('
-
-
-
-            {#            {{ url_for("taskboard.render_milestone_column") }}', {'project_id': project_id}, function () {#}
-                $('div[id^=task_card]').on('click', LoadTaskColumn);
-                $('#layui_colla_content' + milestone_node_id).addClass('layui-show');
-                $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
-                // setProjectLineWidth();
-                setLineWidthByClass('project');
-                layui.use('element', function () {
-                    layui.element.init();
-                });
-            });*/
-        }
-
-        function LoadMileStone(project_id, show, milestone_node_id) {
+        function LoadMileStone(project_id, show, milestone_node_id_array) {
             $('#milestone-panel-body').load('{{ url_for("taskboard.render_milestone_column") }}', {'project_id': project_id}, function () {
                 $('div[id^=task_card]').on('click', LoadTaskColumn);
-                if (show)
-                    $('#layui_colla_content' + milestone_node_id).addClass('layui-show');
+                if (show) {
+                    for (let i = 0; i < milestone_node_id_array.length; i++) {
+                        $('#layui_colla_content' + milestone_node_id_array[i]).addClass('layui-show');
+                    }
+                }
                 $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
                 // setProjectLineWidth();
                 setLineWidthByClass('project');
@@ -276,11 +786,22 @@
                         //exts: 'zip|rar|7z|txt|doc|docx',
                         bindAction: '#upload_btn',
                         done: function (res) {
-                            console.log(res)
-                            layer.msg("File Upload Success")
-                            setTimeout(() => {
-                                LoadTaskById(task_id);
-                            }, 300);
+                            layer.msg("File Upload Success");
+                            let tree = $('#tree-panel-body').jstree(true);
+                            let node = tree.get_node('#task_node' + task_id);
+                            tree.deselect_node(tree.get_selected()[0]);
+                            tree.select_node(node);
+                            /*setTimeout(() => {
+
+
+
+
+
+
+
+
+                            {#LoadTaskById(task_id);#}
+                            }, 300);*/
                         }
                     });
                 });
@@ -318,7 +839,7 @@
 
         function Register_time_tip() {
             let tip_index;
-            $('[id^=comment_tip]').hover(function () {
+            $('[name=moment_tip]').hover(function () {
                 let ele = $(this);
                 let time = moment(ele.data('timestamp')).format('LLL');
                 tip_index = layer.tips(
@@ -329,6 +850,175 @@
             }, function () {
                 layer.close(tip_index);
             })
+        }
+
+        function before_task_modal_show(milestone_id) {
+            $('#store_milestone_id_when_add_task').text(milestone_id);
+            task_modal_show({id: 'milestone_node' + milestone_id}, 'add');
+        }
+
+        function task_edit_modal_show(task_id) {
+            $('#EditTaskModal' + task_id).modal('show');
+        }
+
+        function task_modal_show(node, action, data) {
+            let input = $('#task_title_input');
+            let input_error = $('#task_title-input-error');
+            let $input = new Input(input);
+            let description_input = $('#task_add_modal_textarea');
+            input.on('focusout', function () {
+                if (!$input.validator.is_valid()) {
+                    input.css('border', '1px solid #ff0000');
+                    input.focus().select();
+                    input_error.show();
+                } else {
+                    input.css('border', '1px solid #DBDBDB');
+                    input_error.hide();
+                }
+            });
+            let id = node.id.split('milestone_node')[1];
+            $('#store_milestone_id_when_add_task').text(id);
+            input.val('');
+            description_input.val('');
+            $('#milestone_select_' + id).attr('selected', 'selected');
+            if (action === 'edit') {
+                $('#add_or_edit_task').text('Edit Task');
+                $('#task_submit_button').text('Save Changes');
+                input.val($('#task_title').text());
+                description_input.val($('#task_description').text());
+                $('#user_select_' + data.user_id).attr('selected', 'selected');
+                $('#category_select_' + data.category_id).attr('selected', 'selected');
+                $('#milestone_select_' + data.milestone_id).attr('selected', 'selected');
+                $('#color_text').val(data.color);
+                $('#task_points').val(data.points);
+            }
+            let ele = $('#Color_picker');
+            {#ele.attr('data-color', '#D9EDF7');#}
+            layui.use('colorpicker', function () {
+                let colorpicker = layui.colorpicker;
+                //渲染
+                colorpicker.render({
+                    elem: ele,  //绑定元素
+                    color: '#D9EDF7', //设置默认色
+                    size: 'lg',
+                    predefine: true,
+                    colors: ['#dff0d8', '#d9edf7', '#fcf8e3', '#f2dede', '#337ab7'],
+                    change: function (color) {
+                        $('#color_text').val(color);
+                    }
+                });
+            });
+            layui.use('laydate', function () {
+                let today = new Date();
+                let dd = today.getDate();
+                let mm = today.getMonth() + 1; //January is 0!
+                if (parseInt(mm) < 10)
+                    mm = '0' + mm;
+                let yyyy = today.getFullYear();
+                let today_date = `${yyyy}-${mm}-${dd}`;
+                $('#date_picker').val(today_date);
+                let render_value = today_date
+                if (action === 'edit') {
+                    render_value = data.due_date;
+                    $('#date_picker').val(render_value);
+                }
+                let laydate = layui.laydate;
+                laydate.render({
+                    elem: '#date_picker',
+                    lang: 'en',
+                    type: 'date',
+                    value: render_value,
+                    min: 0,
+                    btns: ['now', 'confirm'],
+                    done: function (value, date, endDate) {
+                        $('#date_picker').val(value);
+                    }
+                });
+            });
+            $('#EditTaskModal').attr('data-backdrop', 'static').modal('show');
+        }
+
+        function task_modal_save() {
+            let $task_title_input = $('#task_title_input');
+            let input = new Input($task_title_input);
+            $task_title_input.trigger('change');
+            if (!input.validator.is_valid()) {
+                layer.msg('Task name is invalid, Please check out your input carefully !', {
+                    skin: 'layer-error-skin',
+                    offset: '100px',
+                    area: ['430px', 'auto'],
+                    time: 1000,
+                    end: function () {
+                        $task_title_input.css('border', '1px solid #ff0000');
+                        $task_title_input.focus().select();
+                    }
+                });
+                return
+            }
+            let task_name = $('#task_title_input').val();
+            let task_description = $('#task_add_modal_textarea').val();
+            let assigned_user_id = $('#task_add_modal_user option:selected').val();
+            let category_id = $('#task_add_modal_category option:selected').val();
+            let milestone_id = $('#task_add_modal_milestone option:selected').val();
+            let color_text = $('#color_text').val();
+            if (!color_text)
+                color_text = '#D9EDF7';
+            let date_picker_text = $('#date_picker').val();
+            let points = $('#task_points').val();
+            let action_type = 'add';
+            let task_id;
+            if ($('#task_submit_button').text() === 'Save Changes') {
+                task_id = $('#store_task_id_for_ajax').text();
+                action_type = 'edit';
+            }
+            let data_json = {
+                action_type: action_type,
+                task_id: task_id,
+                task_name: task_name,
+                task_description: task_description,
+                assigned_user_id: assigned_user_id,
+                category_id: category_id,
+                milestone_id: milestone_id,
+                color_text: color_text,
+                date_picker_text: date_picker_text,
+                points: points
+            };
+
+            $.ajax({
+                type: "post",
+                url: "{{ url_for('taskboard.save_task_edit_modal') }}",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(data_json),
+                success: function (status_id) {
+                    let status = status_id.split('-')[0];
+                    let id = status_id.split('-')[1];
+                    if (status !== 'fail') {
+                        $('#EditTaskModal').modal('hide');
+                        if (status === 'edit')
+                            layer.msg('修改成功！');
+                        else if (status === 'add')
+                            layer.msg('添加成功！');
+                        let tree = $('#tree-panel-body').jstree(true);
+                        let store_milestone_id = $('#store_milestone_id_when_add_task').text();
+                        let node = tree.get_node('#milestone_node' + store_milestone_id);
+                        tree.deselect_node(node);
+                        tree.refresh_node(node);
+                        setTimeout(function () {
+                            {#parent.location.reload();#}
+                            let node = tree.get_node('#task_node' + id);
+                            tree.select_node(node);
+                        }, 1000);
+                    } else {
+                        layer.msg('修改失败，请稍后再试！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+                complete: function () {
+
+                }
+            });
         }
 
         function edit_task_comment(the, comment_id) {
@@ -397,6 +1087,68 @@
                 },
             });
 
+        }
+
+        function delete_node_or_task(obj) {
+            let node_id = obj.id;
+            let type_and_id = getTypeAndId(node_id);
+            let id = type_and_id.id;
+            let node_type = type_and_id.node_type;
+            let name = obj.text;
+            let layer_title = node_type.charAt(0).toUpperCase() + node_type.slice(1);
+            let layer_content = '<div class="text-center" style="margin-top:20px"><p>Are you sure to delete ' + node_type + ' <span class="label label-danger">' +
+                name + '</span> ?</p></div>';
+            if(node_type ==='project')
+                layer_content+='<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: Everything of this project will be removed !</p></div>';
+            if (node_type === 'milestone')
+                layer_content = layer_content + '<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: All task in this milestone will also be removed !</p></div>';
+            if (node_type === 'task')
+                layer_content += '<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: Comment and Files belongs to this task will also be removed !</p></div>';
+            // let node_collection = storeProjectMilestoneTaskId(node_type, id);
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: 'Delete ' + layer_title,
+                content: layer_content,
+                btn: ['删除', '取消'],
+                anim: 6,
+                offset: '150px',
+                yes: function (index) {
+                    $.ajax({
+                        url: "{{ url_for('taskboard.delete_node') }}",
+                        type: 'POST',
+                        data: {
+                            'type': node_type,
+                            'id': id,
+                        },
+                        success: function (e) {
+                            layer.close(index);
+                            if (e === 'ok') {
+                                let inst = $('#tree-panel-body').jstree(true);
+                                if (inst.is_selected(obj.id)) {
+                                    inst.delete_node(inst.get_selected());
+                                } else {
+                                    inst.delete_node(obj.id);
+                                }
+                                layer.msg(node_type + " : " + name + ' 删除成功！');
+                                inst.refresh();
+                                AjaxReloadPageAfterContextMenu(node_type, id, 'delete');
+                            } else {
+                                layer.msg('删除失败！');
+                                return;
+                            }
+                        },
+                        error: function (error) {
+                            layer.msg('Something wrong in server！');
+                            console.log(error);
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
         }
 
         function delete_task_attachment(the, file_id, file_source_name, file_security_name, task_id) {
