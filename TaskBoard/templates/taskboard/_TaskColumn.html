@@ -1,34 +1,60 @@
 <div class="task_title">
     <span class="line" id="line3"></span>
-    <span class="title text-capitalize">{{ task.title }}</span>
+    <span id="task_title" class="title text-capitalize">{{ task.title }}</span>
     <span class="line" id="line4"></span>
+    <span id="store_task_id_for_ajax" hidden>{{ task.id }}</span>
+    <span id="store_milestone_id_for_ajax" hidden>{{ task.milestone_id }}</span>
 </div>
 <div class="task_column_panel" class="panel" style="margin-top: auto;">
     <div class="panel-body" style="background: {{ task.color }};">
         <div class="row">
-            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Description :</h4>
-            <div class="col-sm-12"><p>{{ task.description }}</p></div>
+            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Description :
+                <span class="pull-right" style="margin-right: 20px;font-size: 15px;">
+                    <i class="fa fa-tags" aria-hidden="true"></i>
+                    Points:{{ task.points }}</span>
+            </h4>
+            <div class="col-sm-12"><p id="task_description">{{ task.description }}</p></div>
             <div class="col-sm-12"
-                 style="font-weight: bold;margin-top: 20px;text-shadow: 0px 0px 3px rgba(255, 81, 28, 1);">
+                 style="font-weight: bold;margin-top: 20px;text-shadow: 0px 0px 3px rgba(255, 81, 28, 1);"
+                 id="task_due_date">
                 Due:{{ task.due_date }}</div>
+            {% if current_user.is_admin or current_user.id == task.user_id %}
+                <div class="task_action" style="margin-top: 100px;">
+                    <div class="col-sm-6">
+                        <button class="form-control btn-info"
+                                onclick="task_modal_show({id:'milestone_node{{ task.milestone_id }}'},'edit',{user_id:'{{ task.user_id }}',category_id:'{{ task.category_id }}',color:'{{ task.color }}',due_date:'{{ task.due_date }}',points:'{{ task.points }}'})">
+                            Edit Task
+                        </button>
+                    </div>
+                    <div class="col-sm-6">
+                        <button class="form-control btn-danger"
+                                onclick="delete_node_or_task({id:'task_node{{ task.id }}',text:'{{ task.title }}'})">
+                            Delete Task
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <div class="row" style="margin-top: 20px;">
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 style="font-weight: bold;">Assigned To :<span
-                            style="font-weight: normal;"> {{ task.user.username }}</span></h4>
+                    <h4 id="task_user_h4" data-user_id="{{ task.user.id }}" style="font-weight: bold;">Assigned To:
+                        <span style="font-weight: normal;"> {{ task.user.username }}</span>
+                    </h4>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 style="font-weight: bold;">Category :<span
-                            style="font-weight: normal;"> {{ task.category.title }}</span></h4>
+                    <h4 id="task_category_h4" data-category_id="{{ task.category_id }}" style="font-weight: bold;">Category :
+                        <span style="font-weight: normal;"> {{ task.category.title }}</span>
+                    </h4>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 style="font-weight: bold;">Milestone :<span
-                            style="font-weight: normal;"> {{ task.milestone.title }}</span></h4>
+                    <h4 id="task_milestone_h4" data-milestone_id="{{ task.milestone_id }}" style="font-weight: bold;">Milestone :
+                        <span style="font-weight: normal;"> {{ task.milestone.title }}</span>
+                    </h4>
                 </div>
             </div>
         </div>
@@ -46,7 +72,7 @@
                                     <p style="margin-top: 10px;display: block">
                                         <i class="fa fa-user-o"
                                            style="font-weight: bold;"> {{ file.user.username }}</i>
-                                        <i id="file_tip{{ file.id }}" class="fa fa-calendar-check-o"
+                                        <i id="file_tip{{ file.id }}" name="moment_tip" class="fa fa-calendar-check-o"
                                            style="font-weight: bold;margin-left: 6px;"
                                            data-timestamp="{{ file.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(file.update_time).fromNow(refresh=True) }}</i>
                                     </p>
@@ -94,7 +120,8 @@
                                     <p style="margin-top: 10px;display: block">
                                         <i class="fa fa-user-o"
                                            style="font-weight: bold;"> {{ comment.user.username }}</i>
-                                        <i id="comment_tip{{ comment.id }}" class="fa fa-calendar-check-o"
+                                        <i id="comment_tip{{ comment.id }}" name="moment_tip"
+                                           class="fa fa-calendar-check-o"
                                            style="font-weight: bold;margin-left: 6px;"
                                            data-timestamp="{{ comment.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(comment.update_time).fromNow(refresh=True) }}</i>
                                     </p>
