@@ -219,7 +219,6 @@ def ajax_load_user_table():
 @setting_bp.route('/save-project-edit-modal', methods=["POST"])
 def save_project_edit_modal():
     json_data = request.get_json()
-    print(json_data)
     project_id = json_data.get('project_id', None)
     project_title = json_data.get('project_title', None)
     order_id_array = json_data.get('order_id_array', None)
