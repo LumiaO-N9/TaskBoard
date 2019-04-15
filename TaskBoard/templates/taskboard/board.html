@@ -4,7 +4,6 @@
 {% block style %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/default/style.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layui.css') }}" type="text/css">
-    {#    <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery.contextMenu.min.css') }}" type="text/css">#}
     <style type="text/css">
         .panel {
             margin-top: -20px;
@@ -125,8 +124,6 @@
 {% block scripts %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/jstree.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/layui.js') }}"></script>
-    {#    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.contextMenu.min.js') }}"></script>#}
-    {#    <script type="text/javascript" src="{{ url_for('static',filename='js/jquery.ui.position.js') }}"></script>#}
     <script type="text/javascript">
         let size = {
             width: window.innerWidth || document.body.clientWidth,
