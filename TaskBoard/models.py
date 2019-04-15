@@ -7,13 +7,17 @@ association_table = db.Table('association', db.Column('user_id', db.Integer, db.
                              db.Column('project_id', db.Integer, db.ForeignKey('project.id')))
 
 
-class User(db.Model, UserMixin):
+class TimestampMixin(object):
     id = db.Column(db.Integer, primary_key=True)
+    create_time = db.Column(db.DateTime, default=datetime.utcnow)
+    update_time = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class User(db.Model, UserMixin, TimestampMixin):
     username = db.Column(db.String(20))
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, default=False)
     email = db.Column(db.String(254))
-    create_time = db.Column(db.DateTime, default=datetime.utcnow)
     last_login_time = db.Column(db.DateTime, default=datetime.utcnow)
     default_project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     access_project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
@@ -31,12 +35,9 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
-class Project(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Project(db.Model, TimestampMixin):
     title = db.Column(db.String(60))
     status = db.Column(db.Boolean, default=True)
-    create_time = db.Column(db.DateTime, default=datetime.utcnow)
-    update_time = db.Column(db.DateTime, default=datetime.utcnow)
     default_users = db.relationship('User', back_populates='default_project', foreign_keys='User.default_project_id')
     access_users = db.relationship('User', back_populates='access_project', foreign_keys='User.access_project_id')
     users = db.relationship('User', secondary=association_table, back_populates='projects')
@@ -44,26 +45,20 @@ class Project(db.Model):
     categories = db.relationship('Category', back_populates='project', cascade='all,delete-orphan')
 
 
-class Milestone(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Milestone(db.Model, TimestampMixin):
     title = db.Column(db.String(60))
     order = db.Column(db.Integer)
-    create_time = db.Column(db.DateTime, default=datetime.utcnow)
-    update_time = db.Column(db.DateTime, default=datetime.utcnow)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     project = db.relationship('Project', back_populates='milestones')
     tasks = db.relationship('Task', back_populates='milestone', cascade='all,delete-orphan')
 
 
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Task(db.Model, TimestampMixin):
     title = db.Column(db.String(60))
     description = db.Column(db.Text)
     color = db.Column(db.String(30), default='#fff5ee')
     due_date = db.Column(db.Date)
     points = db.Column(db.Integer, default=0)
-    create_time = db.Column(db.DateTime, default=datetime.utcnow)
-    update_time = db.Column(db.DateTime, default=datetime.utcnow)
     milestone_id = db.Column(db.Integer, db.ForeignKey('milestone.id'))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -74,8 +69,7 @@ class Task(db.Model):
     files = db.relationship('File', back_populates='task')
 
 
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Category(db.Model, TimestampMixin):
     title = db.Column(db.String(60))
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     color = db.Column(db.String(30), default='#d9edf7')
@@ -83,25 +77,19 @@ class Category(db.Model):
     tasks = db.relationship('Task', back_populates='category')
 
 
-class Comment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Comment(db.Model, TimestampMixin):
     text = db.Column(db.String(200))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
     is_edited = db.Column(db.Boolean, default=False)
-    create_time = db.Column(db.DateTime, default=datetime.utcnow)
-    update_time = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments')
     task = db.relationship('Task', back_populates='comments')
 
 
-class File(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class File(db.Model, TimestampMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
     source_name = db.Column(db.String(60))
     security_name = db.Column(db.String(60))
-    create_time = db.Column(db.DateTime, default=datetime.utcnow)
-    update_time = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='files')
     task = db.relationship('Task', back_populates='files')
