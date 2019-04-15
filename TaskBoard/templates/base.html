@@ -70,6 +70,7 @@
         layer.msg(msg, {
             skin: 'layer-error-skin',
             time: 2000,
+            offset: '100px',
             end: function () {
                 ele.css('border', '1px solid #ff0000');
                 ele.focus().select();
@@ -268,6 +269,7 @@
             layer.msg('Project name is invalid, Please check out your input carefully !', {
                 skin: 'layer-error-skin',
                 area: ['430px', 'auto'],
+                offset: '100px',
                 time: 1000,
                 end: function () {
                     $project_title_input.css('border', '1px solid #ff0000');
@@ -296,6 +298,7 @@
             layer.msg('At least one milestone is required !', {
                 skin: 'layer-error-skin',
                 time: 1000,
+                offset: '100px',
                 end: function () {
                     milestone_input.css('border', '1px solid #ff0000');
                     milestone_input.focus().select();
@@ -368,7 +371,7 @@
                         layer.msg('添加成功！');
                     setTimeout(function () {
                         parent.location.reload();
-                    }, 300);
+                    }, 1000);
                 } else {
                     layer.msg('修改失败，请稍后再试！')
                 }
