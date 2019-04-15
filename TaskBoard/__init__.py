@@ -4,7 +4,8 @@ from TaskBoard.extensions import db, login_manager, csrf, bootstrap, moment
 from TaskBoard.blueprints import auth, taskboard, setting
 from TaskBoard.models import User, Project, Milestone, Category, Task
 from flask_wtf.csrf import CSRFError
-import os, click
+import os
+import click
 
 
 def create_app(config_name=None):
@@ -87,13 +88,21 @@ def register_commands(app):
     @click.option('--category', default=4, help='Quantity of categories, default is 4.')
     @click.option('--task', default=4, help='Quantity of tasks, default is 4.')
     @click.option('--comment', default=3, help='Quantity of comments, default is 3.')
-    def forge(project, user, milestone, category, task, comment):
+    @click.option('--remove', default=1, help='Whether remove original upload files or not, default is 1')
+    def forge(project, user, milestone, category, task, comment, remove):
         """Generate fake data."""
         from TaskBoard.fakes import fake_admin_user, fake_Projects, fake_Users, fake_milestones, fake_categories, \
             fake_tasks, fake_comments
+        click.echo('Drop original databases...')
         db.drop_all()
+        click.echo('Create new databases...')
         db.create_all()
-
+        if remove:
+            click.echo('Deleting files in uploads...')
+            upload_path = app.config['ATTACHMENT_UPLOAD_PATH']
+            filename_array = [f for f in os.listdir(upload_path) if os.path.isfile(os.path.join(upload_path, f))]
+            for filename in filename_array:
+                os.remove(os.path.join(upload_path, filename))
         click.echo('Generating %d projects...' % project)
         fake_Projects(project)
 
