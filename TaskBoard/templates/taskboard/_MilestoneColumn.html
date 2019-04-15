@@ -8,12 +8,22 @@
     {% for milestone in project.milestones %}
         <div class="layui-colla-item">
             <h2 class="layui-colla-title text-capitalize"
-                style="font-weight: bold;font-size: 16px">{{ milestone.title }}</h2>
+                style="font-weight: bold;font-size: 16px">{{ milestone.title }}<span
+                    class="layui-badge layui-bg-black"
+                    style="float: right;margin-top: 10px;margin-right: 5px;">{{ milestone.tasks|length }}</span></h2>
             <div id="layui_colla_content{{ milestone.id }}" class="layui-colla-content" style="padding:0px;">
                 {% if milestone.tasks %}
                     {% for task in milestone.tasks %}
                         <div id="task_card{{ task.id }}" class="layui-card" style="background: {{ task.color }};">
-                            <div class="layui-card-header" style="font-weight: bold;">{{ task.title }}</div>
+                            <div class="layui-card-header" style="font-weight: bold;">{{ task.title }}
+                                {% if task.files %}
+                                    <span class="pull-right" style="margin-left:10px"><i class="fa fa-paperclip"></i></span>
+                                {% endif %}
+                                {% if task.comments %}
+                                    <span class="pull-right" style="margin-left:10px"><i class="fa fa-comments-o"></i></span>
+                                {% endif %}
+                                <span class="pull-right">Points:{{ task.points }}</span>
+                            </div>
                             <div class="layui-card-body">{{ task.description }}</div>
                         </div>
                         <hr class="layui-bg-orange">
@@ -21,7 +31,12 @@
                 {% else %}
                     <div class="text-center"
                          style="font-size: 15px;font-weight: bold;margin-top: 20px;margin-bottom: 20px;">No task in this
-                        milestone, please add one !
+                        milestone, please
+                        <button id="add_project_when_none" class="btn btn-default"
+                                onclick="before_task_modal_show('{{ milestone.id }}' )">
+                            <span class="glyphicon glyphicon-plus"></span> Add
+                        </button>
+                        one !
                     </div>
                 {% endif %}
             </div>
