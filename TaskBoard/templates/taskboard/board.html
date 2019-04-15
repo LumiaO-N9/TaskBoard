@@ -122,6 +122,7 @@
     </div>
 {% endblock %}
 {% block scripts %}
+    {{ super() }}
     <script type="text/javascript" src="{{ url_for('static', filename='js/jstree.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/layui.js') }}"></script>
     <script type="text/javascript">
@@ -797,6 +798,8 @@
 
 
 
+
+
                             {#LoadTaskById(task_id);#}
                             }, 300);*/
                         }
@@ -1095,8 +1098,8 @@
             let layer_title = node_type.charAt(0).toUpperCase() + node_type.slice(1);
             let layer_content = '<div class="text-center" style="margin-top:20px"><p>Are you sure to delete ' + node_type + ' <span class="label label-danger">' +
                 name + '</span> ?</p></div>';
-            if(node_type ==='project')
-                layer_content+='<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: Everything of this project will be removed !</p></div>';
+            if (node_type === 'project')
+                layer_content += '<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: Everything of this project will be removed !</p></div>';
             if (node_type === 'milestone')
                 layer_content = layer_content + '<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: All task in this milestone will also be removed !</p></div>';
             if (node_type === 'task')
