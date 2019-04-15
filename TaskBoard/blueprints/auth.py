@@ -18,9 +18,7 @@ def login():
         username = form.username.data
         password = form.password.data
         remember = form.remember.data
-        print(username, password, remember)
         user = User.query.filter_by(username=username).first()
-        print(user)
         if user:
             if user.validate_password(password):
                 duration = datetime.timedelta(days=7)
