@@ -27,7 +27,7 @@ def fake_admin_user():
         is_admin=True,
         email=fake.email(),
     )
-    user.set_password('TaskBoard')
+    user.set_password('TaskBoard.')
     db.session.add(user)
     db.session.commit()
 
@@ -40,7 +40,7 @@ def fake_Users(count=10):
             access_project=Project.query.get(random.randint(1, Project.query.count())),
             email='10000%d@example.com' % i,
         )
-        user.set_password('TaskBoard')
+        user.set_password('TaskBoard.')
         if user.access_project == user.default_project:
             user.projects.append(user.access_project)
         else:
