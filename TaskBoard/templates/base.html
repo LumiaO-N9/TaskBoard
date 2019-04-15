@@ -199,6 +199,8 @@
 
     function show_project_edit_modal(project_id) {
         let input = $('#project_title_input' + project_id);
+        input.css('border', '1px solid #DBDBDB');
+        input.next().hide();
         let milestone_ul = $('#milestone_ul' + project_id);
         let category_ul = $('#category_ul' + project_id);
         let color_picker = $('#color_picker' + project_id);
