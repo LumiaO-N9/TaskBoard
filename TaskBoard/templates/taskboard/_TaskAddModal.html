@@ -8,7 +8,7 @@
                         data-dismiss="modal"
                         aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title">Add Task</h3>
+                <h3 id="add_or_edit_task" class="modal-title">Add Task</h3>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -34,9 +34,9 @@
                         <select id="task_add_modal_user" class="form-control" name="user_select">
                             {% for user in users %}
                                 {% if user.id == current_user.id %}
-                                    <option value="{{ user.id }}" selected>{{ user.username }}</option>
+                                    <option id="user_select_{{ user.id }}" value="{{ user.id }}" selected>{{ user.username }}</option>
                                 {% else %}
-                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                    <option id="user_select_{{ user.id }}" value="{{ user.id }}">{{ user.username }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -46,9 +46,9 @@
                         <select id="task_add_modal_category" class="form-control" name="category_select">
                             {% for category in categories %}
                                 {% if loop.index == 1 %}
-                                    <option value="{{ category.id }}" selected>{{ category.title }}</option>
+                                    <option id="category_select_{{ category.id }}" value="{{ category.id }}" selected>{{ category.title }}</option>
                                 {% else %}
-                                    <option value="{{ category.id }}">{{ category.title }}</option>
+                                    <option id="category_select_{{ category.id }}"  value="{{ category.id }}">{{ category.title }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -96,7 +96,7 @@
                 <button type="button" class="btn btn-default"
                         data-dismiss="modal">Close
                 </button>
-                <a type="button" class="btn btn-primary" name="delete"
+                <a id="task_submit_button" type="button" class="btn btn-primary" name="delete"
                    onclick="task_modal_save()">Add Task
                 </a>
             </div>
