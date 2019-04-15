@@ -164,3 +164,4 @@ fabric.properties
 将删除 TaskBoard/static/js/jquery.ui.position.js
 将删除 data-dev.db
 将删除 uploads/
+/data-dev.db
