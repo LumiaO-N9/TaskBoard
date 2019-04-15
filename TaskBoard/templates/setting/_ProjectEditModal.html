@@ -14,12 +14,18 @@
                     <div class="form-group col-sm-12">
                         <label>Project Name</label>
                         <span id="old_project_title_span{{ project.id }}" hidden>{{ project.title }}</span>
-                        <input id="project_title_input{{ project.id }}" type="text" name="project_title_input{{ project.id }}"
+{#                        <input id="project_title_input{{ project.id }}" type="text"#}
+{#                               name="project_title_input{{ project.id }}"#}
+{#                               class="form-control" value="{{ project.title }}"#}
+{#                               data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>#}
+{#                        <div id="project_title_input{{ project.id }}-input-error" class="input-error">#}
+{#                            5到16位（字母，数字，下划线，减号），必须以字母开头#}
+{#                        </div>#}
+                        <input id="project_title_input{{ project.id }}" type="text"
+                               name="project_title_input{{ project.id }}"
                                class="form-control" value="{{ project.title }}"
-                               data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
-                        <div id="project_title_input{{ project.id }}-input-error" class="input-error">
-                            5到16位（字母，数字，下划线，减号），必须以字母开头
-                        </div>
+                               data-rule='maxlength:30|minlength:3'>
+                        <div id="project_title_input{{ project.id }}-input-error" class="input-error">至少3位，最多30位</div>
                     </div>
                 </div>
                 <div class="row">
