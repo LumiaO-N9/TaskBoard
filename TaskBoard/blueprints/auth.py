@@ -1,8 +1,8 @@
-from flask import Blueprint, redirect, url_for, flash, render_template
-from flask_login import current_user, login_user, logout_user, login_required
+from flask import Blueprint, redirect, url_for, flash, render_template, request
+from flask_login import current_user, login_user, logout_user
 from TaskBoard.forms import LoginForm
 from TaskBoard.models import User
-from TaskBoard.utils import redirect_back
+from TaskBoard.utils import is_safe_url
 import datetime
 
 auth_bp = Blueprint('auth', __name__)
@@ -23,11 +23,21 @@ def login():
             if user.validate_password(password):
                 duration = datetime.timedelta(days=7)
                 login_user(user, remember, duration=duration)
-                return redirect_back()
-            flash('Invalid username or password.', 'warning')
+                next_path = '/'
+                for target in request.args.get('next'), request.referrer:
+                    if not target:
+                        continue
+                    if is_safe_url(target):
+                        next_path_array = target.split('next=')
+                        if len(next_path_array) > 1:
+                            next_path = next_path_array[1].replace('%2F', '/')
+                return next_path
+            # flash('Invalid username or password.', 'warning')
+            return 'invalid'
         else:
-            flash('No account.', 'danger')
-    return render_template('auth/login.html', form=form)
+            # flash('No account.', 'danger')
+            return 'danger'
+    return render_template('auth/login.html')
 
 
 @auth_bp.route('/logout')

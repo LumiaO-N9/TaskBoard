@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% from 'bootstrap/form.html' import render_form %}
 {% block title %}Login{% endblock %}
 {% block style %}
     <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}" type="text/css">
@@ -7,23 +6,100 @@
 {% block content %}
     <div class="container">
         {% include '_flashMessage.html' %}
-        <form class="form-signin" method="post" action="{{ request.full_path }}">
-            {{ form.csrf_token }}
+        <form id=form_signIn class="form-signIn">
             <h2 class="form-signin-heading">TaskBoard - Log in</h2>
-            <label for="inputEmail" class="sr-only">Email address</label>
-            <input type="text" id="inputEmail" name="username" class="form-control" placeholder="Username"
-                   required autofocus>
+            <label for="inputUsername" class="sr-only">Username</label>
+            <input type="text" id="username" name="username" class="form-control"
+                   placeholder="Username"
+                   data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+            <div id="username-error" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
             <label for="inputPassword" class="sr-only">Password</label>
-            <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password"
-                   required>
+            <input type="password" id="password" name="password" class="form-control"
+                   placeholder="Password"
+                   data-rule='pattern:"^.*(?=.{6,})(?=.*[A-Za-z])(?=.*[!@#$%^&*?\\(\\)\\-_\\.]).*$"'
+                   value=""
+                   oncopy="return false" onpaste="return false"
+                   oncontextmenu="return false">
+            <div class="input-error">最少6位，包括至少1个字母，1个特殊字符</div>
             <div class="checkbox">
                 <label>
                     <input type="checkbox" name="remember" value="y"> Remember me
                 </label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            <a class="btn btn-lg btn-primary btn-block" onclick="Login()">Sign in</a>
         </form>
 
     </div> <!-- /container -->
 
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript">
+        function layer_error_msg(ele, msg) {
+            layer.msg(msg, {
+                skin: 'layer-error-skin',
+                time: 2000,
+                offset: '200px',
+                end: function () {
+                    ele.css('border', '1px solid #ff0000');
+                    ele.focus().select();
+                    ele.on('change', function () {
+                        ele.css('border', '1px solid #dbdbdb');
+                    });
+                }
+            });
+        }
+
+        function Login() {
+            let form = $("#form_signIn");
+            let $inputs = form.find('[data-rule]');
+            let inputs_array = [];
+            $inputs.each(function () {
+                inputs_array.push(new Input($(this)));
+            });
+            console.log(inputs_array);
+            $inputs.trigger('change');
+            console.log('xxx');
+            for (let i = 0; i < inputs_array.length; i++) {
+                let item = inputs_array[i];
+                console.log(item.get_name());
+                let r = item.validator.is_valid();
+                if (!r) {
+                    let ele = $('#' + item.get_name());
+                    let msg = 'Please check out your input carefully !';
+                    layer_error_msg(ele, msg);
+                    return;
+                }
+            }
+            $.ajax({
+                url: "{{ url_for('auth.login') }}",
+                type: 'POST',
+                data: form.serialize(),
+                success: function (status) {
+                    if (status !== 'fail') {
+                        if (status === 'invalid') {
+                            let password_input = $('#password');
+                            let msg = 'Invalid username or password, please re-entry !';
+                            layer_error_msg(password_input, msg);
+                            return;
+                        }
+                        if (status === 'danger') {
+                            let username_input = $('#username');
+                            let msg = 'The username is not register, please re-entry !';
+                            layer_error_msg(username_input, msg);
+                            return;
+                        }
+                        if (status.indexOf('/') !== -1) {
+                            let host_url = '{{ request.host_url }}';
+                            window.location.replace(host_url + status.slice(1));
+                        }
+                    } else {
+                        layer.msg('Login failed！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+    </script>
 {% endblock %}
