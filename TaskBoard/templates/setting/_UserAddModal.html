@@ -43,6 +43,19 @@
                         <div id="email-input-error" class="input-error">邮箱格式有误</div>
                     </div>
                     <div class="form-group">
+                        <label>Tag</label>
+                        <select name="tag" form="UserEditModalForm"
+                                class="form-control">
+                            {% for tag in tags %}
+                                {% if loop.index == 1 %}
+                                    <option value="{{ tag.id }}" selected>{{ tag.tag }}</option>
+                                {% else %}
+                                    <option value="{{ tag.id }}">{{ tag.tag }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Select Default Board</label>
                         <select form="UserAddModalForm" class="form-control" name="default_project">
                             <option value="None" selected>None</option>

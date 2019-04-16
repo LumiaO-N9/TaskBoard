@@ -19,7 +19,8 @@
                                placeholder="Username"
                                value="{{ user.username }}"
                                data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
-                        <div id="username-input-error{{ user.id }}" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
+                        <div id="username-input-error{{ user.id }}" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Change Password</label>
@@ -46,6 +47,17 @@
                                value="{{ user.email }}"
                                data-rule='pattern:"^([A-Za-z0-9_\\-\\.])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,4})$"'>
                         <div id="email-input-error{{ user.id }}" class="input-error">邮箱格式有误</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tag</label>
+                        <select name="tag" form="UserEditModalForm{{ user.id }}"
+                                class="form-control">
+                            {% for tag in tags %}
+                                {% if tag.id != user.tag_id %}
+                                    <option value="{{ tag.id }}">{{ tag.tag }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Select Default Board</label>

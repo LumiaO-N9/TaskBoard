@@ -442,7 +442,7 @@
                 password2.trigger('blur');
             });
             password2.on('blur', function () {
-                if (password1.val() === password2.val()) {
+                if (password1.val() === '' && password2 === '' || password1.val() === password2.val()) {
                     error.hide();
                 } else {
                     error.show();
@@ -474,20 +474,19 @@
 
         function user_modal_save(user_id) {
             let form = $("#UserEditModalForm" + user_id);
+            let password1_input = $('#user_password1_input' + user_id);
+            let password2_input = $('#user_password2_input' + user_id);
+            if (user_id !== '' && password1_input.val() === '' && password2_input.val() === '')
+                password1_input.removeAttr('data-rule');
             let $inputs = form.find('[data-rule]');
             let inputs_array = [];
             $inputs.each(function () {
                 inputs_array.push(new Input($(this)));
             });
             $inputs.trigger('change');
-            let password1_input = $('#user_password1_input' + user_id);
-            let password2_input = $('#user_password2_input' + user_id);
             password2_input.trigger('blur');
             for (let i = 0; i < inputs_array.length; i++) {
                 let item = inputs_array[i];
-                if (user_id !== '' && item.get_name() == 'password1' && password1_input.val() === '' && password2_input.val() === '') {
-                    continue;
-                }
                 let r = item.validator.is_valid();
                 if (!r) {
                     layer.msg('Please check out your input carefully !');

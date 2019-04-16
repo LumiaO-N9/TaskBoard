@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request
-from TaskBoard.models import Project, User, Milestone, Category
+from TaskBoard.models import Project, User, Milestone, Category, Tag
 from TaskBoard.extensions import db
 from flask_login import login_required, current_user
 
@@ -16,7 +16,8 @@ def login_project():
 def index():
     projects = Project.query.order_by(Project.title).all()
     users = User.query.order_by(User.is_admin.desc()).all()
-    return render_template('setting/settings.html', projects=projects, users=users)
+    tags = Tag.query.all()
+    return render_template('setting/settings.html', projects=projects, users=users, tags=tags)
 
 
 @setting_bp.route('/change-default-project', methods=['POST'])
@@ -133,6 +134,7 @@ def save_user_edit_modal():
     username = request.form.get('username', None)
     password = request.form.get('password1', None)
     email = request.form.get('email', None)
+    tag_id = request.form.get('tag', None)
     default_project_id = request.form.get('default_project', None)
     access_project_id = request.form.get('access_project', None)
     is_admin = request.form.get('is_admin', False)
@@ -155,6 +157,8 @@ def save_user_edit_modal():
             user.set_password(password)
         if email:
             user.email = email
+        if tag_id:
+            user.tag_id = tag_id
         if default_project_id:
             project = Project.query.get(default_project_id)
             user.default_project = project
