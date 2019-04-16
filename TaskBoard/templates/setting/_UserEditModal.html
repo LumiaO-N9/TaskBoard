@@ -52,9 +52,14 @@
                         <label>Tag</label>
                         <select name="tag" form="UserEditModalForm{{ user.id }}"
                                 class="form-control">
+                            {% if user.is_admin %}
+                                <option value="-2">None</option>
+                            {% endif %}
                             {% for tag in tags %}
                                 {% if tag.id != user.tag_id %}
                                     <option value="{{ tag.id }}">{{ tag.tag }}</option>
+                                {% else %}
+                                    <option value="{{ tag.id }}" selected>{{ tag.tag }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>

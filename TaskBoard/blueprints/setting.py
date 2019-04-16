@@ -158,10 +158,16 @@ def save_user_edit_modal():
         if email:
             user.email = email
         if tag_id:
-            user.tag_id = tag_id
+            if tag_id == 'None':
+                user.tag_id = None
+            else:
+                user.tag_id = tag_id
         if default_project_id:
-            project = Project.query.get(default_project_id)
-            user.default_project = project
+            if default_project_id == 'None':
+                user.default_project_id = None
+            else:
+                project = Project.query.get(default_project_id)
+                user.default_project = project
         if access_project_id:
             if access_project_id == "None":
                 user.access_project = None
@@ -218,6 +224,42 @@ def ajax_load_user_table():
     projects = Project.query.order_by(Project.title).all()
     users = User.query.order_by(User.is_admin.desc()).all()
     return render_template('setting/_UsersTable.html', projects=projects, users=users)
+
+
+@setting_bp.route('/add-tag', methods=['POST'])
+def add_tag():
+    tag = request.form.get('tag')
+    if tag == 'None':
+        return 'fail'
+    try:
+        if Tag.query.filter_by(tag=tag).first():
+            return 'same'
+        new_tag = Tag(tag=tag)
+        db.session.add(new_tag)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return 'fail'
+    return 'ok'
+
+
+@setting_bp.route('/edit-tag', methods=['POST'])
+def edit_tag():
+    tag_id = request.form.get('tag_id')
+    tag_tag = request.form.get('tag')
+    if tag_tag == 'None':
+        return 'fail'
+    try:
+        same_tag = Tag.query.filter_by(tag=tag_tag).first()
+        if same_tag and same_tag.id != tag_id:
+            return 'same'
+        tag = Tag.query.get(tag_id)
+        tag.tag = tag_tag
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return 'fail'
+    return 'ok'
 
 
 @setting_bp.route('/save-project-edit-modal', methods=["POST"])

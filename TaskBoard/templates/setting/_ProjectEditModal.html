@@ -14,13 +14,13 @@
                     <div class="form-group col-sm-12">
                         <label>Project Name</label>
                         <span id="old_project_title_span{{ project.id }}" hidden>{{ project.title }}</span>
-{#                        <input id="project_title_input{{ project.id }}" type="text"#}
-{#                               name="project_title_input{{ project.id }}"#}
-{#                               class="form-control" value="{{ project.title }}"#}
-{#                               data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>#}
-{#                        <div id="project_title_input{{ project.id }}-input-error" class="input-error">#}
-{#                            5到16位（字母，数字，下划线，减号），必须以字母开头#}
-{#                        </div>#}
+                        {#                        <input id="project_title_input{{ project.id }}" type="text"#}
+                        {#                               name="project_title_input{{ project.id }}"#}
+                        {#                               class="form-control" value="{{ project.title }}"#}
+                        {#                               data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>#}
+                        {#                        <div id="project_title_input{{ project.id }}-input-error" class="input-error">#}
+                        {#                            5到16位（字母，数字，下划线，减号），必须以字母开头#}
+                        {#                        </div>#}
                         <input id="project_title_input{{ project.id }}" type="text"
                                name="project_title_input{{ project.id }}"
                                class="form-control" value="{{ project.title }}"
@@ -69,20 +69,31 @@
                     </div>
                 </div>
                 <div class="row">
-
                     <div class="form-group col-sm-12">
-                        <label>Select Users</label>
-                        <div id="select_users{{ project.id }}">
+                        <label for="select_users{{ project.id }}" class="col-sm-6 form-inline"
+                               style="padding-left: 0px;">Select Users</label>
+                        <span class="form-group form-inline">
+                            <label for="filter_by_tag{{ project.id }}" style="font-size: 10px;font-weight: bold;">Filter By Tag:</label>
+                                    <select class="form-control" id="filter_by_tag{{ project.id }}">
+                                        <option value="-1">All</option>
+                                        {% for tag in tags %}
+                                            <option value="{{ tag.id }}">{{ tag.tag }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </span>
+                        <div id="select_users{{ project.id }}" style="margin-top: 20px;">
                             {% for user in users %}
                                 {% if user in project.users %}
-                                    <label class="half-width">
-                                        <input name="project_user" type="checkbox" id="inlineCheckbox{{ user.id }}"
+                                    <label class="one-third" data-tag_id="{{ user.tag_id }}">
+                                        <input name="project_user" type="checkbox"
+                                               id="inlineCheckbox{{ user.id }}"
                                                value="{{ user.id }}"
                                                checked> {{ user.username }}
                                     </label>
                                 {% else %}
-                                    <label class="half-width">
-                                        <input name="normal_user" type="checkbox" id="inlineCheckbox{{ user.id }}"
+                                    <label class="one-third" data-tag_id="{{ user.tag_id }}">
+                                        <input name="normal_user" type="checkbox"
+                                               id="inlineCheckbox{{ user.id }}"
                                                value="{{ user.id }}"> {{ user.username }}
                                     </label>
                                 {% endif %}

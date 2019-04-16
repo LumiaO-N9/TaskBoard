@@ -122,6 +122,24 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        {% if current_user.is_admin %}
+                            <div class="col-sm-6">
+                                <div class="header"><h4>Edit Tags</h4></div>
+                                <select class="form-control" id="Tags_Edit" style="display: inline-block;width: 70%">
+                                    <option value="-2">None</option>
+                                    {% for tag in tags %}
+                                        {% if tag.id != current_user.tag_id %}
+                                            <option value="{{ tag.id }}">{{ tag.tag }}</option>
+                                        {% else %}
+                                            <option value="{{ tag.id }}" selected>{{ tag.tag }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <input type="button" class="btn btn-default btn-info" onclick="Edit_Tag()" value="Edit">
+                                <input type="button" class="btn btn-default btn-default" onclick="Add_Tag()"
+                                       value="Add">
+                            </div>
+                        {% endif %}
                         <div class="col-sm-12">
                             <hr>
                         </div>
@@ -281,6 +299,118 @@
                     error.hide();
                 } else {
                     error.show();
+                }
+            });
+        }
+
+        function Edit_Tag() {
+            let select_option = $('#Tags_Edit option:selected');
+            let tag_val = select_option.val();
+            if (tag_val === '-2') {
+                Add_Tag();
+                return;
+            }
+            let tag_name = select_option.text();
+            console.log(tag_name);
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: 'Edit Tag',
+                content: `<div class="text-center" style="margin-top:20px"><label for="tag_edit_input" class="form-group">Tag name:</label><input class="form-control" id="tag_edit_input" value="${tag_name}"></div>`,
+                btn: ['修改', '取消'],
+                anim: 1,
+                offset: '150px',
+                yes: function (index) {
+                    let tag_input = $('#tag_edit_input');
+                    tag_input.change(function () {
+                        tag_input.css('border', '1px solid #dbdbdb');
+                    });
+                    let tag = tag_input.val();
+                    if (tag === '') {
+                        tag_input.css('border', '1px solid #ff0000');
+                        tag_input.focus().select();
+                        layer.msg('Please input a name !');
+                        return;
+                    }
+                    $.ajax({
+                        url: "{{ url_for('setting.edit_tag') }}",
+                        type: 'POST',
+                        data: {
+                            'tag_id': tag_val,
+                            'tag': tag
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('修改成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else if (e === 'same') {
+                                let msg = 'The tag name you input almost existed, please re-entry !';
+                                layer_error_msg(tag_input, msg);
+                                return;
+                            } else {
+                                layer.msg('修改失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+
+        }
+
+        function Add_Tag() {
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: 'Add Tag',
+                content: '<div class="text-center" style="margin-top:20px"><label for="tag_add_input" class="form-group">Tag name:</label><input class="form-control" id="tag_add_input"></div>',
+                btn: ['确定', '取消'],
+                anim: 1,
+                offset: '150px',
+                yes: function (index) {
+                    let tag_input = $('#tag_add_input');
+                    tag_input.change(function () {
+                        tag_input.css('border', '1px solid #dbdbdb');
+                    })
+                    let tag = tag_input.val();
+                    if (tag === '') {
+                        tag_input.css('border', '1px solid #ff0000');
+                        tag_input.focus().select();
+                        layer.msg('Please input a name !');
+                        return;
+                    }
+                    $.ajax({
+                        url: "{{ url_for('setting.add_tag') }}",
+                        type: 'POST',
+                        data: {
+                            'tag': tag
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('添加成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else if (e === 'same') {
+                                let msg = 'The tag name you input almost existed, please re-entry !';
+                                layer_error_msg(tag_input, msg);
+                                return;
+                            } else {
+                                layer.msg('添加失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
                 }
             });
         }
@@ -485,6 +615,11 @@
             });
             $inputs.trigger('change');
             password2_input.trigger('blur');
+            let password2_input_error = password2_input.next('div:visible');
+            if (password2_input_error.length !== 0) {
+                layer.msg('Please check out your input carefully !');
+                return;
+            }
             for (let i = 0; i < inputs_array.length; i++) {
                 let item = inputs_array[i];
                 let r = item.validator.is_valid();

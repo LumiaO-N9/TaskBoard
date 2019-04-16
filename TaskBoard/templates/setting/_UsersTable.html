@@ -4,6 +4,7 @@
         <th>User</th>
         <th>Email</th>
         <th>Admin</th>
+        <th>Tag</th>
         <th>Default Board</th>
         <th>Access Board</th>
         <th>Action</th>
@@ -15,6 +16,7 @@
             <td>{{ user.username }}</td>
             <td>{{ user.email|default('None') }}</td>
             <td>{{ TextToGlyphicon(user.is_admin) }}</td>
+            <td>{{ user.tag.tag|default('None') }}</td>
             <td>{{ user.default_project.title|default('None') }}</td>
             <td>{% if user.is_admin %}all{% else %}{{ user.access_project.title|default('None') }}{% endif %}</td>
             <td>

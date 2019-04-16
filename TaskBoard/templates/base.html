@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css">
     <style type="text/css">
+        .one-third {
+            width: 33%;
+            float: left;
+            font-weight: normal;
+            padding-right: 10px;
+            margin-right: 0px;
+        }
+
         .half-width {
             width: 50%;
             float: left;
@@ -262,9 +270,32 @@
             }
             select_users.find('input[name=normal_user]').prop('checked', false);
             select_users.find('input[name=project_user]').prop('checked', true);
+            $('#filter_by_tag' + project_id).val('-1');
+            $('#select_users' + project_id).children('label[data-tag_id]').show();
             milestone_ul.children('li').show();
             category_ul.children('li').show();
+            $('#filter_by_tag' + project_id).change(function () {
+                TagFilter(project_id);
+            });
             $('#EditProjectModal' + project_id).attr('data-backdrop', 'static').modal('show');
+        }
+
+        function TagFilter(project_id) {
+            let tag_val = $('#filter_by_tag' + project_id + ' option:selected').val();
+            let user_checkboxes = $('#select_users' + project_id).children('label[data-tag_id]');
+            if (tag_val === '-1') {
+                user_checkboxes.show();
+                return;
+            } else {
+                user_checkboxes.hide();
+                user_checkboxes.each(function () {
+                    let ele = $(this);
+                    let ele_val = ele.attr('data-tag_id');
+                    if (ele_val === tag_val)
+                        ele.show();
+                });
+            }
+            console.log(tag_val);
         }
 
         function project_modal_save(project_id) {
