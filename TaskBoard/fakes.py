@@ -1,4 +1,4 @@
-from TaskBoard.models import User, Project, Milestone, Task, Category, Comment
+from TaskBoard.models import User, Project, Milestone, Task, Category, Comment, Tag
 from TaskBoard.extensions import db
 from faker import Faker
 from random import choice
@@ -32,6 +32,13 @@ def fake_admin_user():
     db.session.commit()
 
 
+def fake_Tags(count=8):
+    for i in range(count):
+        tag = Tag(tag=fake.word().title())
+        db.session.add(tag)
+    db.session.commit()
+
+
 def fake_Users(count=10):
     for i in range(count):
         user = User(
@@ -40,6 +47,7 @@ def fake_Users(count=10):
             access_project=Project.query.get(random.randint(1, Project.query.count())),
             email='10000%d@example.com' % i,
         )
+        user.tag_id = random.randint(1, Tag.query.count())
         user.set_password('TaskBoard.')
         if user.access_project == user.default_project:
             user.projects.append(user.access_project)

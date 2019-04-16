@@ -21,18 +21,26 @@ class User(db.Model, UserMixin, TimestampMixin):
     last_login_time = db.Column(db.DateTime, default=datetime.utcnow)
     default_project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     access_project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'))
     default_project = db.relationship('Project', back_populates='default_users', foreign_keys=[default_project_id])
     access_project = db.relationship('Project', back_populates='access_users', foreign_keys=[access_project_id])
     projects = db.relationship('Project', secondary=association_table, back_populates='users')
     tasks = db.relationship('Task', back_populates='user')
     comments = db.relationship('Comment', back_populates='user')
     files = db.relationship('File', back_populates='user')
+    tag = db.relationship('Tag', back_populates='users')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def validate_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+class Tag(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tag = db.Column(db.String(20))
+    users = db.relationship('User', back_populates='tag')
 
 
 class Project(db.Model, TimestampMixin):
