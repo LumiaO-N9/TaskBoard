@@ -14,9 +14,7 @@
                     Points:{{ task.points }}</span>
             </h4>
             <div class="col-sm-12"><p id="task_description">{{ task.description }}</p></div>
-            <div class="col-sm-12"
-                 style="font-weight: bold;margin-top: 20px;text-shadow: 0px 0px 3px rgba(255, 81, 28, 1);"
-                 id="task_due_date">
+            <div class="col-sm-12 due-date" style="margin-top: 20px;" id="task_due_date">
                 Due:{{ task.due_date }}</div>
             {% if current_user.is_admin or current_user.id == task.user_id %}
                 <div class="task_action" style="margin-top: 100px;">
@@ -39,20 +37,22 @@
             <div class="col-sm-4">
                 <div class="header">
                     <h4 id="task_user_h4" data-user_id="{{ task.user.id }}" style="font-weight: bold;">Assigned To:
-                        <span style="font-weight: normal;"> {{ task.user.username }}</span>
+                        <span style="font-weight: normal;"> {{ task.user.username | default('None') }}</span>
                     </h4>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 id="task_category_h4" data-category_id="{{ task.category_id }}" style="font-weight: bold;">Category :
+                    <h4 id="task_category_h4" data-category_id="{{ task.category_id }}" style="font-weight: bold;">
+                        Category :
                         <span style="font-weight: normal;"> {{ task.category.title }}</span>
                     </h4>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 id="task_milestone_h4" data-milestone_id="{{ task.milestone_id }}" style="font-weight: bold;">Milestone :
+                    <h4 id="task_milestone_h4" data-milestone_id="{{ task.milestone_id }}" style="font-weight: bold;">
+                        Milestone :
                         <span style="font-weight: normal;"> {{ task.milestone.title }}</span>
                     </h4>
                 </div>

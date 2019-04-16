@@ -17,12 +17,16 @@
                         <div id="task_card{{ task.id }}" class="layui-card" style="background: {{ task.color }};">
                             <div class="layui-card-header" style="font-weight: bold;">{{ task.title }}
                                 {% if task.files %}
-                                    <span class="pull-right" style="margin-left:10px"><i class="fa fa-paperclip"></i></span>
+                                    <span class="pull-right" style="margin-left:10px"><i
+                                            class="fa fa-paperclip"></i></span>
                                 {% endif %}
                                 {% if task.comments %}
-                                    <span class="pull-right" style="margin-left:10px"><i class="fa fa-comments-o"></i></span>
+                                    <span class="pull-right" style="margin-left:10px"><i
+                                            class="fa fa-comments-o"></i></span>
                                 {% endif %}
-                                <span class="pull-right">Points:{{ task.points }}</span>
+                                <span class="pull-right" style="margin-left: 10px;">Points:{{ task.points }}</span>
+                                <span class="due-date pull-right" name="task_due_date_in_milestone">
+                                    Due:{{ task.due_date }}</span>
                             </div>
                             <div class="layui-card-body">{{ task.description }}</div>
                         </div>
