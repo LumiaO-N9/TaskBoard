@@ -800,6 +800,32 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             {#LoadTaskById(task_id);#}
                             }, 300);*/
                         }
@@ -999,15 +1025,28 @@
                         else if (status === 'add')
                             layer.msg('添加成功！');
                         let tree = $('#tree-panel-body').jstree(true);
-                        let store_milestone_id = $('#store_milestone_id_when_add_task').text();
-                        let node = tree.get_node('#milestone_node' + store_milestone_id);
-                        tree.deselect_node(node);
-                        tree.refresh_node(node);
+
+                        let select_node = tree.get_selected()[0];
+                        tree.deselect_node(select_node);
+                        {#let store_milestone_id = $('#store_milestone_id_when_add_task').text();#}
+                        {#let milestone_node = tree.get_node('#milestone_node' + store_milestone_id);#}
+                        tree.refresh();
+                        let is_show_milestone_array = [];
+                        $('.layui-show').each(function () {
+                            is_show_milestone_array.push($(this)[0].id.split('layui_colla_content')[1]);
+                        });
                         setTimeout(function () {
                             {#parent.location.reload();#}
-                            let node = tree.get_node('#task_node' + id);
-                            tree.select_node(node);
-                        }, 1000);
+                            let task_node = tree.get_node('#task_node' + id);
+                            {#tree.open_node(milestone_node);#}
+                            tree.select_node(task_node);
+                            setTimeout(function () {
+                                for (let i = 0; i < is_show_milestone_array.length; i++) {
+                                    $('#layui_colla_content' + is_show_milestone_array[i]).addClass('layui-show');
+                                }
+                            }, 100);
+                            {#tree.select_node(node);#}
+                        }, 700);
                     } else {
                         layer.msg('修改失败，请稍后再试！')
                     }
@@ -1133,7 +1172,9 @@
                                 }
                                 layer.msg(node_type + " : " + name + ' 删除成功！');
                                 inst.refresh();
-                                AjaxReloadPageAfterContextMenu(node_type, id, 'delete');
+                                setTimeout(function () {
+                                    AjaxReloadPageAfterContextMenu(node_type, id, 'delete');
+                                }, 500);
                             } else {
                                 layer.msg('删除失败！');
                                 return;
