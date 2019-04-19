@@ -111,7 +111,7 @@ def register_commands(app):
         fake_admin_user()
 
         click.echo('Generating %d tags...' % tag)
-        fake_Tags()
+        fake_Tags(tag)
 
         click.echo('Generating %d users...' % user)
         fake_Users(user)
