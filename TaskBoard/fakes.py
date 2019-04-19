@@ -60,7 +60,8 @@ def fake_Users(count=10):
 
 def fake_milestones(count=5):
     for i in range(Project.query.count()):  # 为每个project创建count-1或者count个Milestone
-        for j in range(random.randint(count - 1, count)):
+        # for j in range(random.randint(count - 1, count)):
+        for j in range(count):  # generate five Milestones for every Project
             milestone = Milestone(
                 title=fake.word().title(),
                 order=j,
@@ -72,7 +73,8 @@ def fake_milestones(count=5):
 
 def fake_categories(count=4):
     for i in range(Project.query.count()):  # 为每个project创建count-2或者count个Category
-        for j in range(random.randint(count - 2, count)):
+        # for j in range(random.randint(count - 2, count)):
+        for j in range(count):  # generate four categories for every project
             category = Category(
                 title=fake.name(),
                 project=Project.query.get(i + 1),
@@ -84,7 +86,8 @@ def fake_categories(count=4):
 
 def fake_tasks(count=4):
     for i in range(Milestone.query.count()):  # 为每个Milestone创建0~count个task
-        for j in range(random.randint(0, count)):
+        # for j in range(random.randint(0, count)):
+        for j in range(count):  # generate four tasks for every milestone
             task = Task(
                 title=fake.name(),
                 description=fake.text(166),
@@ -101,7 +104,8 @@ def fake_tasks(count=4):
 
 def fake_comments(count=3):
     for i in range(Task.query.count()):  # 为每个Task创建0~count个comment
-        for j in range(random.randint(0, count)):
+        # for j in range(random.randint(0, count)):
+        for j in range(count):  # generate three comments for every task
             comment = Comment(
                 text=fake.text(100),
                 task_id=Task.query.get(i + 1).id

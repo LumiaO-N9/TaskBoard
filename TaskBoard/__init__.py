@@ -85,11 +85,11 @@ def register_commands(app):
     @click.option('--project', default=3, help='Quantity of projects, default is 3.')
     @click.option('--tag', default=8, help='Quantity of tags, default is 8.')
     @click.option('--user', default=10, help='Quantity of users, default is 10.')
-    @click.option('--milestone', default=5, help='Quantity of milestones, default is 5.')
-    @click.option('--category', default=4, help='Quantity of categories, default is 4.')
-    @click.option('--task', default=4, help='Quantity of tasks, default is 4.')
-    @click.option('--comment', default=3, help='Quantity of comments, default is 3.')
-    @click.option('--remove', default=1, help='Whether remove original upload files or not, default is 1')
+    @click.option('--milestone', default=5, help='Quantity of milestones, default is 5 (every project).')
+    @click.option('--category', default=4, help='Quantity of categories, default is 4 (every project).')
+    @click.option('--task', default=4, help='Quantity of tasks, default is 4 (every milestone).')
+    @click.option('--comment', default=3, help='Quantity of comments, default is 3 (every task).')
+    @click.option('--remove', default=1, help='Whether remove original upload files or not, default is 1 (True).')
     def forge(project, tag, user, milestone, category, task, comment, remove):
         """Generate fake data."""
         from TaskBoard.fakes import fake_admin_user, fake_Projects, fake_Tags, fake_Users, fake_milestones, \
