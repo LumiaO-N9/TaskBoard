@@ -116,16 +116,16 @@ def register_commands(app):
         click.echo('Generating %d users...' % user)
         fake_Users(user)
 
-        click.echo('Generating %d milestones...' % milestone)
+        click.echo('Generating %d milestones for every project ...' % milestone)
         fake_milestones(milestone)
 
-        click.echo('Generating %d categories...' % category)
+        click.echo('Generating %d categories for every project ...' % category)
         fake_categories(category)
 
-        click.echo('Generating %d tasks...' % task)
+        click.echo('Generating %d tasks for every milestone ...' % task)
         fake_tasks(task)
 
-        click.echo('Generating %d comments...' % comment)
+        click.echo('Generating %d comments for every task ...' % comment)
         fake_comments(comment)
 
         click.echo('Done.')
