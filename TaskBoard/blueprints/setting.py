@@ -23,7 +23,7 @@ def index():
 @setting_bp.route('/change-default-project', methods=['POST'])
 def change_default_project():
     project_id = request.form['project_id']
-    user_id = request.form['user_id']
+    user_id = current_user.id
     try:
         user = User.query.get(user_id)
         project = Project.query.get(project_id)

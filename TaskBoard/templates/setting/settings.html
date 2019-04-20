@@ -242,13 +242,11 @@
             $('#default_project_change').change(function () {
                 let project_id = $(this).val();
                 let project_title = $('#default_project_change option:selected').text();
-                let user_id = "{{ current_user.id }}"
                 $.ajax({
                     url: "{{ url_for('setting.change_default_project') }}",
                     type: 'POST',
                     data: {
                         'project_id': project_id,
-                        'user_id': user_id
                     },
                     success: function (e) {
                         if (e === 'ok') {
