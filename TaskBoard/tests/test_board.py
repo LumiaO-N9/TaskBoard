@@ -316,3 +316,6 @@ class BoardTestCase(BaseTestCase):
             response_data = self.post_data(url, data=dict(comment_id=comment_id))
             self.assertIn('ok', response_data)
             self.assertEqual(None, Comment.query.get(comment_id))
+
+    def test_tree_json(self):
+        pass
