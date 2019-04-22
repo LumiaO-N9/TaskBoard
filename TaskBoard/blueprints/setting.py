@@ -78,7 +78,9 @@ def change_user_username_or_email():
 
 @setting_bp.route('/chang-project-status', methods=['POST'])
 def change_project_status():
-    project_id = request.form['project_id']
+    project_id = request.form.get('project_id', None)
+    if not project_id:
+        return 'None'
     try:
         project = Project.query.get(project_id)
         status = project.status
@@ -104,7 +106,9 @@ def sort_by_date():
 
 @setting_bp.route('/del-user-by-id', methods=['POST'])
 def del_user_by_id():
-    user_id = request.form['user_id']
+    user_id = request.form.get('user_id', None)
+    if not user_id:
+        return 'None'
     try:
         user = User.query.get(user_id)
         db.session.delete(user)
@@ -117,7 +121,9 @@ def del_user_by_id():
 
 @setting_bp.route('/del-project-by-id', methods=['POST'])
 def del_project_by_id():
-    project_id = request.form['project_id']
+    project_id = request.form.get('project_id', None)
+    if not project_id:
+        return 'None'
     try:
         project = Project.query.get(project_id)
         db.session.delete(project)
@@ -142,6 +148,8 @@ def save_user_edit_modal():
     try:
         if user_id:
             user = User.query.get(user_id)
+            if not user:
+                return 'None'
         else:
             user = User()
             status = 'add'
@@ -228,9 +236,9 @@ def ajax_load_user_table():
 
 @setting_bp.route('/add-tag', methods=['POST'])
 def add_tag():
-    tag = request.form.get('tag')
-    if tag == 'None':
-        return 'fail'
+    tag = request.form.get('tag', None)
+    if not tag:
+        return 'None'
     try:
         if Tag.query.filter_by(tag=tag).first():
             return 'same'
@@ -245,10 +253,10 @@ def add_tag():
 
 @setting_bp.route('/edit-tag', methods=['POST'])
 def edit_tag():
-    tag_id = request.form.get('tag_id')
-    tag_tag = request.form.get('tag')
-    if tag_tag == 'None':
-        return 'fail'
+    tag_id = request.form.get('tag_id', None)
+    tag_tag = request.form.get('tag', None)
+    if not tag_tag or not tag_id:
+        return 'None'
     try:
         same_tag = Tag.query.filter_by(tag=tag_tag).first()
         if same_tag and same_tag.id != tag_id:
