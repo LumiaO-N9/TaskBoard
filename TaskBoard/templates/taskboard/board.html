@@ -330,7 +330,11 @@
                                 },
                             });
                         } else if (mode === 'copy_node') {
-                            inst.create_node(obj, node_buffer.node[0].text, "last", function (new_node) {
+                            let icon = 'fa fa-maxcdn';
+                            if (node_type === 'task')
+                                icon = 'fa fa-tumblr';
+                            let node_json = {'text': node_buffer.node[0].text, 'icon': icon};
+                            inst.create_node(obj, node_json, "last", function (new_node) {
                                 try {
                                     {#check_if_same_name_exist(new_node.parent);#}
                                     {#inst.edit(new_node, null,);#}
@@ -793,46 +797,6 @@
                             let node = tree.get_node('#task_node' + task_id);
                             tree.deselect_node(tree.get_selected()[0]);
                             tree.select_node(node);
-                            /*setTimeout(() => {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            {#LoadTaskById(task_id);#}
-                            }, 300);*/
                         }
                     });
                 });
