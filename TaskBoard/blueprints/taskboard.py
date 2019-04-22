@@ -99,13 +99,13 @@ def save_task_edit_modal():
 
 @taskboard_bp.route('/add-milestone-node', methods=['POST'])
 def add_milestone_node():
-    new_name = request.form.get('new_name').title()
-    parent_id = request.form.get('parent_id')
+    new_name = request.form.get('new_name', None)
+    parent_id = request.form.get('parent_id', None)
     try:
         if parent_id == 'None':
             return 'fail'
         else:
-            new_milestone = Milestone(title=new_name, project_id=parent_id)
+            new_milestone = Milestone(title=new_name.title(), project_id=parent_id)
             db.session.add(new_milestone)
         db.session.commit()
     except Exception as e:
@@ -121,7 +121,7 @@ def rename_node():
     new_name = request.form.get('new_name').title()
     try:
         if node_type == 'None':
-            return 'fail'
+            return 'None'
         elif node_type == 'task':
             task = Task.query.get(node_id)
             task.title = new_name
@@ -146,7 +146,7 @@ def copy_node():
     target_id = request.form.get('target_id')
     try:
         if node_type == 'None':
-            return 'fail'
+            return 'None'
         elif node_type == 'task':
             task = Task.query.get(node_id)
             task.title = new_name
@@ -173,7 +173,7 @@ def move_node():
     target_id = request.form.get('target_id')
     try:
         if node_type == 'None':
-            return 'fail'
+            return 'None'
         elif node_type == 'task':
             # target_id = target_id_text.split('milestone_node')[1]
             task = Task.query.get(node_id)
@@ -195,7 +195,7 @@ def delete_node():
     node_id = request.form.get('id')
     try:
         if node_type == 'None':
-            return 'fail'
+            return 'None'
         elif node_type == 'task':
             wait_delete_obj = Task.query.get(node_id)
         elif node_type == 'milestone':
@@ -294,6 +294,8 @@ def edit_or_add_comment():
 @taskboard_bp.route('/delete-comment', methods=['POST'])
 def delete_comment_by_id():
     comment_id = request.form.get('comment_id', None)
+    if not comment_id:
+        return 'None'
     try:
         comment = Comment.query.get(comment_id)
         db.session.delete(comment)
