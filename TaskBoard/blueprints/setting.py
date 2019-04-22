@@ -270,6 +270,21 @@ def edit_tag():
     return 'ok'
 
 
+@setting_bp.route('/delete-tag', methods=['POST'])
+def delete_tag():
+    tag_id = request.form.get('tag_id', None)
+    if not tag_id:
+        return 'None'
+    try:
+        tag = Tag.query.get(tag_id)
+        db.session.delete(tag)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return 'fail'
+    return 'ok'
+
+
 @setting_bp.route('/save-project-edit-modal', methods=["POST"])
 def save_project_edit_modal():
     json_data = request.get_json()

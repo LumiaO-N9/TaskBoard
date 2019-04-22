@@ -32,6 +32,10 @@
             display: inline;
         }
 
+        body .demo-class .layui-layer-btn .layui-layer-btn1 {
+            background-color: #f24838;
+        }
+
         body {
             background-color: #eee;
         }
@@ -309,14 +313,13 @@
                 return;
             }
             let tag_name = select_option.text();
-            console.log(tag_name);
             layer.open({
                 type: 1,
-                skin: "layui-layer-rim",
+                skin: "demo-class",
                 area: ['400px', '200px'],
                 title: 'Edit Tag',
                 content: `<div class="text-center" style="margin-top:20px"><label for="tag_edit_input" class="form-group">Tag name:</label><input class="form-control" id="tag_edit_input" value="${tag_name}"></div>`,
-                btn: ['修改', '取消'],
+                btn: ['修改', '删除', '取消'],
                 anim: 1,
                 offset: '150px',
                 yes: function (index) {
@@ -356,6 +359,27 @@
                     });
                 },
                 btn2: function (index) {
+                    $.ajax({
+                        url: "{{ url_for('setting.delete_tag') }}",
+                        type: 'POST',
+                        data: {
+                            'tag_id': tag_val,
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('删除成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else {
+                                layer.msg('删除失败！')
+                            }
+                        },
+                    });
+                    return;
+                },
+                btn3: function (index) {
                     layer.close(index);
                 }
             });
