@@ -313,7 +313,7 @@ def save_project_edit_modal():
             if user.access_project in user.projects:
                 user.projects.remove(user.access_project)
             user.access_project = None
-            if user.default_project.id == project.id:
+            if user.default_project and user.default_project.id == project.id:
                 user.default_project = None
         project.users.clear()
         for i in wait_add_users_id_array:
@@ -353,7 +353,7 @@ def save_project_edit_modal():
             title = exist_milestones_id_title[i]
             milestone = Milestone.query.filter_by(title=title).first()
             if milestone:
-                milestone.order = str(order)
+                milestone.order = order
                 order = order + 1
         db.session.commit()
     except Exception as e:
