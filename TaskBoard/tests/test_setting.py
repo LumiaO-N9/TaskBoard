@@ -43,9 +43,9 @@ class SettingTestCase(BaseTestCase):
         project = Project.query.get(1)
         project_id = project.id
         with self.client:
-            response = self.client.post(url_for('setting.change_default_project'), data=dict(project_id=project_id))
-            data = response.get_data(as_text=True)
-            self.assertIn('ok', data)
+            url = url_for('setting.change_default_project')
+            response_data = self.post_data(url, data=dict(project_id=project_id))
+            self.assertIn('ok', response_data)
             user_id = current_user.id
             user = User.query.get(user_id)
             self.assertEqual(user.default_project_id, project_id)
