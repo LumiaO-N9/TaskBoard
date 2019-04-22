@@ -327,6 +327,8 @@ def save_project_edit_modal():
             if category in project.categories:
                 if category.title != value['title']:
                     category.title = value['title']
+                if category.color != value['color']:
+                    category.color = value['color']
             else:
                 new_category = Category(
                     title=value['title'],
