@@ -50,7 +50,7 @@ def render_milestone_column():
 @taskboard_bp.route('/render-task-column', methods=['POST'])
 def render_task_column():
     task_id = request.form.get('task_id', None)
-    if len(task_id) != 0:
+    if task_id:
         try:
             task = Task.query.get(task_id)
             return render_template('taskboard/_TaskColumn.html', task=task)
