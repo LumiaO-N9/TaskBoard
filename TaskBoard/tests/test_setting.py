@@ -10,7 +10,7 @@ from flask import url_for
 from flask_login import current_user
 from TaskBoard.tests.base import BaseTestCase
 from TaskBoard.fakes import *
-import unittest, json
+import unittest
 
 
 class SettingTestCase(BaseTestCase):
@@ -18,11 +18,6 @@ class SettingTestCase(BaseTestCase):
     def setUp(self) -> None:
         super(SettingTestCase, self).setUp()
         self.login()
-        fake_Projects()
-        fake_Tags()
-        fake_Users()
-        fake_milestones()
-        fake_categories()
 
     def post_data(self, url, data):
         response = self.client.post(url, data=data)
@@ -45,6 +40,9 @@ class SettingTestCase(BaseTestCase):
         self.assertIn('Current Projects', data)
 
     def test_change_default_project(self):
+        fake_Projects()
+        fake_Tags()
+        fake_Users()
         project = Project.query.get(1)
         project_id = project.id
         with self.client:
@@ -59,7 +57,6 @@ class SettingTestCase(BaseTestCase):
         current_password = "TaskBoard."
         new_password = "HelloFlask."
         with self.client:
-            self.login()
             url = url_for('setting.change_user_password')
             data = dict(current_password="wrong-current-password", password=new_password)
             response_data = self.post_data(url, data)
@@ -67,12 +64,12 @@ class SettingTestCase(BaseTestCase):
             data = dict(current_password=current_password, password=new_password)
             response_data = self.post_data(url, data)
             self.assertIn('ok', response_data)
-            username = current_user.username
-            response = self.login(username=username, password=new_password)
-            data = response.get_data(as_text=True)
-            self.assertIn('/', data)
+            self.assertEqual(True, current_user.validate_password(new_password))
 
     def test_change_user_username_or_email(self):
+        fake_Projects()
+        fake_Tags()
+        fake_Users()
         name = "email"
         same_info = "100001@example.com"
         info = "test@test.email"
@@ -97,6 +94,7 @@ class SettingTestCase(BaseTestCase):
             self.assertIn(current_user.username, info1)
 
     def test_change_project_status(self):
+        fake_Projects()
         project = Project.query.get(1)
         project_id = project.id
         status = project.status
@@ -119,6 +117,9 @@ class SettingTestCase(BaseTestCase):
         pass
 
     def test_del_user_by_id(self):
+        fake_Projects()
+        fake_Tags()
+        fake_Users()
         user = User.query.filter_by(is_admin=0).first()
         user_id = user.id
         with self.client:
@@ -132,6 +133,7 @@ class SettingTestCase(BaseTestCase):
             self.assertEqual(None, User.query.get(user_id))
 
     def test_del_project_by_id(self):
+        fake_Projects()
         project = Project.query.get(1)
         project_id = project.id
         with self.client:
@@ -145,6 +147,9 @@ class SettingTestCase(BaseTestCase):
             self.assertEqual(None, Project.query.get(project_id))
 
     def test_save_user_edit_modal(self):
+        fake_Projects()
+        fake_Tags()
+        fake_Users()
         user_id_not_exist = -1
         user = User.query.filter_by(is_admin=0).first()
         user_id_exist = user.id
@@ -220,6 +225,7 @@ class SettingTestCase(BaseTestCase):
         pass
 
     def test_add_tag(self):
+        fake_Tags()
         tag_name = "NewTag"
         with self.client:
             url = url_for('setting.add_tag')
@@ -233,6 +239,7 @@ class SettingTestCase(BaseTestCase):
             self.assertIn('same', response_data)
 
     def test_edit_tag(self):
+        fake_Tags()
         tag_name = 'NewTag'
         tag = Tag.query.get(1)
         tag_id = tag.id
@@ -250,6 +257,7 @@ class SettingTestCase(BaseTestCase):
             self.assertIn('same', response_data)
 
     def test_delete_tag(self):
+        fake_Tags()
         tag = Tag.query.get(1)
         tag_id = tag.id
         with self.client:
@@ -263,6 +271,11 @@ class SettingTestCase(BaseTestCase):
             self.assertEqual(None, Tag.query.get(tag_id))
 
     def test_save_project_edit_modal(self):
+        fake_Projects()
+        fake_Tags()
+        fake_Users()
+        fake_milestones()
+        fake_categories()
         last_milestone_id = Milestone.query.order_by(Milestone.id.desc()).first().id
         last_category_id = Category.query.order_by(Category.id.desc()).first().id
         project = Project.query.get(1)
