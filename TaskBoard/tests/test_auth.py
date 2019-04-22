@@ -8,10 +8,8 @@
 
 from flask import url_for
 from TaskBoard.tests.base import BaseTestCase
-import unittest
 
 
-@unittest.skip('Skip this class temporarily')
 class AuthTestCase(BaseTestCase):
 
     def test_login_user(self):

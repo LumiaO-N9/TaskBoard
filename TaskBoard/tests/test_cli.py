@@ -9,10 +9,8 @@
 from TaskBoard.models import User, Tag, Project, Milestone, Category, Task, Comment
 from TaskBoard.extensions import db
 from TaskBoard.tests.base import BaseTestCase
-import unittest
 
 
-@unittest.skip('Skip this class temporarily')
 class CLITestCase(BaseTestCase):
 
     def setUp(self):
