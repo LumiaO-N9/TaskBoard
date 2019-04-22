@@ -42,3 +42,7 @@ class BaseTestCase(unittest.TestCase):
 
     def logout(self):
         return self.client.get(url_for('auth.logout'), follow_redirects=True)
+
+    def post_data(self, url, data):
+        response = self.client.post(url, data=data)
+        return response.get_data(as_text=True)
