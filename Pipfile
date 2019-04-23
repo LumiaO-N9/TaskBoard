@@ -13,10 +13,10 @@ flask = "*"
 python-dotenv = "*"
 flask-sqlalchemy = "*"
 flask-wtf = "*"
-bootstrap-flask = "*"
 flask-login = "*"
 sqlalchemy = "*"
 flask-moment = "*"
+flask-debugtoolbar = "*"
 
 [requires]
 python_version = "3.7"
