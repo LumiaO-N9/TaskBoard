@@ -67,6 +67,7 @@ class Task(db.Model, TimestampMixin):
     color = db.Column(db.String(30), default='#fff5ee')
     due_date = db.Column(db.Date)
     points = db.Column(db.Integer, default=0)
+    is_complete = db.Column(db.Boolean, default=False)
     milestone_id = db.Column(db.Integer, db.ForeignKey('milestone.id'))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
