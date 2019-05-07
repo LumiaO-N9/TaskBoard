@@ -4,6 +4,9 @@
     <span class="line" id="line2"></span>
     <span id="store_project_id_for_ajax" hidden>{{ project.id }}</span>
 </div>
+<div class="layui-progress">
+    <div class="layui-progress-bar" lay-percent="{{ complete_percent }}%"></div>
+</div>
 <div class="layui-collapse">
     {% for milestone in project.milestones %}
         <div class="layui-colla-item">
@@ -13,7 +16,7 @@
                     style="float: right;margin-top: 10px;margin-right: 5px;">{{ milestone.tasks|length }}</span></h2>
             <div id="layui_colla_content{{ milestone.id }}" class="layui-colla-content" style="padding:0px;">
                 {% if milestone.tasks %}
-                    {% for task in milestone.tasks %}
+                    {% for task in milestone.tasks|sort(attribute='due_date') %}
                         <div id="task_card{{ task.id }}" class="layui-card" style="background: {{ task.color }};">
                             <div class="layui-card-header" style="font-weight: bold;">{{ task.title }}
                                 {% if task.files %}

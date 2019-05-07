@@ -5,6 +5,13 @@
     <span id="store_task_id_for_ajax" hidden>{{ task.id }}</span>
     <span id="store_milestone_id_for_ajax" hidden>{{ task.milestone_id }}</span>
 </div>
+<div class="layui-progress">
+    {% if task.is_complete %}
+        <div class="layui-progress-bar" lay-percent="100%"></div>
+    {% else %}
+        <div class="layui-progress-bar layui-bg-red" lay-percent="{{ task_complete_percent }}%"></div>
+    {% endif %}
+</div>
 <div class="task_column_panel" class="panel" style="margin-top: auto;">
     <div class="panel-body" style="background: {{ task.color }};">
         <div class="row">
@@ -158,5 +165,17 @@
                 </div>
             </div>
         </div>
+        {% if not task.is_complete %}
+            <div class="row" style="margin-top: 20px;margin-bottom: 20px">
+                <div class="">
+                    <div class="col-sm-12">
+                        <button class="form-control btn-success"
+                                onclick="complete_task('{{ task.id }}')">
+                            <span style="font-size: 17px;">Complete Task</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>

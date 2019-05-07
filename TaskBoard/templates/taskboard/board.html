@@ -777,6 +777,9 @@
                 setLineWidthByClass('task');
                 Register_time_tip();
                 $('.task_column_panel').css('height', size.height - 50 - 38 - 60);
+                layui.use('element', function () {
+                    layui.element.init();
+                });
                 layui.use('upload', function () {
                     let upload = layui.upload;
                     let upload_ele = $('#upload_attachment');
@@ -1220,11 +1223,15 @@
                                 layer.close(index);
                                 layer.msg('删除成功！');
                                 setTimeout(() => {
-                                    LoadTaskById(task_id);
+                                    AjaxReloadPageAfterContextMenu('task', task_id, '');
                                 }, 300);
                             } else {
                                 layer.msg('删除失败！')
                             }
+                        },
+                        error: function (error) {
+                            layer.msg('Something wrong in server！');
+                            console.log(error);
                         },
                     });
                 },
@@ -1233,6 +1240,46 @@
                 }
             });
 
+        }
+
+        function complete_task(task_id) {
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: '完成任务',
+                content: '<div class="text-center" style="margin-top:20px"><p>确定该任务已完成 ?</p></div>',
+                btn: ['确定', '取消'],
+                anim: 1,
+                offset: '150px',
+                yes: function (index) {
+                    $.ajax({
+                        url: "{{ url_for('taskboard.complete_task_by_id') }}",
+                        type: 'POST',
+                        data: {
+                            'task_id': task_id,
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('Success！');
+                                setTimeout(() => {
+                                    AjaxReloadPageAfterContextMenu('task', task_id, '');
+                                }, 300);
+                            } else {
+                                layer.msg('Failed！')
+                            }
+                        },
+                        error: function (error) {
+                            layer.msg('Something wrong in server！');
+                            console.log(error);
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
         }
     </script>
 {% endblock %}
