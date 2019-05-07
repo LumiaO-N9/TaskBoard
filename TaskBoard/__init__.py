@@ -32,7 +32,7 @@ def register_extensions(app):
     login_manager.init_app(app)
     csrf.init_app(app)
     moment.init_app(app)
-    toolbar.init_app(app)
+    # toolbar.init_app(app)
 
 
 def register_blueprints(app):
