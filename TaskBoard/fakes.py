@@ -92,10 +92,13 @@ def fake_tasks(count=4):
                 title=fake.name(),
                 description=fake.text(166),
                 color=choice(color_array),
-                due_date=fake.date_this_year(before_today=False, after_today=True),
+                # due_date=fake.date_this_year(before_today=False, after_today=True),
+                due_date=fake.date_this_month(before_today=False, after_today=True),
+                create_time=fake.past_datetime(start_date='-30d'),
                 points=random.randint(0, 10),
                 milestone=Milestone.query.get(i + 1)
             )
+            task.is_complete = choice([False, True, False])
             task.category = choice(task.milestone.project.categories)
             task.user = choice(task.milestone.project.users)
             db.session.add(task)
