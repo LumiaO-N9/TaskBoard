@@ -5,7 +5,7 @@
     <span id="store_project_id_for_ajax" hidden>{{ project.id }}</span>
 </div>
 <div class="layui-progress">
-    <div class="layui-progress-bar" lay-percent="{{ complete_percent }}%"></div>
+    <div class="layui-progress-bar layui-bg-orange" lay-percent="{{ complete_percent }}%"></div>
 </div>
 <div class="layui-collapse">
     {% for milestone in project.milestones %}
@@ -32,6 +32,19 @@
                                     Due:{{ task.due_date }}</span>
                             </div>
                             <div class="layui-card-body">{{ task.description }}</div>
+                            <div class="layui-progress layui-progress-big" lay-showPercent="yes">
+                                {% if task.is_complete %}
+                                    <div class="layui-progress-bar" lay-percent="100%"></div>
+                                {% else %}
+                                    {% if task.task_process_color %}
+                                        <div class="layui-progress-bar layui-bg-{{ task.task_process_color }}"
+                                             lay-percent="{{ task.task_complete_percent }}%"></div>
+                                    {% else %}
+                                        <div class="layui-progress-bar layui-bg-red"
+                                             lay-percent="{{ task.task_complete_percent }}%"></div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                         </div>
                         <hr class="layui-bg-orange">
                     {% endfor %}
