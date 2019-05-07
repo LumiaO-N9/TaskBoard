@@ -846,7 +846,7 @@
                 let ele = $(this);
                 let time = moment(ele.data('timestamp')).format('LLL');
                 tip_index = layer.tips(
-                    time,
+                    'Create at ' + time,
                     ele, {
                         tips: [1, '#2b2b2b'],
                     });
