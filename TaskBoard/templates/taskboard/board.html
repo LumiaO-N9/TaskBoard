@@ -653,9 +653,11 @@
                 is_show_milestone_array.push($(this)[0].id.split('layui_colla_content')[1]);
             });
             if (node_type === 'project') {
-                if (action === 'delete')
-                    LoadMileStone('', false, []);
-                else {
+                if (action === 'delete') {
+                    {#LoadMileStone('', false, []);#}
+                    $('#milestone-panel-body').children().remove();
+                    $('#task-panel-body').children().remove();
+                } else {
                     LoadMileStone(project_id, true, is_show_milestone_array);
                     LoadTaskById(task_id);
                 }
@@ -664,7 +666,7 @@
                     is_show_milestone_array.splice(is_show_milestone_array.indexOf(id), 1);
                 }
                 LoadMileStone(project_id, true, is_show_milestone_array);
-                LoadTaskById(task_id);
+                LoadTaskById('');
             } else if (node_type === 'task') {
                 if (action === 'delete') {
                     task_id = '';
@@ -772,6 +774,10 @@
         }
 
         function LoadTaskById(task_id) {
+            if (task_id === '') {
+                $('#task-panel-body').children().remove();
+                return;
+            }
             $('#task-panel-body').load('{{ url_for("taskboard.render_task_column") }}', {'task_id': task_id}, function () {
                 // setTaskLineWidth();
                 setLineWidthByClass('task');
