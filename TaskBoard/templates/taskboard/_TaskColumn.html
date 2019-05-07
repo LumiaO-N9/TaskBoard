@@ -12,6 +12,7 @@
         <div class="layui-progress-bar layui-bg-red" lay-percent="{{ task_complete_percent }}%"></div>
     {% endif %}
 </div>
+{{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
 <div class="task_column_panel" class="panel" style="margin-top: auto;">
     <div class="panel-body" style="background: {{ task.color }};">
         <div class="row">
@@ -22,7 +23,10 @@
             </h4>
             <div class="col-sm-12"><p id="task_description">{{ task.description }}</p></div>
             <div class="col-sm-12 due-date" style="margin-top: 20px;" id="task_due_date">
-                Due:{{ task.due_date }}</div>
+                Due<i id="task_tip{{ task.id }}" name="moment_tip"
+                       style="font-weight: bold;margin-left: 6px;"
+                       data-timestamp="{{ task.create_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(task.due_date).fromNow(refresh=True) }}</i>
+            </div>
             {% if current_user.is_admin or current_user.id == task.user_id %}
                 <div class="task_action" style="margin-top: 100px;">
                     <div class="col-sm-6">
@@ -69,7 +73,6 @@
             <div class="row" style="margin-top: 20px;">
                 <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Attachments :</h4>
                 <div class="attachments">
-                    {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
                     <ul class="list-group">
                         {% for file in task.files %}
                             <li class="list-group-item">
@@ -113,11 +116,9 @@
             </button>
         </div>
         {% if task.comments %}
-
             <div class="row" style="margin-top: 20px;">
                 <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Comments :</h4>
                 <div class="comment">
-                    {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
                     <ul class="list-group">
                         {% for comment in task.comments %}
                             <li class="list-group-item">
