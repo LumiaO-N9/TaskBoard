@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from TaskBoard.settings import config
 from TaskBoard.extensions import db, login_manager, csrf, moment, toolbar
-from TaskBoard.blueprints import auth, taskboard, setting
+from TaskBoard.blueprints import auth, taskboard, setting, statistic
 from TaskBoard.models import User, Project, Milestone, Category, Task
 from flask_wtf.csrf import CSRFError
 import os
@@ -39,6 +39,7 @@ def register_blueprints(app):
     app.register_blueprint(taskboard.taskboard_bp)
     app.register_blueprint(auth.auth_bp, url_prefix='/auth')
     app.register_blueprint(setting.setting_bp, url_prefix='/setting')
+    app.register_blueprint(statistic.statistic_bp, url_prefix='/statistic')
 
 
 def register_shell_context(app):
