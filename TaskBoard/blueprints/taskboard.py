@@ -40,7 +40,16 @@ def render_milestone_column():
     if project_id != 'None':
         try:
             project = Project.query.get(project_id)
-            return render_template('taskboard/_MilestoneColumn.html', project=project)
+            task_total_count = 0
+            task_complete_count = 0
+            for milestone in project.milestones:
+                task_total_count += len(milestone.tasks)
+                for task in milestone.tasks:
+                    if task.is_complete:
+                        task_complete_count = task_complete_count + 1
+            complete_percent = task_complete_count / task_total_count * 100
+            return render_template('taskboard/_MilestoneColumn.html', project=project,
+                                   complete_percent=complete_percent)
         except Exception as e:
             print(e)
             abort(500)
@@ -53,7 +62,15 @@ def render_task_column():
     if task_id:
         try:
             task = Task.query.get(task_id)
-            return render_template('taskboard/_TaskColumn.html', task=task)
+            task_complete_percent = 0
+            create_date = task.create_time.date()
+            due_date = task.due_date
+            today_date = datetime.utcnow().date()
+            print(today_date)
+            print((due_date - create_date).days)
+            print((due_date - today_date).days)
+            task_complete_percent = (today_date - create_date).days / (due_date - create_date).days * 100
+            return render_template('taskboard/_TaskColumn.html', task=task, task_complete_percent=task_complete_percent)
         except Exception as e:
             print(e)
             abort(500)
@@ -258,6 +275,23 @@ def delete_task_attachment():
     except Exception as e:
         print(e)
         abort(500)
+
+
+@taskboard_bp.route('/complete-task', methods=['POST'])
+def complete_task_by_id():
+    task_id = request.form.get('task_id', None)
+
+    if task_id:
+        try:
+            task = Task.query.get(task_id)
+            if task:
+                task.is_complete = True
+                db.session.commit()
+                return 'ok'
+        except Exception as e:
+            print(e)
+            abort(500)
+    return 'fail'
 
 
 @taskboard_bp.route('/edit-or-add-comment', methods=['POST'])
