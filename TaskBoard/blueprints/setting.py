@@ -1,9 +1,19 @@
-from flask import Blueprint, render_template, request
-from TaskBoard.models import Project, User, Milestone, Category, Tag
+from flask import Blueprint, render_template, request, current_app
+from TaskBoard.models import Project, User, Milestone, Category, Tag, Log
 from TaskBoard.extensions import db
 from flask_login import login_required, current_user
+import os
 
 setting_bp = Blueprint('setting', __name__)
+
+
+def create_log(log, flag=True):
+    if flag:
+        new_log = Log(log=current_user.username + ' ' + log)
+    else:
+        new_log = Log(log=log)
+    print(new_log.log)
+    db.session.add(new_log)
 
 
 @setting_bp.before_request
@@ -23,12 +33,12 @@ def index():
 @setting_bp.route('/change-default-project', methods=['POST'])
 def change_default_project():
     project_id = request.form['project_id']
-    user_id = current_user.id
     try:
-        user = User.query.get(user_id)
+        user = current_user
         project = Project.query.get(project_id)
         if user.default_project != project:
             user.default_project = project
+            create_log('change default project to ' + project.title)
             db.session.commit()
     except Exception as e:
         print(e)
@@ -45,6 +55,7 @@ def change_user_password():
         if not user.validate_password(current_password):
             return 'invalid'
         user.set_password(password)
+        create_log('change his or her password. ')
         db.session.commit()
     except Exception as e:
         print(e)
@@ -64,10 +75,12 @@ def change_user_username_or_email():
             if info != current_user.email and User.query.filter_by(email=info).first():
                 return 'same'
             current_user.email = info
+            create_log('change his or her email to ' + info)
         elif name == 'username':
             if info != current_user.username and User.query.filter_by(username=info).first():
                 return 'same'
             current_user.username = info
+            create_log('change his or her username to ' + info)
         db.session.commit()
     except Exception as e:
         print(e)
@@ -85,6 +98,10 @@ def change_project_status():
         project = Project.query.get(project_id)
         status = project.status
         project.status = not status
+        action = 'Inactive'
+        if project.status:
+            action = 'Active'
+        create_log(action.title() + ' project ' + project.title)
         db.session.commit()
     except Exception as e:
         print(e)
@@ -112,6 +129,7 @@ def del_user_by_id():
     try:
         user = User.query.get(user_id)
         db.session.delete(user)
+        create_log('remove user ' + current_user.username)
         db.session.commit()
     except Exception as e:
         print(e)
@@ -126,6 +144,19 @@ def del_project_by_id():
         return 'None'
     try:
         project = Project.query.get(project_id)
+        for milestone in project.milestones:
+            for task in milestone.tasks:
+                upload_path = current_app.config['ATTACHMENT_UPLOAD_PATH']
+                for file in task.files:
+                    file_path = os.path.join(upload_path, file.security_name)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                        create_log('Delete file ' + file.create_time + ' (auto)', False)
+                for comment in task.comments:
+                    create_log('Delete comment ' + comment.text[:20] + '...... (auto)', False)
+                create_log('Delete task ' + task.title + '(auto)', False)
+            create_log(' Delete milestone ' + milestone.title + ' (auto)', False)
+        create_log('delete project ' + project.title)
         db.session.delete(project)
         db.session.commit()
     except Exception as e:
@@ -186,6 +217,10 @@ def save_user_edit_modal():
                     user.projects.append(project)
         if is_admin:
             user.is_admin = True
+        if status == 'edit':
+            create_log('edit user ' + user.username + '\'s information')
+        elif status == 'add':
+            create_log('create user ' + user.username)
         db.session.commit()
     except Exception as e:
         print(e)
@@ -244,6 +279,7 @@ def add_tag():
             return 'same'
         new_tag = Tag(tag=tag)
         db.session.add(new_tag)
+        create_log('add tag ' + tag.tag)
         db.session.commit()
     except Exception as e:
         print(e)
@@ -262,6 +298,7 @@ def edit_tag():
         if same_tag and same_tag.id != tag_id:
             return 'same'
         tag = Tag.query.get(tag_id)
+        create_log('rename tag ' + tag.tag + ' to ' + tag_tag)
         tag.tag = tag_tag
         db.session.commit()
     except Exception as e:
@@ -277,6 +314,7 @@ def delete_tag():
         return 'None'
     try:
         tag = Tag.query.get(tag_id)
+        create_log('delete tag ' + tag.tag)
         db.session.delete(tag)
         db.session.commit()
     except Exception as e:
@@ -299,6 +337,7 @@ def save_project_edit_modal():
     wait_add_users_id_array = json_data.get('wait_add_users_id_array', None)
     order = 0
     status = 'edit'
+    project_users_original = []
     try:
         if project_id:
             project = Project.query.get(project_id)
@@ -306,28 +345,46 @@ def save_project_edit_modal():
             project = Project()
             status = 'add'
             db.session.add(project)
+        for user in project.users:
+            project_users_original.append(user)
+        if status == 'edit':
+            create_log('edit project ' + project.title)
+        elif status == 'add':
+            create_log('create project ' + project.title)
         if project.title != project_title:
             project.title = project_title
+            if status == 'edit':
+                create_log('rename project ' + project.title + ' to ' + project_title)
+            elif status == 'add':
+                create_log('set new project\'s name as ' + project_title)
         for i in wait_remove_users_id_array:
             user = User.query.get(i)
             if user.access_project in user.projects:
                 user.projects.remove(user.access_project)
             user.access_project = None
+            create_log(
+                'remove user ' + user.username + ' from project ' + project.title + '\'workers')
             if user.default_project and user.default_project.id == project.id:
                 user.default_project = None
         project.users.clear()
         for i in wait_add_users_id_array:
             user = User.query.get(i)
             project.users.append(user)
+            if user not in project_users_original:
+                create_log(
+                    'add user ' + user.username + ' to project ' + project.title + '\'s workers')
         for i in wait_to_delete_category_id_array:
             category = Category.query.get(i)
+            create_log('delete category ' + category.title + ' in project ' + project.title)
             db.session.delete(category)
         for key, value in exist_categories_id_title_color.items():
             category = Category.query.get(key)
             if category in project.categories:
                 if category.title != value['title']:
+                    create_log('rename category ' + category.title + ' to ' + value['title'])
                     category.title = value['title']
                 if category.color != value['color']:
+                    create_log('change category ' + category.title + '\'s color to ' + value['color'])
                     category.color = value['color']
             else:
                 new_category = Category(
@@ -335,14 +392,18 @@ def save_project_edit_modal():
                     color=value['color'],
                     project=project
                 )
+                create_log(
+                    'create category ' + category.title + ' for project ' + project.title + ' and set its color as ' + category.color)
                 db.session.add(new_category)
         for i in wait_to_delete_milestone_id_array:
             milestone = Milestone.query.get(i)
+            create_log('delete milestone ' + milestone.title + ' from project ' + project.title + '\'s milestones')
             db.session.delete(milestone)
         for key, value in exist_milestones_id_title.items():
             milestone = Milestone.query.get(key)
             if milestone in project.milestones:
                 if milestone.title != value:
+                    create_log('rename milestone ' + milestone.title + ' to ' + value)
                     milestone.title = value
             else:
                 new_milestone = Milestone(
@@ -350,13 +411,20 @@ def save_project_edit_modal():
                     order=0,
                     project=project
                 )
+                create_log('create milestone ' + new_milestone.title + ' for project ' + project.title)
                 db.session.add(new_milestone)
+        project_milestones_order_orginal = [milestone.id for milestone in project.milestones]
         for i in order_id_array:
             title = exist_milestones_id_title[i]
             milestone = Milestone.query.filter_by(title=title).first()
             if milestone:
                 milestone.order = order
                 order = order + 1
+        db.session.commit()
+        project_milestones_order_present = [milestone.id for milestone in project.milestones]
+        if project_milestones_order_orginal != project_milestones_order_present:
+            create_log('change the order of milestones in project ' + project.title + ' : ' + ' '.join(
+                [milestone.title for milestone in project.milestones]))
         db.session.commit()
     except Exception as e:
         print(e)
