@@ -61,7 +61,9 @@ def render_milestone_column():
                     elif task.task_complete_percent >= 100:
                         task.is_complete = True
                         db.session.commit()
-            complete_percent = task_complete_count * 100 // task_total_count
+            complete_percent = 0
+            if task_total_count > 0:
+                complete_percent = task_complete_count * 100 // task_total_count
             return render_template('taskboard/_MilestoneColumn.html', project=project,
                                    complete_percent=complete_percent)
         except Exception as e:
@@ -79,8 +81,17 @@ def render_task_column():
             create_date = task.create_time.date()
             due_date = task.due_date
             today_date = datetime.utcnow().date()
-            task_complete_percent = (today_date - create_date).days / (due_date - create_date).days * 100
-            return render_template('taskboard/_TaskColumn.html', task=task, task_complete_percent=task_complete_percent)
+            task.task_complete_percent = (today_date - create_date).days * 100 // (due_date - create_date).days
+            if task.task_complete_percent < 33:
+                task.task_process_color = 'green'
+            elif task.task_complete_percent < 67:
+                task.task_process_color = 'orange'
+            elif task.task_complete_percent < 100:
+                task.task_process_color = 'red'
+            elif task.task_complete_percent >= 100:
+                task.is_complete = True
+                db.session.commit()
+            return render_template('taskboard/_TaskColumn.html', task=task)
         except Exception as e:
             print(e)
             abort(500)
