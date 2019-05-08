@@ -12,7 +12,7 @@
     <div class="collapse navbar-collapse" id="navbar-collapse-1">
         <ul class="nav navbar-nav navbar-right">
             <li id="board"><a href="{{ url_for('taskboard.index') }}">Boards</a></li>
-            <li id="statistics"><a href="{{ url_for('statistic.index') }}">Statistics</a></li>
+            <li id="statistics"><a href="{{ url_for('timeline.index', week=0) }}">TimeLine</a></li>
             <li id="settings"><a href="{{ url_for('setting.index') }}">Settings</a></li>
             <li id="logout"><a href="{{ url_for('auth.logout') }}">Logout({{ current_user.username }})</a></li>
         </ul>
