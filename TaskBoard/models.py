@@ -53,7 +53,8 @@ class Project(db.Model, TimestampMixin):
     default_users = db.relationship('User', back_populates='default_project', foreign_keys='User.default_project_id')
     access_users = db.relationship('User', back_populates='access_project', foreign_keys='User.access_project_id')
     users = db.relationship('User', secondary=association_table, back_populates='projects')
-    milestones = db.relationship('Milestone', back_populates='project', cascade='all,delete-orphan')
+    milestones = db.relationship('Milestone', back_populates='project', cascade='all,delete-orphan',
+                                 order_by='Milestone.order')
     categories = db.relationship('Category', back_populates='project', cascade='all,delete-orphan')
 
 
