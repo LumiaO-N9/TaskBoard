@@ -259,7 +259,7 @@
                                 $('#users_table_div').load('{{ url_for("setting.ajax_load_user_table") }}');
                             }, 300);
                         } else {
-                            alert('fail');
+                            layer.msg('Default Project修改失败！');
                         }
                     },
                     error: function (error) {
@@ -466,7 +466,7 @@
                         }
                         tr_ele.attr('data-status', 'False');
                     } else {
-                        alert('fail');
+                        layer.msg(project_title + '状态修改失败！');
                     }
                 },
                 error: function (error) {
