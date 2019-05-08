@@ -12,7 +12,6 @@ def create_log(log, flag=True):
         new_log = Log(log=current_user.username + ' ' + log)
     else:
         new_log = Log(log=log)
-    print(new_log.log)
     db.session.add(new_log)
 
 
@@ -349,14 +348,12 @@ def save_project_edit_modal():
             project_users_original.append(user)
         if status == 'edit':
             create_log('edit project ' + project.title)
-        elif status == 'add':
-            create_log('create project ' + project.title)
         if project.title != project_title:
             project.title = project_title
             if status == 'edit':
                 create_log('rename project ' + project.title + ' to ' + project_title)
             elif status == 'add':
-                create_log('set new project\'s name as ' + project_title)
+                create_log('create new project ' + project_title)
         for i in wait_remove_users_id_array:
             user = User.query.get(i)
             if user.access_project in user.projects:
@@ -404,25 +401,25 @@ def save_project_edit_modal():
             if milestone in project.milestones:
                 if milestone.title != value:
                     create_log('rename milestone ' + milestone.title + ' to ' + value)
-                    milestone.title = value
+                    milestone.title = value.title()
             else:
                 new_milestone = Milestone(
-                    title=value,
+                    title=value.title(),
                     order=0,
                     project=project
                 )
-                create_log('create milestone ' + new_milestone.title + ' for project ' + project.title)
+                create_log('create milestone ' + new_milestone.title.title() + ' for project ' + project.title)
                 db.session.add(new_milestone)
-        project_milestones_order_orginal = [milestone.id for milestone in project.milestones]
+        project_milestones_order_original = [milestone.id for milestone in project.milestones]
         for i in order_id_array:
             title = exist_milestones_id_title[i]
-            milestone = Milestone.query.filter_by(title=title).first()
+            milestone = Milestone.query.filter_by(title=title.title()).first()
             if milestone:
                 milestone.order = order
                 order = order + 1
         db.session.commit()
         project_milestones_order_present = [milestone.id for milestone in project.milestones]
-        if project_milestones_order_orginal != project_milestones_order_present:
+        if project_milestones_order_original != project_milestones_order_present:
             create_log('change the order of milestones in project ' + project.title + ' : ' + ' '.join(
                 [milestone.title for milestone in project.milestones]))
         db.session.commit()
