@@ -13,6 +13,10 @@ class TimestampMixin(object):
     update_time = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Log(db.Model, TimestampMixin):
+    log = db.Column(db.Text)
+
+
 class User(db.Model, UserMixin, TimestampMixin):
     username = db.Column(db.String(20))
     password_hash = db.Column(db.String(128))
@@ -37,7 +41,7 @@ class User(db.Model, UserMixin, TimestampMixin):
         return check_password_hash(self.password_hash, password)
 
 
-class Tag(db.Model):
+class Tag(db.Model, TimestampMixin):
     id = db.Column(db.Integer, primary_key=True)
     tag = db.Column(db.String(20))
     users = db.relationship('User', back_populates='tag')
