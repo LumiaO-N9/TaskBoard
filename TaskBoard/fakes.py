@@ -59,7 +59,7 @@ def fake_Users(count=10):
             default_project=Project.query.get(random.randint(1, Project.query.count())),
             access_project=Project.query.get(random.randint(1, Project.query.count())),
             email='10000%d@example.com' % i,
-            create_time=fake.date_time_between(start_date="-34d", end_date="now", tzinfo=None)
+            create_time=fake.date_time_between(start_date="-34d", end_date="-2d", tzinfo=None)
         )
         user.tag_id = random.randint(1, Tag.query.count())
         user.set_password('TaskBoard.')
@@ -119,7 +119,9 @@ def fake_tasks(count=4):
                 color=choice(color_array),
                 # due_date=fake.date_this_year(before_today=False, after_today=True),
                 due_date=fake.date_this_month(before_today=False, after_today=True),
-                create_time=fake.past_datetime(start_date='-30d'),
+                # create_time=fake.past_datetime(start_date='-30d'),
+                create_time=fake.date_time_between(start_date='-30d', end_date="-2d",
+                                                   tzinfo=None),
                 points=random.randint(0, 10),
                 milestone=Milestone.query.get(i + 1)
             )
@@ -142,7 +144,7 @@ def fake_comments(count=3):
                 task=Task.query.get(i + 1)
             )
             comment.user_id = choice(User.query.all()).id
-            comment.create_time = fake.date_time_between(start_date=comment.task.create_time, end_date="now",
+            comment.create_time = fake.date_time_between(start_date=comment.task.create_time, end_date="-1d",
                                                          tzinfo=None)
             log = Log(log='Create Comment for Task ' + comment.task.title)
             log.create_time = comment.create_time
