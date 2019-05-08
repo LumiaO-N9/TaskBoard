@@ -11,7 +11,7 @@
             <li name="forever" id="{{ name }}_li{{ instance.id }}" class="list-group-item" value="{{ instance.id }}">
             <span class="fa fa-arrows-v pull-left" style="margin-left: -15px;padding-left: 10px">  |</span>
         {% elif name =='category' %}
-            <li name="forever" id="{{ name }}_li{{ instance.id }}" class="list-group-item" value="{{ instance.id }}" style="text-transform: capitalize;background: {{ instance.color }}">
+            <li name="forever" id="{{ name }}_li{{ instance.id }}" class="list-group-item" value="{{ instance.id }}" style="text-transform: capitalize;background:{{ instance.color }}">
         {% endif %}
         <span name="old_title" hidden>{{ instance.title }}</span>
         <span name="{{ name }}_title_span" id="{{ name }}_span{{ instance.id }}" style="width: 170px;display: inline-block;word-wrap:break-word;">{{ instance.title }}</span>

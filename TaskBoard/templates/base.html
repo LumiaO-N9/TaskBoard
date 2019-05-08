@@ -184,7 +184,7 @@
                 <span class="fa fa-arrows-v pull-left" style="margin-left: -15px;padding-left: 10px">  |</span>`;
             } else if (name === 'category') {
                 color = $('#color_picker' + project_id).attr('data-color');
-                li_str = `<li name ="temporary" id="category_li${instance.id}" class="list-group-item" value="${instance.id}" style="text-transform: capitalize;background: ${color}">`;
+                li_str = `<li name ="temporary" id="category_li${instance.id}" class="list-group-item" value="${instance.id}" style="text-transform: capitalize;background:${color}">`;
             }
             ul.append(li_str + `
                  <span name="old_title" hidden>${instance.title}</span>
