@@ -7,8 +7,12 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}" type="text/css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css">
+    <link crossorigin="anonymous" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          href="https://lib.baomitu.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    {#    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}" type="text/css">#}
+    <link crossorigin="anonymous" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+          href="https://lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    {#    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.css') }}" type="text/css">#}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" type="text/css">
     {% block style %}
 
@@ -20,12 +24,16 @@
 {% block content %}
 
 {% endblock %}
-<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/layer.js') }}"></script>
+<script crossorigin="anonymous" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT"
+        src="https://lib.baomitu.com/jquery/3.3.1/jquery.min.js"></script>
+<script crossorigin="anonymous" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        src="https://lib.baomitu.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script crossorigin="anonymous" integrity="sha384-Ysr53n0PIGi7rAduJ+BAMGbxA9RFQwIQfPh2bD9pf1x3vrnDsdX4SlwCNpxmrPIi"
+        src="https://lib.baomitu.com/layer/3.1.1/layer.js"></script>
+<script crossorigin="anonymous" integrity="sha384-3FVBPC6KVc/qhio8Uvc2RHtrjsSjJYANs9BGxxxi3J/ueXJO4ZB2BUu2kURd6FDI"
+        src="https://lib.baomitu.com/Sortable/1.8.4/Sortable.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='js/validator/js/validator.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='js/validator/js/input.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static',filename='js/Sortable.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/layui.js') }}"></script>
 <script type="text/javascript">
     $(function () {
