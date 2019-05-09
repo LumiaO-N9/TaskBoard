@@ -14,7 +14,7 @@
                 data-status="{{ project.status }}">
                 <td id="project_title{{ project.id }}">{{ project.title }}</td>
                 <td>
-                    <ul class="list-group" style="display: block;width: 200px;word-wrap: break-word">
+                    <ul name="project_table_milestones" class="list-group">
                         {% for milestone in project.milestones|sort(attribute='order') %}
                             <li class="list-group-item list-group-item-success">
                                 <span class="badge">{{ milestone.tasks|length }}</span>
@@ -24,7 +24,7 @@
                     </ul>
                 </td>
                 <td>
-                    <ul class="list-group" style="display: block;width: 250px;">
+                    <ul name="project_table_categories" class="list-group">
                         {% for category in project.categories %}
                             <li class="list-group-item" style="background: {{ category.color }}">
                                 {{ category.title }}
@@ -50,13 +50,11 @@
                         </a>
                         <a name="delete"
                            onclick="del_project(this, '{{ project.id }}')">
-                                                    <span class="glyphicon glyphicon-trash"
-                                                          style="margin-left:8px">
-                                                    </span>
+                            <span class="glyphicon glyphicon-trash"></span>
                         </a>
                         {% include 'setting/_ProjectEditModal.html' %}
 
-                        <label name="status" style="margin-left:8px;font-weight: normal">
+                        <label name="status">
                             {% if project.status %}
                                 <input type="checkbox" value="{{ project.id }}" checked>
                             {% else %}
