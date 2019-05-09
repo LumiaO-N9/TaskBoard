@@ -1,11 +1,19 @@
 from flask import Blueprint, render_template, jsonify, abort, request, current_app, send_from_directory, url_for
 from flask_login import login_required, current_user
-from TaskBoard.models import User, Project, Milestone, Category, Task, Comment, File
+from TaskBoard.models import User, Project, Milestone, Category, Task, Comment, File, Log
 from TaskBoard.extensions import db
 from datetime import datetime
 import uuid, os
 
 taskboard_bp = Blueprint('taskboard', __name__)
+
+
+def create_log(log, flag=True, color='#666'):
+    if flag:
+        new_log = Log(log=current_user.username + ' ' + log, color=color)
+    else:
+        new_log = Log(log=log, color=color)
+    db.session.add(new_log)
 
 
 def random_filename(filename):
@@ -109,24 +117,52 @@ def save_task_edit_modal():
     milestone_id = json_data.get('milestone_id', None)
     color_text = json_data.get('color_text', None)
     date_picker_text = json_data.get('date_picker_text', None)
-    date_time = datetime.strptime(date_picker_text, '%Y-%m-%d')
+    due_date = datetime.strptime(date_picker_text, '%Y-%m-%d')
     points = json_data.get('points', None)
     try:
         if action_type == 'edit':
             task_id = json_data.get('task_id')
             task = Task.query.get(task_id)
-            task.title = task_name.title()
-            task.description = task_description
-            task.user_id = assigned_user_id
-            task.category_id = category_id
-            task.milestone_id = milestone_id
-            task.color = color_text
-            task.due_date = date_time
-            task.points = points
+            create_log('edit task ' + task.title)
+            if task.title.title() != task_name.title():
+                create_log('rename task ' + task.title + ' to ' + task_name)
+                task.title = task_name.title()
+            if task.description != task_description:
+                create_log('modify the task ' + task.description[:30] + '...... as ' + task_description[:30] + '......')
+                task.description = task_description
+            if task.user_id != assigned_user_id:
+                create_log('assign the task ' + task.title + ' to ' + User.query.get(assigned_user_id).username)
+                task.user_id = assigned_user_id
+            if task.category_id != category_id:
+                old_category_title = task.category.title
+                new_category_title = Category.query.get(category_id).title
+                create_log(
+                    'move task ' + task.title + ' from category ' + old_category_title + ' to ' + new_category_title)
+                task.category_id = category_id
+            if task.milestone_id != milestone_id:
+                old_milestone_title = task.milestone.title
+                new_milestone_title = Milestone.query.get(milestone_id).title
+                create_log(
+                    'move task ' + task.title + ' from milestone ' + old_milestone_title + ' to ' + new_milestone_title)
+                task.milestone_id = milestone_id
+            if task.color != color_text:
+                task.color = color_text
+                create_log('change task ' + task.title + '\'s color to ' + color_text)
+            if task.due_date != due_date:
+                create_log('change the task ' + task.title + '\'s due date to ' + due_date.strftime('%Y-%m-%d'))
+                task.due_date = due_date
+            if task.points != points:
+                if task.points > int(points):
+                    create_log(
+                        'decrease the task ' + task.title + '\'s points from ' + str(task.points) + ' to ' + points)
+                elif task.points < int(points):
+                    create_log(
+                        'increase the task ' + task.title + '\'s points from ' + str(task.points) + ' to ' + points)
+                task.points = points
         elif action_type == 'add':
             task = Task(title=task_name.title(), description=task_description, user_id=assigned_user_id,
                         category_id=category_id,
-                        milestone_id=milestone_id, color=color_text, due_date=date_time, points=points, )
+                        milestone_id=milestone_id, color=color_text, due_date=due_date, points=points)
             db.session.add(task)
         db.session.commit()
     except Exception as e:
@@ -144,6 +180,8 @@ def add_milestone_node():
             return 'fail'
         else:
             new_milestone = Milestone(title=new_name.title(), project_id=parent_id)
+            create_log('create milestone ' + new_name.title() + ' for project ' + Project.query.get(
+                parent_id).title)
             db.session.add(new_milestone)
         db.session.commit()
     except Exception as e:
@@ -162,12 +200,15 @@ def rename_node():
             return 'None'
         elif node_type == 'task':
             task = Task.query.get(node_id)
+            create_log('rename task ' + task.title + ' to ' + new_name)
             task.title = new_name
         elif node_type == 'milestone':
             milestone = Milestone.query.get(node_id)
+            create_log('rename milestone ' + milestone.title + ' to ' + new_name)
             milestone.title = new_name
         elif node_type == 'project':
             project = Project.query.get(node_id)
+            create_log('rename project ' + project.title + ' to ' + new_name)
             project.title = new_name
         db.session.commit()
     except Exception as e:
@@ -187,20 +228,29 @@ def copy_node():
             return 'None'
         elif node_type == 'task':
             task = Task.query.get(node_id)
-            task.title = new_name
             new_task = Task(title=new_name, description=task.description, color=task.color, due_date=task.due_date,
                             points=task.points, milestone_id=target_id, category_id=task.category_id,
                             user_id=task.user_id)
+            create_log('copy task ' + task.title + ' to milestone ' + Milestone.query.get(
+                target_id).title + ' as ' + new_task.title)
             db.session.add(new_task)
+            new_node_id = new_task.id
         elif node_type == 'milestone':
-            # milestone = Milestone.query.get(node_id)
+            milestone = Milestone.query.get(node_id)
             new_milestone = Milestone(title=new_name, project_id=target_id)
             db.session.add(new_milestone)
+            create_log('copy milestone ' + milestone.title + ' to project ' + Project.query.get(
+                target_id).title + ' as ' + new_milestone.title)
+            new_node_id = new_milestone.id
         db.session.commit()
+        if node_type == 'task':
+            new_node_id = new_task.id
+        elif node_type == 'milestone':
+            new_node_id = new_milestone.id
     except Exception as e:
         print(e)
         abort(500)
-    return 'ok'
+    return 'ok-' + str(new_node_id)
 
 
 @taskboard_bp.route('/move-node', methods=['POST'])
@@ -216,10 +266,12 @@ def move_node():
             # target_id = target_id_text.split('milestone_node')[1]
             task = Task.query.get(node_id)
             task.milestone_id = target_id
+            create_log('move task ' + task.title + ' to milestone ' + Milestone.query.get(target_id).title)
         elif node_type == 'milestone':
             # target_id = target_id_text.split('project_node')[1]
             milestone = Milestone.query.get(node_id)
             milestone.project_id = target_id
+            create_log('move milestone ' + milestone.title + ' to project ' + Project.query.get(target_id).title)
         db.session.commit()
     except Exception as e:
         print(e)
@@ -231,15 +283,51 @@ def move_node():
 def delete_node():
     node_type = request.form.get('type')
     node_id = request.form.get('id')
+    upload_path = current_app.config['ATTACHMENT_UPLOAD_PATH']
     try:
         if node_type == 'None':
             return 'None'
         elif node_type == 'task':
             wait_delete_obj = Task.query.get(node_id)
+            task = wait_delete_obj
+            for file in task.files:
+                file_path = os.path.join(upload_path, file.security_name)
+                print(file.source_name)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    create_log('Delete file ' + file.source_name + ' (auto)', False, color='#F66B68')
+                db.session.delete(file)
+            for comment in task.comments:
+                create_log('Delete comment ' + comment.text[:20] + '...... (auto)', False, color='#F66B68')
+            create_log('Delete task ' + task.title + '(auto)', False, color='#F66B68')
         elif node_type == 'milestone':
             wait_delete_obj = Milestone.query.get(node_id)
+            milestone = wait_delete_obj
+            for task in milestone.tasks:
+                for file in task.files:
+                    file_path = os.path.join(upload_path, file.security_name)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                        create_log('Delete file ' + file.source_name + ' (auto)', False, color='#F66B68')
+                for comment in task.comments:
+                    create_log('Delete comment ' + comment.text[:20] + '...... (auto)', False, color='#F66B68')
+                create_log('Delete task ' + task.title + '(auto)', False, color='#F66B68')
         elif node_type == 'project':
             wait_delete_obj = Project.query.get(node_id)
+            project = wait_delete_obj
+            for milestone in project.milestones:
+                for task in milestone.tasks:
+                    upload_path = current_app.config['ATTACHMENT_UPLOAD_PATH']
+                    for file in task.files:
+                        file_path = os.path.join(upload_path, file.security_name)
+                        if os.path.isfile(file_path):
+                            os.remove(file_path)
+                            create_log('Delete file ' + file.source_name + ' (auto)', False, color='#F66B68')
+                    for comment in task.comments:
+                        create_log('Delete comment ' + comment.text[:20] + '...... (auto)', False, color='#F66B68')
+                    create_log('Delete task ' + task.title + '(auto)', False, color='#F66B68')
+                create_log(' Delete milestone ' + milestone.title + ' (auto)', False, color='#F66B68')
+        create_log('delete ' + node_type + ' ' + wait_delete_obj.title, color='#F66B68')
         db.session.delete(wait_delete_obj)
         db.session.commit()
     except Exception as e:
@@ -257,6 +345,7 @@ def task_attachment_upload():
     new_filename = random_filename(filename)
     try:
         file = File(source_name=filename, security_name=new_filename, user_id=user_id, task_id=task_id)
+        create_log('upload file ' + filename + ' to task ' + Task.query.get(task_id).title)
         db.session.add(file)
         db.session.commit()
         attachment.save(os.path.join(current_app.config['ATTACHMENT_UPLOAD_PATH'], new_filename))
@@ -274,6 +363,8 @@ def task_attachment_upload():
 def download_task_attachment(file_id, filename):
     try:
         file = File.query.get(file_id)
+        create_log('download file ' + file.source_name + ' in task ' + file.task.title)
+        db.session.commit()
         return send_from_directory(current_app.config['ATTACHMENT_UPLOAD_PATH'], filename, as_attachment=True,
                                    attachment_filename=file.source_name)
     except Exception as e:
@@ -287,6 +378,7 @@ def delete_task_attachment():
     file_security_name = request.form.get('file_security_name', None)
     try:
         file = File.query.get(file_id)
+        create_log('delete file ' + file.source_name + ' in task ' + file.task.title, color='#F66B68')
         db.session.delete(file)
         db.session.commit()
         path = os.path.join(current_app.config['ATTACHMENT_UPLOAD_PATH'], file_security_name)
@@ -301,12 +393,12 @@ def delete_task_attachment():
 @taskboard_bp.route('/complete-task', methods=['POST'])
 def complete_task_by_id():
     task_id = request.form.get('task_id', None)
-
     if task_id:
         try:
             task = Task.query.get(task_id)
             if task:
                 task.is_complete = True
+                create_log('complete task ' + task.title, color='#008000')
                 db.session.commit()
                 return 'ok'
         except Exception as e:
@@ -325,6 +417,7 @@ def edit_or_add_comment():
             task_id = request.form.get('task_id', None)
             try:
                 comment = Comment(text=text, user_id=user_id, task_id=task_id)
+                create_log('create comment ' + text[:30] + '...... in task ' + Task.query.get(task_id).title)
                 db.session.add(comment)
                 db.session.commit()
                 return 'add'
@@ -335,6 +428,8 @@ def edit_or_add_comment():
             try:
                 comment_id = request.form.get('comment_id', None)
                 comment = Comment.query.get(comment_id)
+                create_log('update comment ' + comment.text[:30] + '...... to ' + text[
+                                                                                  :30] + '...... in task ' + comment.task.title)
                 comment.text = text
                 comment.user_id = user_id
                 comment.update_time = datetime.utcnow()
@@ -353,6 +448,7 @@ def delete_comment_by_id():
         return 'None'
     try:
         comment = Comment.query.get(comment_id)
+        create_log('delete comment ' + comment.text[:30] + '...... in task ' + comment.task.title, color='#F66B68')
         db.session.delete(comment)
         db.session.commit()
     except Exception as e:
