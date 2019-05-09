@@ -18,6 +18,7 @@ sqlalchemy = "*"
 flask-moment = "*"
 flask-debugtoolbar = "*"
 mysqlclient = "*"
+flask-assets = "*"
 
 [requires]
 python_version = "3.7"
