@@ -1,0 +1,27 @@
+.one-third {
+    width: 33%;
+    float: left;
+    font-weight: normal;
+    padding-right: 10px;
+    margin-right: 0px;
+}
+
+.half-width {
+    width: 50%;
+    float: left;
+    font-weight: normal;
+    padding-right: 10px;
+    margin-right: 0;
+}
+
+.input-error {
+    padding-top: 5px;
+    font-size: 90%;
+    color: #a10;
+    display: none;
+}
+
+body .layer-error-skin {
+    background: #f24838;
+    color: #ffffff;
+}
