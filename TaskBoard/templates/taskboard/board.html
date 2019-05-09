@@ -349,14 +349,16 @@
                                                 'target_id': target_id
                                             },
                                             success: function (e) {
-                                                if (e === 'ok') {
+                                                let status = e.split('-')[0];
+                                                let new_node_id = e.split('-')[1];
+                                                if (status === 'ok') {
                                                     layer.msg(node_type + ' ' + name + '复制成功！');
                                                 } else {
                                                     layer.msg('Copy failed！');
                                                     return;
                                                 }
                                                 inst.refresh();
-                                                AjaxReloadPageAfterContextMenu(node_type, id, "paste");
+                                                AjaxReloadPageAfterContextMenu(node_type, new_node_id, "paste");
                                             },
                                             error: function (error) {
                                                 layer.msg('Something wrong in server！');
@@ -705,7 +707,6 @@
         function whether_show_add_button() {
             let is_no_project = $('#tree-panel-body').children('.jstree-container-ul.jstree-children.jstree-contextmenu')[0].hasChildNodes();
             if (!is_no_project) {
-                console.log('xx');
                 $('#add_project_when_none').show();
                 $('#board_container').load('{{ url_for("taskboard.none_project") }}');
             }
