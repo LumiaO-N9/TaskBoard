@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}TaskBoard{% endblock %}
 {% block style %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/default/style.min.css') }}" type="text/css">
+    <link crossorigin="anonymous" integrity="sha384-Zh2HdzYhUvyBFypsA0C0aEL1cS6VSTxDI7QAl3gMglZyikoqj4fb0CE9Ti49zo/o"
+          href="https://lib.baomitu.com/jstree/3.3.8/themes/default/style.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/board.css') }}" type="text/css">
 {% endblock %}
 {% block content %}
@@ -37,8 +38,8 @@
 {% endblock %}
 {% block scripts %}
     {{ super() }}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/jstree.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/layui.js') }}"></script>
+    <script crossorigin="anonymous" integrity="sha384-7R25F9vMUFngQH7+V1j1DivPGPs7Q3nlqHpzeJ3++2AKqqvnUCGpOiHoWOUPPvTO"
+            src="https://lib.baomitu.com/jstree/3.3.8/jstree.min.js"></script>
     <script type="text/javascript">
         let size = {
             width: window.innerWidth || document.body.clientWidth,
