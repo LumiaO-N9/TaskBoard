@@ -7,11 +7,11 @@ import os
 setting_bp = Blueprint('setting', __name__)
 
 
-def create_log(log, flag=True):
+def create_log(log, flag=True, color='#666'):
     if flag:
-        new_log = Log(log=current_user.username + ' ' + log)
+        new_log = Log(log=current_user.username + ' ' + log, color=color)
     else:
-        new_log = Log(log=log)
+        new_log = Log(log=log, color=color)
     db.session.add(new_log)
 
 
@@ -128,7 +128,7 @@ def del_user_by_id():
     try:
         user = User.query.get(user_id)
         db.session.delete(user)
-        create_log('remove user ' + current_user.username)
+        create_log('remove user ' + current_user.username, color='#F66B68')
         db.session.commit()
     except Exception as e:
         print(e)
@@ -150,12 +150,12 @@ def del_project_by_id():
                     file_path = os.path.join(upload_path, file.security_name)
                     if os.path.isfile(file_path):
                         os.remove(file_path)
-                        create_log('Delete file ' + file.create_time + ' (auto)', False)
+                        create_log('Delete file ' + file.source_name + ' (auto)', False, color='#F66B68')
                 for comment in task.comments:
-                    create_log('Delete comment ' + comment.text[:20] + '...... (auto)', False)
-                create_log('Delete task ' + task.title + '(auto)', False)
-            create_log(' Delete milestone ' + milestone.title + ' (auto)', False)
-        create_log('delete project ' + project.title)
+                    create_log('Delete comment ' + comment.text[:20] + '...... (auto)', False, color='#F66B68')
+                create_log('Delete task ' + task.title + '(auto)', False, color='#F66B68')
+            create_log(' Delete milestone ' + milestone.title + ' (auto)', False, color='#F66B68')
+        create_log('delete project ' + project.title, color='#F66B68')
         db.session.delete(project)
         db.session.commit()
     except Exception as e:
@@ -219,7 +219,7 @@ def save_user_edit_modal():
         if status == 'edit':
             create_log('edit user ' + user.username + '\'s information')
         elif status == 'add':
-            create_log('create user ' + user.username)
+            create_log('create user ' + user.username, color='#008000')
         db.session.commit()
     except Exception as e:
         print(e)
@@ -313,7 +313,7 @@ def delete_tag():
         return 'None'
     try:
         tag = Tag.query.get(tag_id)
-        create_log('delete tag ' + tag.tag)
+        create_log('delete tag ' + tag.tag, color='#F66B68')
         db.session.delete(tag)
         db.session.commit()
     except Exception as e:
@@ -372,7 +372,7 @@ def save_project_edit_modal():
                     'add user ' + user.username + ' to project ' + project.title + '\'s workers')
         for i in wait_to_delete_category_id_array:
             category = Category.query.get(i)
-            create_log('delete category ' + category.title + ' in project ' + project.title)
+            create_log('delete category ' + category.title + ' in project ' + project.title, color='#F66B68')
             db.session.delete(category)
         for key, value in exist_categories_id_title_color.items():
             category = Category.query.get(key)
@@ -390,11 +390,12 @@ def save_project_edit_modal():
                     project=project
                 )
                 create_log(
-                    'create category ' + category.title + ' for project ' + project.title + ' and set its color as ' + category.color)
+                    'create category ' + new_category.title + ' for project ' + project.title + ' and set its color as ' + new_category.color)
                 db.session.add(new_category)
         for i in wait_to_delete_milestone_id_array:
             milestone = Milestone.query.get(i)
-            create_log('delete milestone ' + milestone.title + ' from project ' + project.title + '\'s milestones')
+            create_log('delete milestone ' + milestone.title + ' from project ' + project.title + '\'s milestones',
+                       color='#F66B68')
             db.session.delete(milestone)
         for key, value in exist_milestones_id_title.items():
             milestone = Milestone.query.get(key)
