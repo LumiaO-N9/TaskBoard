@@ -17,6 +17,7 @@ flask-login = "*"
 sqlalchemy = "*"
 flask-moment = "*"
 flask-debugtoolbar = "*"
+mysqlclient = "*"
 
 [requires]
 python_version = "3.7"
