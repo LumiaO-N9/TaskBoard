@@ -15,6 +15,7 @@ class TimestampMixin(object):
 
 class Log(db.Model, TimestampMixin):
     log = db.Column(db.Text)
+    color = db.Column(db.String(10), default='#666')
 
 
 class User(db.Model, UserMixin, TimestampMixin):
@@ -80,7 +81,7 @@ class Task(db.Model, TimestampMixin):
     category = db.relationship('Category', back_populates='tasks')
     user = db.relationship('User', back_populates='tasks')
     comments = db.relationship('Comment', back_populates='task', cascade='all,delete-orphan')
-    files = db.relationship('File', back_populates='task')
+    files = db.relationship('File', back_populates='task', cascade='all,delete-orphan')
 
 
 class Category(db.Model, TimestampMixin):
