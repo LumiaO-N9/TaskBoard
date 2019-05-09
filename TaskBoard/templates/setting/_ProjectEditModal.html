@@ -41,9 +41,9 @@
                                id="milestoneNameInput{{ project.id }}"
                                name="MilestoneNameInput"
                                class="form-control"
-                               placeholder="Milestone Name"
+                               placeholder="Milestone Name" style="width: 85%;"
                         >
-                        <a class="btn btn-default btn-md add_milestone"
+                        <a class="btn btn-default btn-md" style="margin-top: 5px;"
                            onclick="add_milestone_or_category('{{ project.id }}', 'milestone')"><span
                                 class="glyphicon glyphicon-plus"></span></a>
                     </div>
@@ -58,9 +58,11 @@
                         <input type="text"
                                id="categoryNameInput{{ project.id }}" class="form-control  pull-left"
                                name="CategoryNameInput"
-                               placeholder="Category Name">
-                        <div name="color_picker_category" id="color_picker{{ project.id }}"></div>
-                        <a class="btn btn-default btn-md add_category"
+                               placeholder="Category Name" style="width: 85%;">
+                        <div name="color_picker_category" id="color_picker{{ project.id }}"
+                             style="margin-left: 3px;"></div>
+                        <a class="btn btn-default btn-md"
+                           style="margin-top: 5px;display: block;width: 40.02px;"
                            onclick="add_milestone_or_category({{ project.id }},'category')">
                             <span class="glyphicon glyphicon-plus"></span>
                         </a>
@@ -68,11 +70,10 @@
                 </div>
                 <div class="row">
                     <div class="form-group col-sm-12">
-                        <label for="select_users{{ project.id }}" class="col-sm-6 form-inline select_users_label">Select
-                            Users</label>
+                        <label for="select_users{{ project.id }}" class="col-sm-6 form-inline"
+                               style="padding-left: 0px;">Select Users</label>
                         <span class="form-group form-inline">
-                            <label for="filter_by_tag{{ project.id }}"
-                                   class="filter_by_tag_label">Filter By Tag:</label>
+                            <label for="filter_by_tag{{ project.id }}" style="font-size: 10px;font-weight: bold;">Filter By Tag:</label>
                                     <select class="form-control" id="filter_by_tag{{ project.id }}">
                                         <option value="-1">All</option>
                                         {% for tag in tags %}
@@ -80,7 +81,7 @@
                                         {% endfor %}
                                     </select>
                                 </span>
-                        <div id="select_users{{ project.id }}" class="select_users">
+                        <div id="select_users{{ project.id }}" style="margin-top: 20px;">
                             {% for user in users %}
                                 {% if user in project.users %}
                                     <label class="one-third" data-tag_id="{{ user.tag_id }}">
