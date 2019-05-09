@@ -1,85 +1,760 @@
-<div class="modal fade" tabindex="-1"
-     id="EditProjectModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close"
-                        data-dismiss="modal"
-                        aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title">Add Project</h3>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="form-group col-sm-12">
-                        <label>Project Name</label>
-                        <span id="old_project_title_span" hidden></span>
-                        <input id="project_title_input" type="text" name="project_title"
-                               class="form-control" data-rule='maxlength:30|minlength:3' placeholder="Project Name">
-                        <div id="project_title-input-error" class="input-error">至少3位，最多30位</div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-6 form-group">
-                        <label>Milestones</label>
-                        <ul id="milestone_ul" name="milestones-list" class="list-group"></ul>
-                        <input type="text"
-                               id="milestoneNameInput"
-                               name="MilestoneNameInput"
-                               class="form-control"
-                               placeholder="Milestone Name">
-                        <a class="btn btn-default btn-md add_milestone"
-                           onclick="add_milestone_or_category('','milestone')"><span
-                                class="glyphicon glyphicon-plus"></span></a>
-                    </div>
-                    <div class="col-xs-6 form-group">
-                        <label>Categories</label>
-                        <ul id="category_ul" name="category-list" class="list-group"></ul>
-                        <input type="text"
-                               id="categoryNameInput" class="form-control  pull-left"
-                               name="CategoryNameInput"
-                               placeholder="Category Name">
-                        <div name="color_picker_category" id="color_picker"></div>
-                        <a class="btn btn-default btn-md add_category"
-                           onclick="add_milestone_or_category('','category')">
-                            <span class="glyphicon glyphicon-plus"></span>
-                        </a>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="form-group col-sm-12">
-                        <label for="select_users" class="col-sm-6 form-inline select_users_label">Select Users</label>
-                        <span class="form-group form-inline">
-                            <label for="filter_by_tag" class="filter_by_tag_label">Filter By Tag:</label>
-                                    <select class="form-control" id="filter_by_tag">
-                                        <option value="-1">All</option>
-                                        {% for tag in tags %}
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layui.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}" type="text/css">
+{% endblock %}
+{% block content %}
+    {% include '_navbar.html' %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h3>User Settings</h3></div>
+                    <div class="panel-body">
+                        <div class="col-sm-6">
+                            <div class="header"><h4>Change Password</h4></div>
+                            <div id="change_password_form">
+                                <div class="form-group">
+                                    <input type="password" id="password" name="password" class="form-control"
+                                           placeholder="Current Password">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="password1" name="password1" class="form-control"
+                                           placeholder="New Password"
+                                           data-rule='pattern:"^.*(?=.{6,})(?=.*[A-Za-z])(?=.*[!@#$%^&*?\\(\\)\\-_\\.]).*$"'
+                                           value=""
+                                           oncopy="return false" onpaste="return false"
+                                           oncontextmenu="return false">
+                                    <div class="input-error">最少6位，包括至少1个字母，1个特殊字符</div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="password2" name="password2" class="form-control"
+                                           placeholder="Verify Password" oncopy="return false" onpaste="return false"
+                                           oncontextmenu="return false">
+                                    <div class="input-error">两次输入的密码不一致！</div>
+                                </div>
+                                <div class="form-group">
+                                    <a type="button" class="btn btn-default btn-info"
+                                       onclick="change_user_password()">Update Password
+                                    </a>
+                                    <button class="btn btn-default btn-default" type="reset">Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="header"><h4>Change Username</h4></div>
+                            <div>
+                                <div class="form-group">
+                                    <input type="text" id="username" name="username" class="form-control"
+                                           placeholder="New Username"
+                                           data-rule='pattern:"^[a-zA-Z]+[a-zA-Z0-9_\\-]{4,16}$"'>
+                                    <div id="username-error" class="input-error">5到16位（字母，数字，下划线，减号），必须以字母开头</div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="button" class="btn btn-default btn-info" value="Update Username"
+                                           onclick="change_user_username_or_email('username')"/>
+                                    <button class="btn btn-default btn-default" type="reset">Reset
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="header"><h4>Change Email</h4></div>
+                            <form id="change_user_email">
+                                <div class="form-group">
+                                    <input type="text" id="email" name="email" class="form-control"
+                                           placeholder="New Email"
+                                           data-rule='pattern:"^([A-Za-z0-9_\\-\\.])+\\@([A-Za-z0-9_\\-\\.])+\\.([A-Za-z]{2,4})$"'>
+                                    <div id="email-error" class="input-error">邮箱格式有误</div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="button" class="btn btn-default btn-info"
+                                           onclick="change_user_username_or_email('email')"
+                                           value="Update Email"/>
+                                    <button class="btn btn-default btn-default" type="reset">Reset
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="header"><h4>Select Default Project</h4></div>
+                            <select class="form-control" id="default_project_change">
+                                <option value="{{ current_user.default_project.id|default('None') }}"
+                                        selected>{{ current_user.default_project.title|default('None') }}</option>
+                                {% for project in projects %}
+                                    {% if (current_user.is_admin or project in current_user.projects) and project != current_user.default_project %}
+                                        <option value="{{ project.id }}">{{ project.title }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if current_user.is_admin %}
+                            <div class="col-sm-6">
+                                <div class="header"><h4>Edit Tags</h4></div>
+                                <select class="form-control" id="Tags_Edit">
+                                    <option value="-2">None</option>
+                                    {% for tag in tags %}
+                                        {% if tag.id != current_user.tag_id %}
                                             <option value="{{ tag.id }}">{{ tag.tag }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </span>
-                        <div id="select_users" class="select_users">
-                            {% for user in users %}
-                                <label class="half-width" data-tag_id="{{ user.tag_id }}">
-                                    <input name="normal_user" type="checkbox" id="inlineCheckbox{{ user.id }}"
-                                           value="{{ user.id }}"> {{ user.username }}
-                                </label>
-                            {% endfor %}
+                                        {% else %}
+                                            <option value="{{ tag.id }}" selected>{{ tag.tag }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <input type="button" class="btn btn-default btn-info" onclick="Edit_Tag()" value="Edit">
+                                <input type="button" class="btn btn-default btn-default" onclick="Add_Tag()"
+                                       value="Add">
+                            </div>
+                        {% endif %}
+                        <div class="col-sm-12">
+                            <hr>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="header"><h4>TaskBoard Users</h4></div>
+                            <div id="users_table_div" class="table-responsive">
+                                {% include 'setting/_UsersTable.html' %}
+                            </div>
+                            {% if current_user.is_admin %}
+                                <div class="form-group">
+                                    <a class="btn btn-default btn-info" onclick="show_user_edit_modal('')">
+                                        <span class="glyphicon glyphicon-plus"></span> Add User
+                                    </a>
+                                </div>
+                                {% include 'setting/_UserAddModal.html' %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <p class="small clearfix">
-                    <em>Administrators have access to all projects, whether or not they are selected here.</em>
-                </p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default"
-                        data-dismiss="modal">Close
-                </button>
-                <a type="button" class="btn btn-primary" name="delete"
-                   onclick="project_modal_save('')">Add Project
-                </a>
+            <div class="col-sm-12 col-md-6">
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h3>Project Settings</h3></div>
+                    <div class="panel-body">
+                        <div class="col-sm-12">
+                            <h4>Current Projects
+                                <span class="small form-group form-inline pull-right">Show By User:
+                                    <select class="form-control" id="show_by_user">
+                                        <option value="any">Any User</option>
+                                        {% for user in users %}
+                                            <option value="{{ user.id }}">{{ user.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </span>
+                                <span class="small form-group form-inline pull-right">Filter By Status:
+                                    <select class="form-control" id="filter_by_status">
+                                        <option value="all">All Projects</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </span>
+                                <span class="small form-group form-inline pull-right">Sort By:
+                                    <select class="form-control" id="sort_by_name_or_date">
+                                        <option value="name">Project Name</option>
+                                        <option value="date">Create Date</option>
+                                    </select>
+                                </span>
+                            </h4>
+                        </div>
+                        <div class="col-sm-12">
+                            <div id="projects_table_div" class="table-responsive">
+                                {% include 'setting/_ProjectsTable.html' %}
+                            </div>
+                            {% if current_user.is_admin %}
+                                <div class="form-group">
+                                    <button class="btn btn-default btn-info" onclick="show_project_edit_modal('')"><span
+                                            class="glyphicon glyphicon-plus"></span> Add Project
+                                    </button>
+                                </div>
+                                {% include 'setting/_ProjectAddModal.html' %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(function () {
+
+            $('#settings').addClass('active').children('a').removeAttr('href');
+
+            layer.config({
+                offset: '150px',
+            });
+            Register_password_validator();
+            Register_username_validator();
+            Register_email_validator();
+
+
+            $('label[name="status"] input').change(Register_status_change);
+
+            $('#show_by_user').change(UserAndStatusFilter);
+
+            $('#filter_by_status').change(UserAndStatusFilter);
+
+            $('#sort_by_name_or_date').change(function () {
+                let sort_by = $('#sort_by_name_or_date option:selected').val();
+                if (sort_by === 'name') {
+                    $('#projects_table').load('{{ url_for("setting.sort_by_name") }}', UserAndStatusFilter);
+                } else if (sort_by === 'date') {
+                    $('#projects_table').load('{{ url_for("setting.sort_by_date") }}', UserAndStatusFilter);
+                }
+            });
+
+            $('#default_project_change').change(function () {
+                let project_id = $(this).val();
+                let project_title = $('#default_project_change option:selected').text();
+                $.ajax({
+                    url: "{{ url_for('setting.change_default_project') }}",
+                    type: 'POST',
+                    data: {
+                        'project_id': project_id,
+                    },
+                    success: function (e) {
+                        if (e === 'ok') {
+                            layer.msg('Default Project成功修改为:' + project_title);
+                            setTimeout(() => {
+                                $('#users_table_div').load('{{ url_for("setting.ajax_load_user_table") }}');
+                            }, 300);
+                        } else {
+                            layer.msg('Default Project修改失败！');
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    },
+                });
+            });
+
+            $('input[name=milestone_input]').bind('keypress', EnterPress);
+
+            $('input[name=category_input]').bind('keypress', EnterPress);
+
+            $('#username').bind('keypress', function (event) {
+                if (event.keyCode === 13)
+                    change_user_username_or_email('username');
+            });
+
+            $('#email').bind('keypress', function (event) {
+                if (event.keyCode === 13)
+                    change_user_username_or_email('email');
+            })
+
+
+        });
+
+        function Register_password_validator() {
+            let form = $('#change_password_form');
+            form.find('[data-rule]').each(function () {
+                new Input($(this));
+            });
+            let password1 = $('#password1');
+            let password2 = $('#password2');
+            let error = password2.next('div.input-error');
+            password1.on('blur', function () {
+                password2.trigger('blur');
+            });
+            password2.on('blur', function () {
+                if (password1.val() === password2.val()) {
+                    error.hide();
+                } else {
+                    error.show();
+                }
+            });
+        }
+
+        function Edit_Tag() {
+            let select_option = $('#Tags_Edit option:selected');
+            let tag_val = select_option.val();
+            if (tag_val === '-2') {
+                Add_Tag();
+                return;
+            }
+            let tag_name = select_option.text();
+            layer.open({
+                type: 1,
+                skin: "demo-class",
+                area: ['400px', '200px'],
+                title: 'Edit Tag',
+                content: `<div class="text-center" style="margin-top:20px"><label for="tag_edit_input" class="form-group">Tag name:</label><input class="form-control" id="tag_edit_input" value="${tag_name}"></div>`,
+                btn: ['修改', '删除', '取消'],
+                anim: 1,
+                offset: '150px',
+                yes: function (index) {
+                    let tag_input = $('#tag_edit_input');
+                    tag_input.change(function () {
+                        tag_input.css('border', '1px solid #dbdbdb');
+                    });
+                    let tag = tag_input.val();
+                    if (tag === '') {
+                        tag_input.css('border', '1px solid #ff0000');
+                        tag_input.focus().select();
+                        layer.msg('Please input a name !');
+                        return;
+                    }
+                    $.ajax({
+                        url: "{{ url_for('setting.edit_tag') }}",
+                        type: 'POST',
+                        data: {
+                            'tag_id': tag_val,
+                            'tag': tag
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('修改成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else if (e === 'same') {
+                                let msg = 'The tag name you input almost existed, please re-entry !';
+                                layer_error_msg(tag_input, msg);
+                                return;
+                            } else {
+                                layer.msg('修改失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    $.ajax({
+                        url: "{{ url_for('setting.delete_tag') }}",
+                        type: 'POST',
+                        data: {
+                            'tag_id': tag_val,
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('删除成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else {
+                                layer.msg('删除失败！')
+                            }
+                        },
+                    });
+                    return;
+                },
+                btn3: function (index) {
+                    layer.close(index);
+                }
+            });
+
+        }
+
+        function Add_Tag() {
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: 'Add Tag',
+                content: '<div class="text-center" style="margin-top:20px"><label for="tag_add_input" class="form-group">Tag name:</label><input class="form-control" id="tag_add_input"></div>',
+                btn: ['确定', '取消'],
+                anim: 1,
+                offset: '150px',
+                yes: function (index) {
+                    let tag_input = $('#tag_add_input');
+                    tag_input.change(function () {
+                        tag_input.css('border', '1px solid #dbdbdb');
+                    })
+                    let tag = tag_input.val();
+                    if (tag === '') {
+                        tag_input.css('border', '1px solid #ff0000');
+                        tag_input.focus().select();
+                        layer.msg('Please input a name !');
+                        return;
+                    }
+                    $.ajax({
+                        url: "{{ url_for('setting.add_tag') }}",
+                        type: 'POST',
+                        data: {
+                            'tag': tag
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('添加成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else if (e === 'same') {
+                                let msg = 'The tag name you input almost existed, please re-entry !';
+                                layer_error_msg(tag_input, msg);
+                                return;
+                            } else {
+                                layer.msg('添加失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        }
+
+        function Register_email_validator() {
+            new Input($('#email'));
+        }
+
+        function Register_username_validator() {
+            new Input($('#username'));
+        }
+
+        function Register_status_change() {
+            let ele = $(this);
+            let project_id = ele.val();
+            let project_title = $('#project_title' + project_id).text();
+            $.ajax({
+                url: "{{ url_for('setting.change_project_status') }}",
+                type: 'POST',
+                data: {
+                    'project_id': project_id,
+                },
+                success: function (e) {
+                    if (e === 'ok') {
+                        layer.msg(project_title + '状态修改成功。');
+                        let tr_ele = ele.parents('tr');
+                        if (tr_ele.attr('data-status') === 'False') {
+                            tr_ele.attr('data-status', 'True');
+                        } else if (tr_ele.attr('data-status') !== 'True') {
+                            return;
+                        }
+                        tr_ele.attr('data-status', 'False');
+                    } else {
+                        layer.msg(project_title + '状态修改失败！');
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+
+        function UserAndStatusFilter() {
+            $('label[name="status"] input').change(Register_status_change);
+            let user_filter_val = $('#show_by_user option:selected').val();
+            let status_filter_val = $('#filter_by_status option:selected').val();
+            let active_tr = $('tr[data-status="True"]');
+            let inactive_tr = $('tr[data-status="False"]');
+            if (user_filter_val !== 'any') {
+                $('ul[name="users"]>li[name!=' + user_filter_val + ']').parents('tr').hide();
+                $('ul[name="users"]>li[name=' + user_filter_val + ']').parents('tr').show();
+            } else {
+                $('ul[name="users"]').parents('tr').show();
+            }
+            if (status_filter_val === 'all') {
+                active_tr.each(function () {
+                    if ($(this).is(':hidden'))
+                        return
+                    $(this).show();
+                });
+                inactive_tr.each(function () {
+                    if ($(this).is(':hidden'))
+                        return;
+                    $(this).show();
+                });
+            } else if (status_filter_val === 'active') {
+                inactive_tr.hide();
+            } else if (status_filter_val === 'inactive') {
+                active_tr.hide();
+            }
+        }
+
+        function del_user(the, user_id) {
+            let name = $(the).parents('tr').children('td').eq(0).text();
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: '删除用户',
+                content: '<div class="text-center" style="margin-top:20px"><p>是否确定删除用户 <span class="label label-danger">' +
+                    name + '</span> ?</p></div>',
+                btn: ['删除', '取消'],
+                anim: 6,
+                offset: '150px',
+                yes: function (index) {
+                    $.ajax({
+                        url: "{{ url_for('setting.del_user_by_id') }}",
+                        type: 'POST',
+                        data: {
+                            'user_id': user_id,
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('删除成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else {
+                                layer.msg('删除失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        }
+
+        function del_project(the, project_id) {
+            let title = $(the).parents('tr').children('td').eq(0).text();
+            layer.open({
+                type: 1,
+                skin: "layui-layer-rim",
+                area: ['400px', '200px'],
+                title: '删除用户',
+                content: '<div class="text-center" style="margin-top:20px"><p>是否确定删除项目 <span class="label label-danger">' +
+                    title + '</span> ?</p></div>',
+                btn: ['删除', '取消'],
+                anim: 6,
+                offset: '150px',
+                yes: function (index, layero) {
+                    $.ajax({
+                        url: "{{ url_for('setting.del_project_by_id') }}",
+                        type: 'POST',
+                        data: {
+                            'project_id': project_id,
+                        },
+                        success: function (e) {
+                            if (e === 'ok') {
+                                layer.close(index);
+                                layer.msg('删除成功！');
+                                setTimeout(() => {
+                                    parent.location.reload();
+                                }, 700);
+                            } else {
+                                layer.msg('删除失败！')
+                            }
+                        },
+                    });
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        }
+
+
+        function show_user_edit_modal(user_id) {
+            let form = $('#UserEditModalForm' + user_id);
+            form.find('[data-rule]').each(function () {
+                new Input($(this));
+            });
+            let password1 = $('#user_password1_input' + user_id);
+            let password2 = $('#user_password2_input' + user_id);
+            let error = password2.next('div.input-error');
+            password1.on('blur', function () {
+                password2.trigger('blur');
+            });
+            password2.on('blur', function () {
+                if (password1.val() === '' && password2 === '' || password1.val() === password2.val()) {
+                    error.hide();
+                } else {
+                    error.show();
+                }
+            });
+            $('#EditUserModal' + user_id).modal('show');
+        }
+
+        function show_user_add_modal() {
+            let form = $('#UserEditModalForm');
+            form.find('[data-rule]').each(function () {
+                new Input($(this));
+            });
+            let password1 = $('#add_user_password1_input');
+            let password2 = $('#add_user_password2_input');
+            let error = $('#password2-error');
+            password1.on('blur', function () {
+                password2.trigger('blur');
+            });
+            password2.on('blur', function () {
+                if (password1.val() === password2.val()) {
+                    error.hide();
+                } else {
+                    error.show();
+                }
+            });
+            $('#AddUserModal').modal('show');
+        }
+
+        function user_modal_save(user_id) {
+            let form = $("#UserEditModalForm" + user_id);
+            let password1_input = $('#user_password1_input' + user_id);
+            let password2_input = $('#user_password2_input' + user_id);
+            if (user_id !== '' && password1_input.val() === '' && password2_input.val() === '')
+                password1_input.removeAttr('data-rule');
+            let $inputs = form.find('[data-rule]');
+            let inputs_array = [];
+            $inputs.each(function () {
+                inputs_array.push(new Input($(this)));
+            });
+            $inputs.trigger('change');
+            password2_input.trigger('blur');
+            let password2_input_error = password2_input.next('div:visible');
+            if (password2_input_error.length !== 0) {
+                layer.msg('Please check out your input carefully !');
+                return;
+            }
+            for (let i = 0; i < inputs_array.length; i++) {
+                let item = inputs_array[i];
+                let r = item.validator.is_valid();
+                if (!r) {
+                    layer.msg('Please check out your input carefully !');
+                    return;
+                }
+            }
+            let modal = $('#EditUserModal' + user_id);
+            $.ajax({
+                url: "{{ url_for('setting.save_user_edit_modal') }}",
+                type: 'POST',
+                data: form.serialize(),
+                success: function (status) {
+                    if (status !== 'fail') {
+                        if (status === 'same username') {
+                            let username_input = $('#user_username_input' + user_id);
+                            let msg = 'You input the username already exists, please re-entry !';
+                            layer_error_msg(username_input, msg);
+                            return;
+                        }
+                        if (status === 'same email') {
+                            let email_input = $('#user_email_input' + user_id);
+                            let msg = 'You input the email adress already exists, please re-entry !';
+                            layer_error_msg(email_input, msg);
+                            return;
+                        }
+                        modal.modal('hide');
+                        if (status === 'edit')
+                            layer.msg('修改成功！');
+                        else if (status === 'add')
+                            layer.msg('添加成功！');
+                        setTimeout(() => {
+                            parent.location.reload();
+                        }, 300);
+                    } else {
+                        layer.msg('修改失败！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+
+        function is_valid(ele, msg) {
+            if (ele.val() === '') {
+                layer_error_msg(ele, msg);
+                return false;
+            }
+            return true;
+        }
+
+        function is_valid_array(inputs_array) {
+            for (let i = 0; i < inputs_array.length; i++) {
+                let item = inputs_array[i];
+                let r = item.validator.is_valid();
+                if (!r) {
+                    layer.msg('Please check out your input carefully !');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function change_user_password() {
+            let current_password = $('#password');
+            let password1_input = $('#password1');
+            let password2_input = $('#password2');
+            let form = $('#change_password_form');
+            let $inputs = form.find('[data-rule]');
+            let inputs_array = [];
+            $inputs.each(function () {
+                inputs_array.push(new Input($(this)));
+            });
+            $inputs.trigger('change');
+            password2_input.trigger('blur');
+            if (!is_valid(current_password, 'Please input current password !')) return;
+            if (!is_valid(password1_input, 'Please input new password !')) return;
+            if (!is_valid(password2_input, 'Please input password again !')) return;
+            if (!is_valid_array(inputs_array)) return;
+            $.ajax({
+                url: "{{ url_for('setting.change_user_password') }}",
+                type: 'POST',
+                data: {
+                    'current_password': current_password.val(),
+                    'password': password1_input.val()
+                },
+                success: function (status) {
+                    if (status !== 'fail') {
+                        if (status === 'ok') {
+                            layer.msg('Password reset complete！');
+                            $('#change_password_form').find('input').val('');
+                        } else if (status === 'invalid') {
+                            let ele = $('#password');
+                            let msg = 'Current password is invalid, Please input again！';
+                            layer_error_msg(ele, msg);
+                        }
+                    } else {
+                        layer.msg('Password change unsuccessful, Please try again later！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+
+        }
+
+        function change_user_username_or_email(name) {
+            let info_input = $('#' + name);
+            let input_validator = new Input(info_input);
+            if (!input_validator.validator.is_valid()) {
+                let ele = info_input;
+                let msg = name + ' format is not correct !';
+                layer_error_msg(ele, msg);
+                return;
+            }
+            $.ajax({
+                url: "{{ url_for('setting.change_user_username_or_email') }}",
+                type: 'POST',
+                data: {
+                    'name': name,
+                    'info': info_input.val(),
+                },
+                success: function (status) {
+                    if (status !== 'fail') {
+                        if (status === 'ok') {
+                            layer.msg(name + ' change success！', {
+                                end: function () {
+                                    if (name === 'email') {
+                                        $('#users_table_div').load('{{ url_for("setting.ajax_load_user_table") }}');
+                                        $('#email').val('');
+                                    } else if (name === 'username')
+                                        parent.location.reload();
+                                }
+                            });
+                        } else if (status === 'same') {
+                            let msg = 'You input the ' + name + ' already exists, please re-entry !';
+                            let ele = info_input;
+                            layer_error_msg(ele, msg);
+                        }
+                    } else {
+                        layer.msg(name + ' change unsuccessful, please try again later！')
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+    </script>
+{% endblock %}
+
