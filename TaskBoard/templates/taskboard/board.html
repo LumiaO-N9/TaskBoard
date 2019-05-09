@@ -3,86 +3,7 @@
 {% block style %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/default/style.min.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layui.css') }}" type="text/css">
-    <style type="text/css">
-        .panel {
-            margin-top: -20px;
-        }
-
-        #project_panel {
-            width: 20%;
-            float: left;
-        {#background: #fcf8e3;#}
-        }
-
-        #milestone_panel, #task_panel {
-            width: 40%;
-            float: left;
-        }
-
-        #tree-panel-body, #milestone-panel-body, #task-panel-body {
-            border: none;
-            box-shadow: none;
-            padding: 0px;
-        }
-
-        .project_title, .task_title {
-            height: 60px;
-            line-height: 60px;
-            text-align: center;
-        }
-
-        .layui-collapse, .task_column_panel, #tree-panel-body {
-            overflow: scroll;
-            overflow-x: hidden;
-        }
-
-        .project_title .line, .task_title .line {
-            display: inline-block;
-            border-top: 1px solid #ccc;
-        }
-
-        .project_title .title, .task_title .title {
-            font-size: 30px;
-            font-weight: bold;
-            color: #686868;
-            vertical-align: middle;
-        }
-
-        .setting-widget {
-            border: 1px solid rgba(51, 51, 51, .2);
-            border-radius: 5px;
-            background-color: #F8F8F8;
-            box-shadow: 0px 0px 3px 0px rgba(51, 51, 51, .2);
-        }
-
-        .setting-widget p {
-            margin-top: 10px;
-            margin-bottom: 10px;
-            font-size: 20px;
-        }
-
-        .setting-widget button {
-            margin-bottom: 20px;
-        }
-
-        /*#Color_picker {
-            display: block;
-            height: 34px;
-            padding: 6px 12px;
-            background-color: #fff;
-            border: solid 1px #ccc;
-            border-radius: 4px;
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-        }*/
-        .due-date {
-            font-weight: bold;
-            text-shadow: 0px 0px 3px rgba(255, 81, 28, 1);
-        }
-
-        body {
-            overflow: hidden;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/board.css') }}" type="text/css">
 {% endblock %}
 {% block content %}
     {% include '_navbar.html' %}
@@ -91,18 +12,9 @@
         <div class="row">
             <div id="project_panel" class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title" style="padding-right: 0px;">Project Tree
-                        {#                        <a id="add_project_when_none"#}
-                        {#                           style="display: none;font-weight: normal;font-size: 10px;float: right;margin-top: -6px;"#}
-                        {#                           class="btn btn-default"#}
-                        {#                           onclick="show_project_edit_modal('')"><span#}
-                        {#                                class="glyphicon glyphicon-plus"></span> Add Project#}
-                        {#                        </a>#}
-                    </h3>
+                    <h3 class="panel-title">Project Tree</h3>
                 </div>
-                <div id="tree-panel-body" class="panel-body">
-                </div>
-
+                <div id="tree-panel-body" class="panel-body"></div>
             </div>
             <div id="milestone_panel" class="panel panel-default">
                 <div class="panel-heading">
@@ -140,29 +52,14 @@
         $(function () {
             $('#board').addClass('active').children('a').removeAttr('href');
             LoadMileStone('{{ current_user.default_project_id }}', false, 0);
-            {#$('#milestone-panel-body').load('{{ url_for("taskboard.render_milestone_column") }}',#}
-            {#    {'project_id': ""},#}
-            {#    function () {#}
-            {#        // setProjectLineWidth();#}
-            {#        setLineWidthByClass('project');#}
-            {#        $('div[id^=task_card]').on('click', LoadTaskColumn);#}
-            {#        $('.layui-collapse').css('height', size.height - 50 - 38 - 60);#}
-            {#        layui.use('element', function () {#}
-            {#            layui.element.init();#}
-            {#        });#}
-            {#    });#}
             $('#tree-panel-body').css('height', size.height - 50 - 38);
             $('.panel').css('height', size.height - 50);
-            //$('#milestone_panel').css('width', (size.width - 400) / 2);
-            //$('#task_panel').css('width', (size.width - 400) / 2);
             LoadTree();
 
 
             window.onresize = function () {
                 setLineWidthByClass('project');
                 setLineWidthByClass('task');
-                /*setProjectLineWidth();
-                setTaskLineWidth();*/
             }
         });
 
@@ -176,13 +73,6 @@
             return label;
         }
 
-        /*function disableTaskAdd(node) {
-            let node_id = $(node)[0].id;
-            if (task_Reg.test(node_id))
-                return true;
-            return false;
-        }*/
-
         function disableUnformatPaste(node) {
             let node_id = $(node)[0].id;
             let tree = $(node).jstree(true);
@@ -194,10 +84,6 @@
                     if (milestone_Reg.test(node_id)) {
                         return false;
                     }
-                    /*if ((new RegExp('task_node')).test(node_id)) {
-                        console.log('false sss');
-                        return false;
-                    }*/
                 }
                 if (milestone_Reg.test(paste_buffer_id)) {
                     if (project_Reg.test(node_id)) {
@@ -209,44 +95,6 @@
         }
 
         function customMenu(node) {
-            // let tree = $('#tree-panel-body').jstree(true);
-            /*let items = {
-                "Edit": {
-                    "separator_before": false,
-                    "separator_after": true,
-                    "label": "Create",
-                    "action": function (data) {
-                        $node = tree.create_node($node, {
-                            text: 'New File',
-                            type: 'file',
-                            icon: 'glyphicon glyphicon-file'
-                        });
-                        tree.deselect_all();
-                        tree.select_node($node);
-                    },
-                },
-                "Rename": {
-                    "separator_before": false,
-                    "separator_after": false,
-                    "label": "Rename",
-                    "action": function (data) {
-                        tree.edit($node);
-                        let nod = tree.get_node('#project_node1');
-                        console.log(nod);
-                        console.log(data);
-                    }
-                },
-                "Remove": {
-                    "separator_before": false,
-                    "separator_after": false,
-                    "label": "Remove",
-                    "action": function (obj) {
-                        tree.delete_node($node);
-                    }
-                }
-            }*/
-            //items : function (o, cb) { // Could be an object directly
-
             let items = {
                 "cut": {
                     "separator_before": false,
@@ -287,11 +135,6 @@
                     "action": function (data) {
                         let inst = $.jstree.reference(data.reference),
                             obj = inst.get_node(data.reference);
-                        /*let edit_obj = inst.get_buffer();
-                        inst.paste(obj);
-                        inst.edit(edit_obj, null, function () {
-                            console.log('ajax asynchronous data to back endpoint');
-                        });*/
                         let node_buffer = inst.get_buffer();
                         let mode = node_buffer.mode;
                         let node_id = node_buffer.node[0].id;
@@ -299,7 +142,6 @@
                         let node_type = type_and_id.node_type;
                         let id = type_and_id.id;
                         let target_id_text = $(node)[0].id;
-                        {#let target_id = $(node)[0].id.split(node_type + '_node')[1];#}
                         let target_id = getTypeAndId(target_id_text).id
                         let buffer_node = node_buffer.node;
                         let name = buffer_node[0].text;
@@ -310,7 +152,6 @@
                                 data: {
                                     'type': node_type,
                                     'id': id,
-                                    //'target_id_text': target_id_text
                                     'target_id': target_id
                                 },
                                 success: function (e) {
@@ -335,8 +176,6 @@
                             let node_json = {'text': node_buffer.node[0].text, 'icon': icon};
                             inst.create_node(obj, node_json, "last", function (new_node) {
                                 try {
-                                    {#check_if_same_name_exist(new_node.parent);#}
-                                    {#inst.edit(new_node, null,);#}
                                     inst.edit(new_node, null, function (ob) {
                                         let new_name = ob.text;
                                         $.ajax({
@@ -379,7 +218,6 @@
                     "separator_before": false,
                     "icon": "fa fa-plus",
                     "separator_after": false,
-                    {#"_disabled": disableTaskAdd(node), //(this.check("create_node", data.reference, {}, "last")),#}
                     "_disabled": false,
                     "label": GenerateLabelByNode(node),
                     "action": function (data) {
@@ -430,13 +268,8 @@
                     "separator_before": false,
                     "icon": "fa fa-font",
                     "separator_after": false,
-                    "_disabled": false, //(this.check("rename_node", data.reference, this.get_parent(data.reference), "")),
+                    "_disabled": false,
                     "label": "Rename",
-                    /*!
-                    "shortcut"			: 113,
-                    "shortcut_label"	: 'F2',
-                    "icon"				: "glyphicon glyphicon-leaf",
-                    */
                     "action": function (data) {
                         let inst = $.jstree.reference(data.reference),
                             obj = inst.get_node(data.reference);
@@ -476,7 +309,7 @@
                     "separator_before": false,
                     "icon": "fa fa-trash-o",
                     "separator_after": false,
-                    "_disabled": false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+                    "_disabled": false,
                     "label": "Delete",
                     "action": function (data) {
                         let inst = $.jstree.reference(data.reference),
@@ -489,67 +322,12 @@
                     "separator_before": true,
                     "icon": "fa fa-pinterest-p",
                     "separator_after": false,
-                    "_disabled": false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+                    "_disabled": false,
                     "label": "New Project",
                     "action": function () {
                         show_project_edit_modal('');
                     }
                 }
-                /*"ccp": {
-                    "separator_before": true,
-                    "icon": false,
-                    "separator_after": false,
-                    "label": "Edit",
-                    "action": false,
-                    "submenu": {
-                        "cut": {
-                            "separator_before": false,
-                            "separator_after": false,
-                            "label": "Cut",
-                            "action": function (data) {
-                                let inst = $.jstree.reference(data.reference),
-                                    obj = inst.get_node(data.reference);
-                                if (inst.is_selected(obj)) {
-                                    inst.cut(inst.get_top_selected());
-                                } else {
-                                    inst.cut(obj);
-                                }
-                            }
-                        },
-                        "copy": {
-                            "separator_before": false,
-                            "icon": false,
-                            "separator_after": false,
-                            "label": "Copy",
-                            "action": function (data) {
-                                let inst = $.jstree.reference(data.reference),
-                                    obj = inst.get_node(data.reference);
-                                if (inst.is_selected(obj)) {
-                                    inst.copy(inst.get_top_selected());
-                                } else {
-                                    inst.copy(obj);
-                                }
-                            }
-                        },
-                        "paste": {
-                            "separator_before": false,
-                            "icon": false,
-                            "_disabled": disableUnformatPaste(node),
-                            "separator_after": false,
-                            "label": "Paste",
-                            "action": function (data) {
-                                console.log(data.reference);
-                                let inst = $.jstree.reference(data.reference),
-                                    obj = inst.get_node(data.reference);
-                                console.log(inst);
-                                inst.paste(obj);
-                                inst.edit(inst.get_children_dom(obj).last(), null, function () {
-                                    console.log('ajax asynchronous data to back endpoint');
-                                });
-                            }
-                        }
-                    }
-                }*/
             };
             let id = $(node)[0].id;
             let node_id;
@@ -599,53 +377,6 @@
             return true;
         }
 
-        /*function storeProjectMilestoneTaskId(node_type, id,) {
-            let project_node_id;
-            let milestone_node_id;
-            let task_node_id;
-            let node_collection;
-            if (node_type === 'task') {
-                task_node_id = id;
-                milestone_node_id = $('#' + node_type + '_node' + id).parents('li[id^=milestone_node]')[0].id.split('milestone_node')[1];
-                project_node_id = $('#' + node_type + '_node' + id).parents('li[id^=project_node]')[0].id.split('project_node')[1];
-            } else if (node_type === 'milestone') {
-                milestone_node_id = id;
-                project_node_id = $('#' + node_type + '_node' + id).parents('li[id^=project_node]')[0].id.split('project_node')[1];
-            } else if (node_type === 'project') {
-                project_node_id = id;
-            }
-            node_collection = {
-                'project_node_id': project_node_id,
-                'milestone_node_id': milestone_node_id,
-                'task_node_id': task_node_id
-            }
-            console.log(node_collection);
-            return node_collection;
-        }*/
-
-        /*function forContextMenuAjaxReload(node_type, node_collection, action) {
-            let project_node_id = node_collection.project_node_id;
-            let milestone_node_id = node_collection.milestone_node_id;
-            let task_node_id = node_collection.task_node_id;
-            if (action === 'delete') {
-                if (node_type === 'task') {
-                    LoadMileStone(project_node_id, true, milestone_node_id);
-                } else if (node_type === 'milestone') {
-                    LoadMileStone(project_node_id, true, milestone_node_id);
-                } else if (node_type === 'project') {
-                    LoadMileStone(project_node_id, false, null);
-                }
-                return;
-            }
-            if (node_type === 'task') {
-                LoadMileStone(project_node_id, true, milestone_node_id);
-                LoadTaskById(task_node_id);
-            } else if (node_type === 'milestone') {
-                LoadMileStone(project_node_id, true, milestone_node_id);
-            } else if (node_type === 'project') {
-                LoadMileStone(project_node_id, false, null);
-            }
-        }*/
 
         function AjaxReloadPageAfterContextMenu(node_type, id, action) {
             let project_id = $('#store_project_id_for_ajax').text();
@@ -656,7 +387,6 @@
             });
             if (node_type === 'project') {
                 if (action === 'delete') {
-                    {#LoadMileStone('', false, []);#}
                     $('#milestone-panel-body').children().remove();
                     $('#task-panel-body').children().remove();
                 } else {
@@ -700,7 +430,6 @@
             }
             let tree = $('#tree-panel-body').jstree(true);
             tree.open_node(node);
-            {#$('#tree-panel-body').jstree('open_node', node);#}
             LoadMileStone(project_id, true, [milestone_node_id]);
         }
 
@@ -730,31 +459,6 @@
             }).on("select_node.jstree", function (e, data) {
                 TreeNodeClickEvent(data);
             }).on('refresh.jstree', whether_show_add_button).on('loaded.jstree', whether_show_add_button);
-            /*.on('loaded.jstree', function () {
-                //$('#tree-panel-body').jstree('open_all');
-                let project_nodes = $('li[id^=project_node]');
-                console.log(project_nodes);
-                project_nodes.each(function () {
-                    let selector = $(this);
-                    console.log(selector[0].id);
-                    $.contextMenu({
-                        selector: selector[0].id,
-                        items: {
-                            'edit': {
-                                name: 'Edit',
-                                icon: 'fa-pencil-square-o',
-                                callback: function (itemKey, opt, e) {
-                                    console.log(itemKey);
-                                    console.log(opt.$trigger[0].id);
-                                    console.log(e);
-                                    return false;
-                                }
-                            }
-                        }
-                    });
-                });
-
-            });*/
         }
 
         function LoadMileStone(project_id, show, milestone_node_id_array) {
@@ -766,7 +470,6 @@
                     }
                 }
                 $('.layui-collapse').css('height', size.height - 50 - 38 - 60);
-                // setProjectLineWidth();
                 setLineWidthByClass('project');
                 layui.use('element', function () {
                     layui.element.init();
@@ -780,7 +483,6 @@
                 return;
             }
             $('#task-panel-body').load('{{ url_for("taskboard.render_task_column") }}', {'task_id': task_id}, function () {
-                // setTaskLineWidth();
                 setLineWidthByClass('task');
                 Register_time_tip();
                 $('.task_column_panel').css('height', size.height - 50 - 38 - 60);
@@ -825,21 +527,6 @@
             ele_title.children('.line').css('width', width);
         }
 
-        /*function setProjectLineWidth() {
-            let project_title = $('.project_title');
-            let title = project_title.children('.title');
-            let width = (parseInt(project_title.css('width')) - parseInt(title.css('width')) - 10) / 2;
-            project_title.children('#line1').css('width', width);
-            project_title.children('#line2').css('width', width);
-        }
-
-        function setTaskLineWidth() {
-            let task_title = $('.task_title');
-            let title = task_title.children('.title');
-            let width = (parseInt(task_title.css('width')) - parseInt(title.css('width')) - 10) / 2;
-            task_title.children('#line3').css('width', width);
-            task_title.children('#line4').css('width', width);
-        }*/
 
         function Register_time_tip() {
             let tip_index;
@@ -897,13 +584,11 @@
                 $('#task_points').val(data.points);
             }
             let ele = $('#Color_picker');
-            {#ele.attr('data-color', '#D9EDF7');#}
             layui.use('colorpicker', function () {
                 let colorpicker = layui.colorpicker;
-                //渲染
                 colorpicker.render({
-                    elem: ele,  //绑定元素
-                    color: '#D9EDF7', //设置默认色
+                    elem: ele,
+                    color: '#D9EDF7',
                     size: 'lg',
                     predefine: true,
                     colors: ['#dff0d8', '#d9edf7', '#fcf8e3', '#f2dede', '#337ab7'],
@@ -915,7 +600,7 @@
             layui.use('laydate', function () {
                 let today = new Date();
                 let dd = today.getDate();
-                let mm = today.getMonth() + 1; //January is 0!
+                let mm = today.getMonth() + 1;
                 if (parseInt(mm) < 10)
                     mm = '0' + mm;
                 let yyyy = today.getFullYear();
@@ -1006,24 +691,19 @@
 
                         let select_node = tree.get_selected()[0];
                         tree.deselect_node(select_node);
-                        {#let store_milestone_id = $('#store_milestone_id_when_add_task').text();#}
-                        {#let milestone_node = tree.get_node('#milestone_node' + store_milestone_id);#}
                         tree.refresh();
                         let is_show_milestone_array = [];
                         $('.layui-show').each(function () {
                             is_show_milestone_array.push($(this)[0].id.split('layui_colla_content')[1]);
                         });
                         setTimeout(function () {
-                            {#parent.location.reload();#}
                             let task_node = tree.get_node('#task_node' + id);
-                            {#tree.open_node(milestone_node);#}
                             tree.select_node(task_node);
                             setTimeout(function () {
                                 for (let i = 0; i < is_show_milestone_array.length; i++) {
                                     $('#layui_colla_content' + is_show_milestone_array[i]).addClass('layui-show');
                                 }
                             }, 100);
-                            {#tree.select_node(node);#}
                         }, 700);
                     } else {
                         layer.msg('修改失败，请稍后再试！')
@@ -1121,7 +801,6 @@
                 layer_content = layer_content + '<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: All task in this milestone will also be removed !</p></div>';
             if (node_type === 'task')
                 layer_content += '<div class="text-center" style="margin-top:20px;   color:red;"><p>Warning: Comment and Files belongs to this task will also be removed !</p></div>';
-            // let node_collection = storeProjectMilestoneTaskId(node_type, id);
             layer.open({
                 type: 1,
                 skin: "layui-layer-rim",

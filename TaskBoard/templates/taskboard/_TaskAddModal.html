@@ -61,12 +61,8 @@
                         <label>Milestone</label>
                         <select id="task_add_modal_milestone" class="form-control" name="milestone_select">
                             {% for milestone in milestones %}
-                                {#                                {% if loop.index == 1 %}#}
-                                {#                                    <option value="{{ milestone.id }}" selected>{{ milestone.title }}</option>#}
-                                {#                                {% else %}#}
                                 <option id="milestone_select_{{ milestone.id }}"
                                         value="{{ milestone.id }}">{{ milestone.title }}</option>
-                                {#                                {% endif %}#}
                             {% endfor %}
                         </select>
                     </div>
@@ -78,17 +74,13 @@
                             <input disabled type="text"
                                    id="color_text" class="form-control"
                                    name="CategoryNameInput"
-                                   placeholder="#D9EDF7" style="width: 78%;display: inline-block;">
-                            <div id="Color_picker" style="float: right;"></div>
+                                   placeholder="#D9EDF7">
+                            <div id="Color_picker"></div>
                         </div>
                     </div>
                     <div class="col-xs-4 form-group ">
                         <label>Date Due</label>
-                        {#                        <div class="form-inline">#}
-                        {#                            <div class="input-group">#}
                         <input type="text" class="form-control" id="date_picker" placeholder="yyyy-MM-dd">
-                        {#                                <div class="input-group-addon" id="trigger_date_picker"><i class="fa fa-calendar"></i></div>#}
-                        {#                            </div>#}
                     </div>
                     <div class="col-xs-4 form-group">
                         <label>Points</label>

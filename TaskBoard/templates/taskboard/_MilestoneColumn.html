@@ -10,24 +10,23 @@
 <div class="layui-collapse">
     {% for milestone in project.milestones %}
         <div class="layui-colla-item">
-            <h2 class="layui-colla-title text-capitalize"
-                style="font-weight: bold;font-size: 16px">{{ milestone.title }}<span
-                    class="layui-badge layui-bg-black"
-                    style="float: right;margin-top: 10px;margin-right: 5px;">{{ milestone.tasks|length }}</span></h2>
-            <div id="layui_colla_content{{ milestone.id }}" class="layui-colla-content" style="padding:0px;">
+            <h2 class="layui-colla-title text-capitalize">{{ milestone.title }}
+                <span class="layui-badge layui-bg-black">{{ milestone.tasks|length }}</span>
+            </h2>
+            <div id="layui_colla_content{{ milestone.id }}" class="layui-colla-content">
                 {% if milestone.tasks %}
                     {% for task in milestone.tasks|sort(attribute='due_date') %}
                         <div id="task_card{{ task.id }}" class="layui-card" style="background: {{ task.color }};">
-                            <div class="layui-card-header" style="font-weight: bold;">{{ task.title }}
+                            <div class="layui-card-header">{{ task.title }}
                                 {% if task.files %}
-                                    <span class="pull-right" style="margin-left:10px"><i
+                                    <span class="pull-right"><i
                                             class="fa fa-paperclip"></i></span>
                                 {% endif %}
                                 {% if task.comments %}
-                                    <span class="pull-right" style="margin-left:10px"><i
+                                    <span class="pull-right"><i
                                             class="fa fa-comments-o"></i></span>
                                 {% endif %}
-                                <span class="pull-right" style="margin-left: 10px;">Points:{{ task.points }}</span>
+                                <span class="pull-right">Points:{{ task.points }}</span>
                                 <span class="due-date pull-right" name="task_due_date_in_milestone">
                                     Due:{{ task.due_date }}</span>
                             </div>
@@ -49,9 +48,7 @@
                         <hr class="layui-bg-orange">
                     {% endfor %}
                 {% else %}
-                    <div class="text-center"
-                         style="font-size: 15px;font-weight: bold;margin-top: 20px;margin-bottom: 20px;">No task in this
-                        milestone, please
+                    <div id="no_task_milestone" class="text-center">No task in this milestone, please
                         <button id="add_project_when_none" class="btn btn-default"
                                 onclick="before_task_modal_show('{{ milestone.id }}' )">
                             <span class="glyphicon glyphicon-plus"></span> Add

@@ -14,22 +14,21 @@
     {% endif %}
 </div>
 {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
-<div class="task_column_panel" class="panel" style="margin-top: auto;">
+<div class="task_column_panel panel">
     <div class="panel-body" style="background: {{ task.color }};">
         <div class="row">
-            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Description :
-                <span class="pull-right" style="margin-right: 20px;font-size: 15px;">
+            <h4 class="custom_task_h4">Description :
+                <span class="pull-right">
                     <i class="fa fa-tags" aria-hidden="true"></i>
                     Points:{{ task.points }}</span>
             </h4>
             <div class="col-sm-12"><p id="task_description">{{ task.description }}</p></div>
-            <div class="col-sm-12 due-date" style="margin-top: 20px;" id="task_due_date">
+            <div class="col-sm-12 due-date" id="task_due_date">
                 Due<i id="task_tip{{ task.id }}" name="moment_tip"
-                      style="font-weight: bold;margin-left: 6px;"
                       data-timestamp="{{ task.create_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(task.due_date).fromNow(refresh=True) }}</i>
             </div>
             {% if current_user.is_admin or current_user.id == task.user_id %}
-                <div class="task_action" style="margin-top: 100px;">
+                <div class="task_action">
                     <div class="col-sm-6">
                         <button class="form-control btn-info"
                                 onclick="task_modal_show({id:'milestone_node{{ task.milestone_id }}'},'edit',{user_id:'{{ task.user_id }}',category_id:'{{ task.category_id }}',color:'{{ task.color }}',due_date:'{{ task.due_date }}',points:'{{ task.points }}'})">
@@ -45,46 +44,43 @@
                 </div>
             {% endif %}
         </div>
-        <div class="row" style="margin-top: 20px;">
+        <div class="row margin_top_20_px">
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 id="task_user_h4" data-user_id="{{ task.user.id }}" style="font-weight: bold;">Assigned To:
-                        <span style="font-weight: normal;"> {{ task.user.username | default('None') }}</span>
+                    <h4 id="task_user_h4" data-user_id="{{ task.user.id }}">Assigned To:
+                        <span> {{ task.user.username | default('None') }}</span>
                     </h4>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 id="task_category_h4" data-category_id="{{ task.category_id }}" style="font-weight: bold;">
+                    <h4 id="task_category_h4" data-category_id="{{ task.category_id }}">
                         Category :
-                        <span style="font-weight: normal;"> {{ task.category.title }}</span>
+                        <span> {{ task.category.title }}</span>
                     </h4>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="header">
-                    <h4 id="task_milestone_h4" data-milestone_id="{{ task.milestone_id }}" style="font-weight: bold;">
+                    <h4 id="task_milestone_h4" data-milestone_id="{{ task.milestone_id }}">
                         Milestone :
-                        <span style="font-weight: normal;"> {{ task.milestone.title }}</span>
+                        <span> {{ task.milestone.title }}</span>
                     </h4>
                 </div>
             </div>
         </div>
         {% if task.files %}
-            <div class="row" style="margin-top: 20px;">
-                <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Attachments :</h4>
+            <div class="row margin_top_20_px">
+                <h4 id="task_files_h4">Attachments :</h4>
                 <div class="attachments">
                     <ul class="list-group">
                         {% for file in task.files %}
                             <li class="list-group-item">
-                                <div id="file_name{{ file.id }}" class="file-name"
-                                     style="width:85%;display: inline-block;word-wrap:break-word;">
+                                <div id="file_name{{ file.id }}" class="file-name">
                                     <span>{{ file.source_name }}</span>
-                                    <p style="margin-top: 10px;display: block">
-                                        <i class="fa fa-user-o"
-                                           style="font-weight: bold;"> {{ file.user.username }}</i>
+                                    <p class="custom-p">
+                                        <i class="fa fa-user-o"> {{ file.user.username }}</i>
                                         <i id="file_tip{{ file.id }}" name="moment_tip" class="fa fa-calendar-check-o"
-                                           style="font-weight: bold;margin-left: 6px;"
                                            data-timestamp="{{ file.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(file.update_time).fromNow(refresh=True) }}</i>
                                     </p>
                                 </div>
@@ -96,7 +92,7 @@
                                     {% if current_user.is_admin or current_user.access_project == task.milestone.project or current_user==file.user %}
                                         <a name="delete"
                                            onclick="delete_task_attachment(this,'{{ file.id }}','{{ file.source_name }}','{{ file.security_name }}', '{{ task.id }}')">
-                                            <span class="glyphicon glyphicon-trash" style="margin-left:8px"></span>
+                                            <span class="glyphicon glyphicon-trash"></span>
                                         </a>
                                     {% endif %}
                                 </div>
@@ -106,32 +102,29 @@
                 </div>
             </div>
         {% endif %}
-        <div class="row" style="margin-top: 20px;">
-            <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Add Attachment :</h4>
-            <div class="layui-upload-drag" id="upload_attachment" style="margin-left: 20px;">
+        <div class="row margin_top_20_px">
+            <h4 class="custom_task_h4">Add Attachment :</h4>
+            <div class="layui-upload-drag" id="upload_attachment">
                 <i class="layui-icon"></i>
                 <p>点击上传，或将文件拖拽到此处</p>
             </div>
-            <button style="display: block;margin-top: 10px;margin-left: 20px;" type="button" class="layui-btn"
+            <button class="layui-btn" type="button"
                     id="upload_btn">开始上传
             </button>
         </div>
         {% if task.comments %}
-            <div class="row" style="margin-top: 20px;">
-                <h4 style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Comments :</h4>
+            <div class="row margin_top_20_px">
+                <h4 class="custom_task_h4">Comments :</h4>
                 <div class="comment">
                     <ul class="list-group">
                         {% for comment in task.comments %}
                             <li class="list-group-item">
-                                <div id="comment_text{{ comment.id }}" class="comment-text"
-                                     style="width:85%;display: inline-block;word-wrap:break-word;">
+                                <div id="comment_text{{ comment.id }}" class="comment-text">
                                     <span>{{ comment.text }}</span>
-                                    <p style="margin-top: 10px;display: block">
-                                        <i class="fa fa-user-o"
-                                           style="font-weight: bold;"> {{ comment.user.username }}</i>
+                                    <p class="custom-p">
+                                        <i class="fa fa-user-o"> {{ comment.user.username }}</i>
                                         <i id="comment_tip{{ comment.id }}" name="moment_tip"
                                            class="fa fa-calendar-check-o"
-                                           style="font-weight: bold;margin-left: 6px;"
                                            data-timestamp="{{ comment.update_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(comment.update_time).fromNow(refresh=True) }}</i>
                                     </p>
                                 </div>
@@ -142,7 +135,7 @@
                                         </a>
                                         <a name="delete"
                                            onclick="delete_task_comment(this,'{{ comment.id }}','{{ task.id }}')">
-                                            <span class="glyphicon glyphicon-trash" style="margin-left:8px"></span>
+                                            <span class="glyphicon glyphicon-trash"></span>
                                         </a>
                                     {% endif %}
                                 </div>
@@ -152,28 +145,27 @@
                 </div>
             </div>
         {% endif %}
-        <div class="row" style="margin-top: 20px;">
-            <h4 id="add_comment_h4" style="font-size: 18px;font-weight: bold;margin-bottom: 20px;">Add Comment :</h4>
-            <div id="comment_textarea_div" style="margin: 10px 10px 10px 10px;">
+        <div class="row margin_top_20_px">
+            <h4 id="add_comment_h4" class="custom_task_h4">Add Comment :</h4>
+            <div id="comment_textarea_div">
                 <input id="store_comment_id" value="add" hidden/>
                 <textarea id="comment_textarea" class="form-control" rows="3"></textarea>
                 <div onclick="submit_comment(this,'{{ task.id }}')" id="comment_textarea_submit"
-                     class="btn btn-info pull-right" style="margin-top: 10px;"><i
+                     class="btn btn-info pull-right"><i
                         class="fa fa-comment-o"></i><span> Submit Comment</span>
                 </div>
-                <div onclick="edit_comment_cancel()" id="comment_textarea_cancel" class="btn btn-default pull-right"
-                     style="margin-top: 10px;margin-right: 10px;display: none;"><i
-                        class="fa fa-times"></i><span> Cancel</span>
+                <div onclick="edit_comment_cancel()" id="comment_textarea_cancel" class="btn btn-default pull-right">
+                    <i class="fa fa-times"></i><span> Cancel</span>
                 </div>
             </div>
         </div>
         {% if not task.is_complete %}
-            <div class="row" style="margin-top: 20px;margin-bottom: 20px">
+            <div id="task_complete" class="row">
                 <div class="">
                     <div class="col-sm-12">
                         <button class="form-control btn-success"
                                 onclick="complete_task('{{ task.id }}')">
-                            <span style="font-size: 17px;">Complete Task</span>
+                            <span id="task_complete_span">Complete Task</span>
                         </button>
                     </div>
                 </div>
