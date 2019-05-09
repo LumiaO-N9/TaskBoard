@@ -78,8 +78,8 @@ def change_user_username_or_email():
         elif name == 'username':
             if info != current_user.username and User.query.filter_by(username=info).first():
                 return 'same'
-            current_user.username = info
             create_log('change his or her username to ' + info)
+            current_user.username = info
         db.session.commit()
     except Exception as e:
         print(e)
