@@ -283,7 +283,7 @@ def add_tag():
             return 'same'
         new_tag = Tag(tag=tag)
         db.session.add(new_tag)
-        create_log('add tag ' + tag.tag)
+        create_log('add tag ' + tag)
         db.session.commit()
     except Exception as e:
         print(e)
