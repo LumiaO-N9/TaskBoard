@@ -21,6 +21,11 @@ def login_project():
     pass
 
 
+@setting_bp.route('/get-js')
+def get_js():
+    return render_template('setting/settings.min.js')
+
+
 @setting_bp.route('/')
 def index():
     projects = Project.query.order_by(Project.title).all()
