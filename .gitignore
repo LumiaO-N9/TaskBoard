@@ -165,3 +165,23 @@ fabric.properties
 将删除 data-dev.db
 将删除 uploads/
 /data-dev.db
+/TaskBoard/static/js/base.js
+将删除 TaskBoard/static/gen/base.min.css
+将删除 TaskBoard/static/gen/base.min.js
+将删除 TaskBoard/static/gen/base2.min.js
+将删除 TaskBoard/static/gen/settings.min.css
+将删除 TaskBoard/static/gen/settings.min.js
+将删除 TaskBoard/static/gen/taskboard.min.css
+将删除 TaskBoard/static/gen/taskboard.min.js
+/TaskBoard/static/js/settings.js
+/TaskBoard/static/js/taskboard.js
+/TaskBoard/templates/setting/settings.min.js
+/TaskBoard/templates/base.min.js
+/TaskBoard/templates/taskboard/taskboard.min.js
+/TaskBoard/static/gen/base.min.css
+/TaskBoard/static/gen/taskboard.min.js
+/TaskBoard/static/gen/base.min.js
+/TaskBoard/static/gen/settings.min.css
+/TaskBoard/static/gen/settings.min.js
+/TaskBoard/static/gen/base2.min.js
+/TaskBoard/static/gen/taskboard.min.css
