@@ -19,6 +19,8 @@ flask-moment = "*"
 flask-debugtoolbar = "*"
 mysqlclient = "*"
 flask-assets = "*"
+jsmin = "*"
+cssmin = "*"
 
 [requires]
 python_version = "3.7"
