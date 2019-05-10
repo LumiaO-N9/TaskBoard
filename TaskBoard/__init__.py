@@ -1,7 +1,8 @@
 from flask import Flask, render_template
+from flask_assets import Bundle
 from TaskBoard.settings import config
-from TaskBoard.extensions import db, login_manager, csrf, moment, toolbar
-from TaskBoard.blueprints import auth, taskboard, setting, timeline
+from TaskBoard.extensions import db, login_manager, csrf, moment, toolbar, assets
+from TaskBoard.blueprints import auth, taskboard, setting, timeline, base
 from TaskBoard.models import User, Project, Milestone, Category, Task
 from flask_wtf.csrf import CSRFError
 import os
@@ -33,10 +34,44 @@ def register_extensions(app):
     csrf.init_app(app)
     moment.init_app(app)
     # toolbar.init_app(app)
+    assets.init_app(app)
+    bundles = {
+        'taskboard_js': Bundle(
+            'js/taskboard.js',
+            filters='jsmin', output='gen/taskboard.min.js'),
+
+        'taskboard_css': Bundle(
+            'css/taskboard.css',
+            filters='cssmin', output='gen/taskboard.min.css'),
+
+        'settings_js': Bundle(
+            'js/settings.js',
+            filters='jsmin', output='gen/settings.min.js'),
+
+        'settings_css': Bundle(
+            'css/settings.css',
+            filters='cssmin', output='gen/settings.min.css'),
+
+        'base_js': Bundle(
+            'js/base.js',
+            filters='jsmin', output='gen/base.min.js'),
+
+        'base2_js': Bundle(
+            'js/validator/js/validator.js',
+            'js/validator/js/input.js', 'js/layui.js',
+            filters='jsmin', output='gen/base2.min.js'),
+
+        'base_css': Bundle(
+            'css/base.css',
+            'css/layui.css',
+            filters='cssmin', output='gen/base.min.css')
+    }
+    assets.register(bundles)
 
 
 def register_blueprints(app):
     app.register_blueprint(taskboard.taskboard_bp)
+    app.register_blueprint(base.base_bp, url_prefix='/base')
     app.register_blueprint(auth.auth_bp, url_prefix='/auth')
     app.register_blueprint(setting.setting_bp, url_prefix='/setting')
     app.register_blueprint(timeline.timeline_bp, url_prefix='/timeline')
@@ -46,10 +81,6 @@ def register_shell_context(app):
     @app.shell_context_processor
     def make_shell_context():
         return dict(db=db, User=User, Project=Project, Milestone=Milestone, Category=Category, Task=Task)
-
-
-def register_template_context(app):
-    pass
 
 
 def register_errors(app):
