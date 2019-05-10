@@ -179,7 +179,7 @@ fabric.properties
 #/TaskBoard/templates/base.min.js
 #/TaskBoard/templates/taskboard/taskboard.min.js
 /TaskBoard/static/gen/base.min.css
-#/TaskBoard/static/gen/taskboard.min.js
+/TaskBoard/static/gen/taskboard.min.js
 /TaskBoard/static/gen/base.min.js
 /TaskBoard/static/gen/settings.min.css
 /TaskBoard/static/gen/settings.min.js
