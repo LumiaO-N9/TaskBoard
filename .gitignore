@@ -175,13 +175,22 @@ fabric.properties
 将删除 TaskBoard/static/gen/taskboard.min.js
 /TaskBoard/static/js/settings.js
 /TaskBoard/static/js/taskboard.js
-/TaskBoard/templates/setting/settings.min.js
-/TaskBoard/templates/base.min.js
-/TaskBoard/templates/taskboard/taskboard.min.js
+#/TaskBoard/templates/setting/settings.min.js
+#/TaskBoard/templates/base.min.js
+#/TaskBoard/templates/taskboard/taskboard.min.js
 /TaskBoard/static/gen/base.min.css
-/TaskBoard/static/gen/taskboard.min.js
+#/TaskBoard/static/gen/taskboard.min.js
 /TaskBoard/static/gen/base.min.js
 /TaskBoard/static/gen/settings.min.css
 /TaskBoard/static/gen/settings.min.js
 /TaskBoard/static/gen/base2.min.js
 /TaskBoard/static/gen/taskboard.min.css
+将删除 logs/
+将删除 migrations/README
+将删除 migrations/alembic.ini
+将删除 migrations/env.py
+将删除 migrations/script.py.mako
+将删除 migrations/versions/
+将删除 TaskBoard/templates/setting/settings.min.js
+将删除 TaskBoard/templates/taskboard/taskboard.min.js
+将删除 TaskBoard/templates/base.min.js
