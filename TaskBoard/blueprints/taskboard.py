@@ -28,6 +28,11 @@ def login_project():
     pass
 
 
+@taskboard_bp.route('/get-js')
+def get_js():
+    return render_template('taskboard/taskboard.min.js')
+
+
 @taskboard_bp.route('/')
 def index():
     users = User.query.order_by(User.is_admin.desc()).all()
