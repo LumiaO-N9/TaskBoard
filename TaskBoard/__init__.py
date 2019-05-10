@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_assets import Bundle
 from TaskBoard.settings import config
-from TaskBoard.extensions import db, login_manager, csrf, moment, toolbar, assets
+from TaskBoard.extensions import db, login_manager, csrf, moment, toolbar, assets, migrate
 from TaskBoard.blueprints import auth, taskboard, setting, timeline, base
 from TaskBoard.models import User, Project, Milestone, Category, Task
 from flask_wtf.csrf import CSRFError
@@ -34,6 +34,7 @@ def register_extensions(app):
     csrf.init_app(app)
     moment.init_app(app)
     # toolbar.init_app(app)
+    migrate.init_app(app, db)
     assets.init_app(app)
     bundles = {
         'taskboard_js': Bundle(

@@ -21,6 +21,7 @@ mysqlclient = "*"
 flask-assets = "*"
 jsmin = "*"
 cssmin = "*"
+flask-migrate = "*"
 
 [requires]
 python_version = "3.7"
