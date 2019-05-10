@@ -19,10 +19,10 @@ class Log(db.Model, TimestampMixin):
 
 
 class User(db.Model, UserMixin, TimestampMixin):
-    username = db.Column(db.String(20))
+    username = db.Column(db.String(20), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, default=False)
-    email = db.Column(db.String(254))
+    email = db.Column(db.String(254), unique=True, index=True)
     last_login_time = db.Column(db.DateTime, default=datetime.utcnow)
     default_project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     access_project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
@@ -44,7 +44,7 @@ class User(db.Model, UserMixin, TimestampMixin):
 
 class Tag(db.Model, TimestampMixin):
     id = db.Column(db.Integer, primary_key=True)
-    tag = db.Column(db.String(20))
+    tag = db.Column(db.String(20), unique=True, index=True)
     users = db.relationship('User', back_populates='tag')
 
 
@@ -60,7 +60,7 @@ class Project(db.Model, TimestampMixin):
 
 
 class Milestone(db.Model, TimestampMixin):
-    title = db.Column(db.String(60))
+    title = db.Column(db.String(60), index=True)
     order = db.Column(db.Integer)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     project = db.relationship('Project', back_populates='milestones')
