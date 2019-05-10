@@ -3,12 +3,14 @@ from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 from flask_moment import Moment
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_assets import Environment
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 moment = Moment()
 toolbar = DebugToolbarExtension()
+assets = Environment()
 login_manager.login_view = 'auth.login'
 # login_manager.login_message = 'Your custom message'
 login_manager.login_message_category = 'warning'
