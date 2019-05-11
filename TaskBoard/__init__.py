@@ -148,6 +148,30 @@ def register_commands(app):
         click.echo('Initialized database.')
 
     @app.cli.command()
+    @click.option('--username', prompt=True, help='The username used to login.')
+    @click.option('--password', prompt=True, hide_input=True,
+                  confirmation_prompt=True, help='The password used to login.')
+    def init(username, password):
+        """Create Admin user"""
+
+        click.echo('Initializing the database...')
+        db.create_all()
+
+        admin = User.query.filter_by(is_admin=True).first()
+        if admin is not None:
+            click.echo('The administrator already exists, updating...')
+            admin.username = username
+            admin.set_password(password)
+        else:
+            click.echo('Creating the temporary administrator account...')
+            admin = User(username=username, is_admin=True)
+            admin.set_password(password)
+            db.session.add(admin)
+
+        db.session.commit()
+        click.echo('Done.')
+
+    @app.cli.command()
     @click.option('--project', default=3, help='Quantity of projects, default is 3.')
     @click.option('--tag', default=8, help='Quantity of tags, default is 8.')
     @click.option('--user', default=10, help='Quantity of users, default is 10.')
