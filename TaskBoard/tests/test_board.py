@@ -84,7 +84,7 @@ class BoardTestCase(BaseTestCase):
         milestone_id = 1
         color_text = '#888888'
         date_picker_text = '2019-10-24'
-        points = 6
+        points = '6'
 
         json_data = {
             'action_type': action_type_edit,
@@ -111,7 +111,7 @@ class BoardTestCase(BaseTestCase):
             self.assertEqual(milestone_id, task.milestone_id)
             self.assertEqual(color_text, task.color)
             self.assertEqual(date_picker_text, task.due_date.strftime('%Y-%m-%d'))
-            self.assertEqual(points, task.points)
+            self.assertEqual(points, str(task.points))
             json_data['action_type'] = action_type_add
             response = self.client.post(url, json=json_data)
             response_data = response.get_data(as_text=True)
@@ -125,7 +125,7 @@ class BoardTestCase(BaseTestCase):
             self.assertEqual(milestone_id, task.milestone_id)
             self.assertEqual(color_text, task.color)
             self.assertEqual(date_picker_text, task.due_date.strftime('%Y-%m-%d'))
-            self.assertEqual(points, task.points)
+            self.assertEqual(points, str(task.points))
 
     def test_add_milestone_node(self):
         project_id = 1

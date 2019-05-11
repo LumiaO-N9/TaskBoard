@@ -185,8 +185,9 @@ def add_milestone_node():
             return 'fail'
         else:
             new_milestone = Milestone(title=new_name.title(), project_id=parent_id)
-            create_log('create milestone ' + new_name.title() + ' for project ' + Project.query.get(
-                parent_id).title)
+            if not current_app.testing:
+                create_log('create milestone ' + new_name.title() + ' for project ' + Project.query.get(
+                    parent_id).title)
             db.session.add(new_milestone)
         db.session.commit()
     except Exception as e:

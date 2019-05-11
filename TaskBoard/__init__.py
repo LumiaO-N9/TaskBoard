@@ -67,39 +67,40 @@ def register_extensions(app):
     moment.init_app(app)
     # toolbar.init_app(app)
     migrate.init_app(app, db)
-    assets.init_app(app)
-    bundles = {
-        'taskboard_js': Bundle(
-            'js/taskboard.js',
-            filters='jsmin', output='gen/taskboard.min.js'),
+    if not app.testing:
+        assets.init_app(app)
+        bundles = {
+            'taskboard_js': Bundle(
+                'js/taskboard.js',
+                filters='jsmin', output='gen/taskboard.min.js'),
 
-        'taskboard_css': Bundle(
-            'css/taskboard.css',
-            filters='cssmin', output='gen/taskboard.min.css'),
+            'taskboard_css': Bundle(
+                'css/taskboard.css',
+                filters='cssmin', output='gen/taskboard.min.css'),
 
-        'settings_js': Bundle(
-            'js/settings.js',
-            filters='jsmin', output='gen/settings.min.js'),
+            'settings_js': Bundle(
+                'js/settings.js',
+                filters='jsmin', output='gen/settings.min.js'),
 
-        'settings_css': Bundle(
-            'css/settings.css',
-            filters='cssmin', output='gen/settings.min.css'),
+            'settings_css': Bundle(
+                'css/settings.css',
+                filters='cssmin', output='gen/settings.min.css'),
 
-        'base_js': Bundle(
-            'js/base.js',
-            filters='jsmin', output='gen/base.min.js'),
+            'base_js': Bundle(
+                'js/base.js',
+                filters='jsmin', output='gen/base.min.js'),
 
-        'base2_js': Bundle(
-            'js/validator/js/validator.js',
-            'js/validator/js/input.js', 'js/layui.js',
-            filters='jsmin', output='gen/base2.min.js'),
+            'base2_js': Bundle(
+                'js/validator/js/validator.js',
+                'js/validator/js/input.js', 'js/layui.js',
+                filters='jsmin', output='gen/base2.min.js'),
 
-        'base_css': Bundle(
-            'css/base.css',
-            'css/layui.css',
-            filters='cssmin', output='gen/base.min.css')
-    }
-    assets.register(bundles)
+            'base_css': Bundle(
+                'css/base.css',
+                'css/layui.css',
+                filters='cssmin', output='gen/base.min.css')
+        }
+        assets.register(bundles)
 
 
 def register_blueprints(app):

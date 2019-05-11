@@ -348,7 +348,7 @@ class SettingTestCase(BaseTestCase):
             for user in project.users:
                 users_array.append(str(user.id))
             self.assertEqual(wait_add_users_id_array, users_array)
-            original_milestones_name = [value for value in exist_milestones_id_title.values()]
+            original_milestones_name = [value.title() for value in exist_milestones_id_title.values()]
             for milestone in project.milestones:
                 self.assertIn(milestone.title, original_milestones_name)
             original_categories_name = [value['title'] for value in exist_categories_id_title_color.values()]
