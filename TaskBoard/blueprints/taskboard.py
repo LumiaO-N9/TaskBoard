@@ -91,6 +91,27 @@ def render_milestone_column():
     return render_template('taskboard/NoDefaultProject.html')
 
 
+@taskboard_bp.route('/render-task-add-modal', methods=['POST'])
+def render_task_add_modal():
+    milestone_id = request.form.get('milestone_id', None)
+    if milestone_id:
+        try:
+            milestone = Milestone.query.get(milestone_id)
+            if milestone:
+                users = User.query.order_by(User.is_admin.desc()).all()
+                categories = milestone.project.categories
+                milestones = milestone.project.milestones
+                return render_template('taskboard/_TaskAddModal.html', users=users, categories=categories,
+                                       milestones=milestones)
+            else:
+                return 'fail'
+        except Exception as e:
+            print(e)
+            abort(500)
+    else:
+        return 'fail'
+
+
 @taskboard_bp.route('/render-task-column', methods=['POST'])
 def render_task_column():
     task_id = request.form.get('task_id', None)
