@@ -78,7 +78,7 @@ def render_milestone_column():
                         task.task_process_color = 'red'
                     elif task.task_complete_percent >= 100:
                         task.task_process_color = 'red'
-                        task.color = '#F24838'
+                        task.color = '#F26B14'
                         db.session.commit()
             complete_percent = 0
             if task_total_count > 0:
@@ -133,7 +133,7 @@ def render_task_column():
                 task.task_process_color = 'red'
             elif task.task_complete_percent >= 100:
                 task.task_process_color = 'red'
-                task.color = '#F24838'
+                task.color = '#F26B14'
                 db.session.commit()
             return render_template('taskboard/_TaskColumn.html', task=task)
         except Exception as e:
