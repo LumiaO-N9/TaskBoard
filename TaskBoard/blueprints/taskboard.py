@@ -80,13 +80,14 @@ def render_milestone_column():
                     elif task.task_complete_percent >= 100:
                         task.task_process_color = 'red'
                         task.color = '#F26B14'
-                        db.session.commit()
+                        # db.session.commit()
             complete_percent = 0
             if task_total_count > 0:
                 complete_percent = task_complete_count * 100 // task_total_count
             return render_template('taskboard/_MilestoneColumn.html', project=project,
                                    complete_percent=complete_percent)
         except Exception as e:
+            print('xxxxxxgggg')
             print(e)
             abort(500)
     return render_template('taskboard/NoDefaultProject.html')
@@ -135,7 +136,7 @@ def render_task_column():
             elif task.task_complete_percent >= 100:
                 task.task_process_color = 'red'
                 task.color = '#F26B14'
-                db.session.commit()
+                # db.session.commit()
             return render_template('taskboard/_TaskColumn.html', task=task)
         except Exception as e:
             print(e)
@@ -200,6 +201,7 @@ def save_task_edit_modal():
             task = Task(title=task_name.title(), description=task_description, user_id=assigned_user_id,
                         category_id=category_id,
                         milestone_id=milestone_id, color=color_text, due_date=due_date, points=points)
+            create_log('create task ' + task.title + ' in milestone ' + Milestone.query.get(milestone_id).title.title())
             db.session.add(task)
         db.session.commit()
     except Exception as e:
