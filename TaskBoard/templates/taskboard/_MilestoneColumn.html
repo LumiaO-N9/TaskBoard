@@ -31,7 +31,7 @@
                                     Due:{{ task.due_date }}</span>
                             </div>
                             <div class="layui-card-body">{{ task.description }}</div>
-                            {% if task.task_process_color<='100' %}
+                            {% if task.task_complete_percent<=100 %}
                                 <div class="layui-progress layui-progress-big" lay-showPercent="yes">
                                     {% if task.is_complete %}
                                         <div class="layui-progress-bar" lay-percent="100%"></div>

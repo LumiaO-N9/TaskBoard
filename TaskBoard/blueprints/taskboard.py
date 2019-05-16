@@ -60,6 +60,7 @@ def render_milestone_column():
                 for task in milestone.tasks:
                     if task.is_complete:
                         task_complete_count = task_complete_count + 1
+                        task.task_complete_percent = 100
                         continue
                     create_date = task.create_time.date()
                     due_date = task.due_date
