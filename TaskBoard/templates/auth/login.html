@@ -34,6 +34,16 @@
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript">
+        $(function () {
+            $('#password').bind('keypress', EnterPress);
+        });
+
+        function EnterPress(event) {
+            if (event.keyCode === 13) {
+                Login();
+            }
+        }
+
         function layer_error_msg(ele, msg) {
             layer.msg(msg, {
                 skin: 'layer-error-skin',
@@ -56,12 +66,9 @@
             $inputs.each(function () {
                 inputs_array.push(new Input($(this)));
             });
-            console.log(inputs_array);
             $inputs.trigger('change');
-            console.log('xxx');
             for (let i = 0; i < inputs_array.length; i++) {
                 let item = inputs_array[i];
-                console.log(item.get_name());
                 let r = item.validator.is_valid();
                 if (!r) {
                     let ele = $('#' + item.get_name());
