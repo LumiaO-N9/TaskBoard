@@ -26,7 +26,7 @@
             <div class="col-sm-12"><p id="task_description">{{ task.description }}</p></div>
             <div class="col-sm-12 due-date" id="task_due_date">
                 Due<i id="task_tip{{ task.id }}" name="moment_tip"
-                      data-timestamp="{{ task.create_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(task.due_date).fromNow(refresh=True) }}</i>
+                      data-timestamp="{{ task.create_time.strftime('%Y-%m-%dT%H:%M:%SZ') }}"> {{ moment(task.due_date_time).fromNow(refresh=True) }}</i>
             </div>
             {% if current_user.is_admin or current_user.id == task.user_id %}
                 <div class="task_action">

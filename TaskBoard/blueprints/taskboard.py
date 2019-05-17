@@ -125,7 +125,7 @@ def render_task_column():
             task = Task.query.get(task_id)
             create_date = task.create_time.date()
             due_date = task.due_date
-            task.due_date = datetime.combine(task.due_date, datetime.max.time())
+            task.due_date_time = datetime.combine(task.due_date, datetime.max.time())
             today_date = datetime.utcnow().date()
             if task.is_complete:
                 task.task_complete_percent = 100
