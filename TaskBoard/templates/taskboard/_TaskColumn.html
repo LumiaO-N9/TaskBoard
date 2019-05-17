@@ -10,7 +10,8 @@
         <div class="layui-progress-bar" lay-percent="100%"></div>
     {% else %}
         <div class="layui-progress-bar layui-bg-{{ task.task_process_color }}"
-             lay-percent="{{ task.task_complete_percent }}%"></div>
+             lay-percent="{{ task.task_complete_percent }}%">
+        </div>
     {% endif %}
 </div>
 {{ moment.include_moment(local_js=url_for('static', filename='js/moment.min.js')) }}
