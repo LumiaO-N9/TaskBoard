@@ -5,6 +5,7 @@ from flask_moment import Moment
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_assets import Environment
 from flask_migrate import Migrate
+from flask_socketio import SocketIO
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -13,7 +14,7 @@ moment = Moment()
 toolbar = DebugToolbarExtension()
 assets = Environment()
 migrate = Migrate()
-
+socketio = SocketIO()
 login_manager.login_view = 'auth.login'
 # login_manager.login_message = 'Your custom message'
 login_manager.login_message_category = 'warning'

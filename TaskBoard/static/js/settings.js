@@ -58,6 +58,7 @@ function Edit_Tag() {
                     if (e === 'ok') {
                         layer.close(index);
                         layer.msg('修改成功！');
+                        socket.emit('refresh');
                         setTimeout(() => {
                             parent.location.reload();
                         }, 700);
@@ -82,6 +83,7 @@ function Edit_Tag() {
                     if (e === 'ok') {
                         layer.close(index);
                         layer.msg('删除成功！');
+                        socket.emit('refresh');
                         setTimeout(() => {
                             parent.location.reload();
                         }, 700);
@@ -131,6 +133,7 @@ function Add_Tag() {
                     if (e === 'ok') {
                         layer.close(index);
                         layer.msg('添加成功！');
+                        socket.emit('refresh');
                         setTimeout(() => {
                             parent.location.reload();
                         }, 700);
@@ -170,6 +173,7 @@ function Register_status_change() {
         },
         success: function (e) {
             if (e === 'ok') {
+                socket.emit('refresh');
                 layer.msg(project_title + '状态修改成功。');
                 let tr_ele = ele.parents('tr');
                 if (tr_ele.attr('data-status') === 'False') {
@@ -241,6 +245,7 @@ function del_user(the, user_id) {
                     if (e === 'ok') {
                         layer.close(index);
                         layer.msg('删除成功！');
+                        socket.emit('refresh');
                         setTimeout(() => {
                             parent.location.reload();
                         }, 700);
@@ -277,6 +282,7 @@ function del_project(the, project_id) {
                 },
                 success: function (e) {
                     if (e === 'ok') {
+                        socket.emit('refresh');
                         layer.close(index);
                         layer.msg('删除成功！');
                         setTimeout(() => {
@@ -386,6 +392,7 @@ function user_modal_save(user_id) {
                     layer.msg('修改成功！');
                 else if (status === 'add')
                     layer.msg('添加成功！');
+                socket.emit('refresh');
                 setTimeout(() => {
                     parent.location.reload();
                 }, 300);
@@ -445,6 +452,7 @@ function change_user_password() {
         success: function (status) {
             if (status !== 'fail') {
                 if (status === 'ok') {
+                    socket.emit('refresh');
                     layer.msg('Password reset complete！');
                     $('#change_password_form').find('input').val('');
                 } else if (status === 'invalid') {
@@ -489,6 +497,7 @@ function change_user_username_or_email(name) {
                                 $('#email').val('');
                             } else if (name === 'username')
                                 parent.location.reload();
+                            socket.emit('refresh');
                         }
                     });
                 } else if (status === 'same') {

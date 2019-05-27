@@ -100,6 +100,7 @@ function customMenu(node) {
                         },
                         success: function (e) {
                             if (e === 'ok') {
+                                socket.emit('refresh');
                                 layer.msg(node_type + ' ' + name + '移动成功！');
                             } else {
                                 layer.msg('Move failed！');
@@ -135,6 +136,7 @@ function customMenu(node) {
                                         let status = e.split('-')[0];
                                         let new_node_id = e.split('-')[1];
                                         if (status === 'ok') {
+                                            socket.emit('refresh');
                                             layer.msg(node_type + ' ' + name + '复制成功！');
                                         } else {
                                             layer.msg('Copy failed！');
@@ -186,6 +188,7 @@ function customMenu(node) {
                                 },
                                 success: function (e) {
                                     if (e === 'ok') {
+                                        socket.emit('refresh');
                                         layer.msg('milestone ' + new_name + ' 修改成功！');
                                     } else {
                                         layer.msg('Add Milestone Failed！');
@@ -233,6 +236,7 @@ function customMenu(node) {
                         },
                         success: function (e) {
                             if (e === 'ok') {
+                                socket.emit('refresh');
                                 layer.msg(node_type + ' name 修改成功！');
                             } else {
                                 layer.msg('Rename failed！');
@@ -436,6 +440,7 @@ function LoadTaskById(task_id) {
                 //exts: 'zip|rar|7z|txt|doc|docx',
                 bindAction: '#upload_btn',
                 done: function (res) {
+                    socket.emit('refresh');
                     layer.msg("File Upload Success");
                     let tree = $('#tree-panel-body').jstree(true);
                     let node = tree.get_node('#task_node' + task_id);
@@ -625,6 +630,7 @@ function task_modal_save() {
                     layer.msg('修改成功！');
                 else if (status === 'add')
                     layer.msg('添加成功！');
+                socket.emit('refresh');
                 let tree = $('#tree-panel-body').jstree(true);
 
                 let select_node = tree.get_selected()[0];
@@ -705,8 +711,10 @@ function submit_comment(the, task_id) {
         },
         success: function (e) {
             if (e === 'edit') {
+                socket.emit('refresh');
                 layer.msg('Comment 修改成功！');
             } else if (e === 'add') {
+                socket.emit('refresh');
                 layer.msg('Comment 增加成功！');
             } else {
                 layer.msg('Submit failed！');
@@ -759,6 +767,7 @@ function delete_node_or_task(obj) {
                 success: function (e) {
                     layer.close(index);
                     if (e === 'ok') {
+                        socket.emit('refresh');
                         let inst = $('#tree-panel-body').jstree(true);
                         if (inst.is_selected(obj.id)) {
                             inst.delete_node(inst.get_selected());
@@ -808,6 +817,7 @@ function delete_task_attachment(the, file_id, file_source_name, file_security_na
                 },
                 success: function (e) {
                     if (e === 'ok') {
+                        socket.emit('refresh');
                         layer.close(index);
                         layer.msg('删除成功！');
                         setTimeout(() => {
@@ -844,6 +854,7 @@ function delete_task_comment(the, comment_id, task_id) {
                 },
                 success: function (e) {
                     if (e === 'ok') {
+                        socket.emit('refresh');
                         layer.close(index);
                         layer.msg('删除成功！');
                         setTimeout(() => {
@@ -885,6 +896,7 @@ function complete_task(task_id) {
                 },
                 success: function (e) {
                     if (e === 'ok') {
+                        socket.emit('refresh');
                         layer.close(index);
                         layer.msg('Success！');
                         setTimeout(() => {

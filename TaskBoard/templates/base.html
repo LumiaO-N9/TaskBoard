@@ -30,8 +30,11 @@
         src="https://lib.baomitu.com/layer/3.1.1/layer.js"></script>
 <script crossorigin="anonymous" integrity="sha384-3FVBPC6KVc/qhio8Uvc2RHtrjsSjJYANs9BGxxxi3J/ueXJO4ZB2BUu2kURd6FDI"
         src="https://lib.baomitu.com/Sortable/1.8.4/Sortable.min.js"></script>
+<script crossorigin="anonymous" integrity="sha384-02icBwcoftjtOXiGInO5AGxT8rHHdAZPN5wk822r/erpFrZaCdZvqTOgIwMStoBf"
+        src="https://lib.baomitu.com/socket.io/2.2.0/socket.io.slim.js"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='gen/base2.min.js') }}"></script>
 <script type="text/javascript">
+    var socket = io.connect();
     $(function () {
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
@@ -39,6 +42,14 @@
                     let csrftoken = $('meta[name=csrf-token]').attr('content');
                     xhr.setRequestHeader("X-CSRFToken", csrftoken)
                 }
+            }
+        });
+        socket.on('refresh', function (data) {
+            console.log(data);
+            if (data === 'refresh') {
+                setTimeout(() => {
+                    parent.location.reload();
+                }, 700);
             }
         });
     });

@@ -23,6 +23,8 @@ jsmin = "*"
 cssmin = "*"
 flask-migrate = "*"
 gunicorn = "*"
+flask-socketio = "*"
+eventlet = "*"
 
 [requires]
 python_version = "3.7"

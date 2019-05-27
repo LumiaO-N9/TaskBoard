@@ -331,6 +331,7 @@ function project_modal_save(project_id) {
                     layer.msg('修改成功！');
                 else if (status === 'add')
                     layer.msg('添加成功！');
+                socket.emit('refresh');
                 setTimeout(function () {
                     parent.location.reload();
                 }, 1000);
