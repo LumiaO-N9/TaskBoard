@@ -34,7 +34,7 @@
         src="https://lib.baomitu.com/socket.io/2.2.0/socket.io.slim.js"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='gen/base2.min.js') }}"></script>
 <script type="text/javascript">
-    var socket = io.connect();
+    var socket = io('/');
     $(function () {
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
