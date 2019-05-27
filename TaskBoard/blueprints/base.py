@@ -8,7 +8,7 @@ base_bp = Blueprint('base', __name__)
 
 @socketio.on('refresh')
 def auto_refresh():
-    emit('refresh', 'refresh', broadcast=True)
+    emit('refresh', 'refresh', broadcast=True, include_self=False)
 
 
 @base_bp.before_request
