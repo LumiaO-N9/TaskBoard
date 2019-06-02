@@ -168,7 +168,9 @@ function customMenu(node) {
             "label": GenerateLabelByNode(node),
             "action": function (data) {
                 if (data.item.label == 'Add Task') {
-                    task_modal_show(node, 'add');
+                    let milestone_id = node.id.split('milestone_node')[1];
+                    // task_modal_show(node, 'add');
+                    before_task_modal_show(milestone_id);
                     return;
                 }
                 let inst = $.jstree.reference(data.reference),
